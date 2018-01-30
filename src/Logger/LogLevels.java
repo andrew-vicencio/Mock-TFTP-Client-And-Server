@@ -1,6 +1,6 @@
 package Logger;
 
-enum LogLevels {
+public enum LogLevels {
     ALL,
     TRACE,
     DEBUG,
