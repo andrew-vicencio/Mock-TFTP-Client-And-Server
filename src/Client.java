@@ -6,8 +6,9 @@ public class Client {
 	DatagramSocket sendReceiveSocket;
 	DatagramPacket sendPacket;
 	DatagramPacket receivePacket;
-	String fileName = "test.txt";
 	String mode = "netascii";
+	final byte writeHeader[] = {0, 2};
+	final byte readHeader[] = {0, 1};
 	
 	/**
 	 * 
@@ -25,6 +26,22 @@ public class Client {
 		System.out.println("Client socket created.");
 	}
 	
+    private byte[] getHeader(boolean write, String filename) throws IOException {
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        if (write) {
+            outputStream.write(writeHeader);
+        } else {
+            outputStream.write(readHeader);
+        }
+
+        outputStream.write(filename.getBytes());
+        outputStream.write(0);
+        outputStream.write(mode.getBytes());
+        outputStream.write(0);
+
+        return outputStream.toByteArray();
+    }
+	
 	
 	/**
 	 * 
@@ -34,7 +51,7 @@ public class Client {
 	 */
 	public void run() {
 		for(int i = 0; i < 11; i++) {
-			sendPacket(i);
+			sendPacket(i, "test.txt"); //todo: input from commandline
 			receivePacket();
 		}
 	}
@@ -63,29 +80,26 @@ public class Client {
 		sendReceiveSocket.close();
 	}
 	
-	public void sendPacket(int i)
+	public void sendPacket(int i, String filename)
 	{
-		ByteArrayOutputStream buffer = new ByteArrayOutputStream();
-		buffer.write(0);
-		if(i % 2 == 0) {
-			buffer.write(1); //Read request
-		} else {
-			buffer.write(2); //Write request
+		byte header[] = null;
+		try {
+			if(i % 2 == 0) {
+				header = getHeader(false, filename); //Read request
+			} else {
+				header = getHeader(true, filename); //Write request
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+			System.exit(1);
 		}
-			
-			
-		buffer.write(fileName.getBytes(), 0, fileName.getBytes().length);
-		buffer.write(0);
-		buffer.write(mode.getBytes(), 0, mode.getBytes().length);
-		buffer.write(0);
-		byte[] send = buffer.toByteArray();
 		
 		System.out.println("Client - Sending following message: ");
-		System.out.println("String: " + buffer.toString());
-		System.out.println("Byte: " + Arrays.toString(send));
+		System.out.println("String: " + header.toString());
+		System.out.println("Byte: " + Arrays.toString(header));
 		
 		try {
-			sendPacket = new DatagramPacket(send, send.length, InetAddress.getLocalHost(), 23);
+			sendPacket = new DatagramPacket(header, header.length, InetAddress.getLocalHost(), 23);
 		} catch (UnknownHostException e) {
 			e.printStackTrace();
 			System.exit(1);
