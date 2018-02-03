@@ -1,6 +1,6 @@
 package Server;
 
-import Logger.Logger;
+import Logger.*;
 
 import java.io.IOException;
 import java.net.DatagramPacket;
@@ -11,9 +11,9 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class Connection extends Thread {
-    private Logger.Logger logger;
+    private Logger logger;
 
-    public Connection(Logger.Logger logger) {
+    public Connection(Logger logger) {
         this.logger = logger;
     }
 
@@ -27,7 +27,7 @@ public class Connection extends Thread {
     void handlePacket(DatagramPacket receivePacket) {
 
         System.out.println("Server: Packet received:");
-        logger.printPacket(Logger.LogLevels.INFO, receivePacket);
+        logger.printPacket(LogLevels.INFO, receivePacket);
 
         try {
             Thread.sleep(100);
@@ -47,7 +47,7 @@ public class Connection extends Thread {
                 receivePacket.getAddress(), receivePacket.getPort());
 
         System.out.println("Server: Sending packet:");
-        logger.printPacket(Logger.LogLevels.INFO, sendPacket);
+        logger.printPacket(LogLevels.INFO, sendPacket);
         String str = new String(sendPacket.getData(), 0, sendPacket.getLength());
 
         Matcher m = p.matcher(str);

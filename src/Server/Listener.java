@@ -1,6 +1,6 @@
 package Server;
 
-import Logger.Logger;
+import Logger.*;
 
 import java.io.IOException;
 import java.net.DatagramPacket;
@@ -11,10 +11,10 @@ public class Listener {
     DatagramPacket receivePacket;
     DatagramSocket receiveSocket;
 
-    Logger.Logger logger;
+    Logger logger;
 
     public Listener() {
-        logger = new Logger.Logger(Logger.LogLevels.ALL);
+        logger = new Logger(LogLevels.ALL);
     }
 
     public void listen(int port) {
@@ -45,7 +45,7 @@ public class Listener {
             System.exit(1);
         }
 
-        Server.Connection connection = new Server.Connection(logger);
+        Connection connection = new Connection(logger);
         connection.handlePacket(receivePacket);
 
     }

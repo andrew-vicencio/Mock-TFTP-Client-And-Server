@@ -1,13 +1,13 @@
 package Logger;
 
 public class Filter {
-    Logger.LogLevels printLogLevel;
+    LogLevels printLogLevel;
 
-    Filter(Logger.LogLevels printLogLevel) {
+    Filter(LogLevels printLogLevel) {
         this.printLogLevel = printLogLevel;
     }
 
-    boolean checkLevel(Logger.LogLevels level) {
+    boolean checkLevel(LogLevels level) {
         return printLogLevel.compareTo(level) >= 0;
     }
 }
