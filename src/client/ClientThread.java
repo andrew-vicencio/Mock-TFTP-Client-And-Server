@@ -90,7 +90,7 @@ public class ClientThread implements Runnable{
 	 */
 	public void sendPacket()
 	{
-		if (sendPacket != null) {
+		if (sendPacket == null) {
 			System.out.println("Error: No packet to be sent.");
 			System.exit(1);
 		}

@@ -45,8 +45,9 @@ public class Listener {
             System.exit(1);
         }
 
-        Connection connection = new Connection(logger);
-        connection.handlePacket(receivePacket);
+        Connection connection = new Connection(logger, receivePacket);
+        connection.start();
+
 
     }
 }

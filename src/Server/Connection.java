@@ -12,8 +12,9 @@ import java.util.regex.Pattern;
 
 public class Connection extends Thread {
     private Logger logger;
-
-    public Connection(Logger logger) {
+    private DatagramPacket receivePacket;
+    public Connection(Logger logger, DatagramPacket receivePacket) {
+        this.receivePacket = receivePacket;
         this.logger = logger;
     }
 
@@ -24,8 +25,7 @@ public class Connection extends Thread {
 
     private Pattern p = Pattern.compile("^\\x00([\\x01\\x02])([^\\x00]+)\\x00([^\\x00]+)\\x00+$");
 
-    void handlePacket(DatagramPacket receivePacket) {
-
+    public void run(){
         System.out.println("Server: Packet received:");
         logger.printPacket(LogLevels.INFO, receivePacket);
 
@@ -74,5 +74,6 @@ public class Connection extends Thread {
 
         sendSocket.close();
     }
+
 
 }
