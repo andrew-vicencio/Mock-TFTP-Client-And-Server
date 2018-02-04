@@ -37,3 +37,13 @@ File Transfer System for SYSC3303
     3. PacketDeconstructor Utilities to deconstruct a packet
 
 ## Setup
+Run
+    1. Select Run Configurations from the Run dropdown menu
+    2. Create a new Launch Group
+    3. Add Server.java, ErrorSimulator.java and Client.java to the Launch Group
+    4. Select the new Launch Group from the run menu and click run
+    
+Command Line
+    1. Enter send
+    2. Enter read or write
+    3. Enter file name
