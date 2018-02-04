@@ -155,7 +155,7 @@ public class Connection extends Thread {
                 blockNumber++;
                 file.add(PacketConstructor.createDatapackets(readResponse, longToBytes(blockNumber), outputStream.toByteArray(), address, port));
             } else {
-                file.add(PacketConstructor.createDatapackets(readResponse, longToBytes(blockNumber), outputStream.toByteArray(), address, port));
+                file.add(PacketConstructor.createEmptyPacket(address,port));
             }
 
             outputStream.close();
@@ -180,6 +180,8 @@ public class Connection extends Thread {
      * Send the datagram packets read from a file, to the client.
      */
     public void sendPackets() {
+
+
 
     }
 

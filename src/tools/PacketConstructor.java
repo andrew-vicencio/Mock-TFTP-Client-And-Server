@@ -64,6 +64,12 @@ public class PacketConstructor {
 
     }
 
+    public static DatagramPacket createEmptyPacket(InetAddress address, int port){
+        byte[] newArray = new byte[1];
+        DatagramPacket newPtk = new DatagramPacket(newArray, 1, address, port);
+        return newPtk;
+    }
+
 
 
 }
