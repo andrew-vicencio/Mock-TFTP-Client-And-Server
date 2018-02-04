@@ -1,10 +1,11 @@
 package Packet;
 
 import java.io.IOException;
+import java.util.Arrays;
 
 public abstract class Packet {
 
-   public static Packet parse(String str) throws Exception {
+    public static Packet parse(String str) throws Exception {
         if (str.length() < 2) {
             throw new Exception("Error must have at least 2 bytes for op-code");
         }
