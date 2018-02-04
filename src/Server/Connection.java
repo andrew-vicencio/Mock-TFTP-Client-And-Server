@@ -30,6 +30,8 @@ public class Connection extends Thread {
      * @param receivePacket Packet that prompted this connection thread to be created
      */
     public Connection(Logger logger, DatagramPacket receivePacket) {
+        this.address = receivePacket.getAddress();
+        this.port = receivePacket.getPort();
         this.receivePacket = receivePacket;
         this.logger = logger;
     }
@@ -129,7 +131,7 @@ public class Connection extends Thread {
         for (int x = 0; x < fileBytes.length; x++) {
 
 
-            if (x == 0 || x % 512 == 0) {
+            if (x == 0 || x % 512 != 0) {
                 outputStream.write(fileBytes[x]);
             } else {
                 blockNumber++;
@@ -180,10 +182,9 @@ public class Connection extends Thread {
      * Send the datagram packets read from a file, to the client.
      */
     public void sendPackets() {
-        DatagramPacket recivePkt = null;
 
-
-
+        byte[] temp = new byte[100];
+        DatagramPacket recivePkt = new DatagramPacket(temp, temp.length);
         for(int x =0; x < file.size(); x++){
             try{
                 sendReceiveSocket.send(file.get(x));
