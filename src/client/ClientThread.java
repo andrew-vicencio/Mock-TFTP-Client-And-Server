@@ -85,12 +85,7 @@ public class ClientThread implements Runnable {
         fileComplete = false;
         receivedData = new byte[516]; 
         FileWriter filewriter = null;
-		try {
-			filewriter = new FileWriter(new File("receivedFile.txt"));
-		} catch (IOException e2) {
-			// TODO Auto-generated catch block
-			e2.printStackTrace();
-		}
+        File temp = new File("receivedFile.txt");
 
         while (!fileComplete) {
             blockNumber++;
@@ -115,13 +110,13 @@ public class ClientThread implements Runnable {
             
             String dataString = new String(receivedData, 0, receivedData.length);
             try {
-				filewriter.write(dataString);
-				filewriter.close();
-			} catch (IOException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-			}
-
+                filewriter = new FileWriter(temp);
+                filewriter.write(dataString);
+                filewriter.close();
+            } catch (IOException e2) {
+                // TODO Auto-generated catch block
+                e2.printStackTrace();
+            }
             ByteArrayOutputStream ack = new ByteArrayOutputStream();
             try {
                 ack.write(ackBytes);
@@ -135,7 +130,7 @@ public class ClientThread implements Runnable {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
             }
-            if (receivedData.length < 512) {
+            if (receivedData.length < 511) {
                 fileComplete = true;
             }
 
@@ -162,6 +157,6 @@ public class ClientThread implements Runnable {
         }
 
         System.out.println("Client - Packet sent.");
-        receivePacket = new DatagramPacket(new byte[100], 100);
+        receivePacket = new DatagramPacket(new byte[522], 522);
     }
 }

@@ -194,20 +194,13 @@ public class Connection extends Thread {
 
 
             try {
-                System.out.println("Waiting");
+                System.out.println("Waiting2.0");
                 sendReceiveSocket.receive(recivePkt);
             } catch (IOException e) {
                 e.printStackTrace();
             }
 
-            String pktString = new String(receivePacket.getData(), 0, receivePacket.getLength());
-            AcknowledgementPacket writeSucc = null;
-            try {
-                writeSucc = (AcknowledgementPacket) Packet.parse(pktString);
-            } catch (Exception e) {
-                e.printStackTrace();
-                System.exit(1);
-            }
+
 
         }
 

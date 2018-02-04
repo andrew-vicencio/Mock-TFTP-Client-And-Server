@@ -41,8 +41,8 @@ public class ErrorSimulator {
     public void start() {
         this.receiveClientPacket();
         this.sendServerPacket();
-        while (true) {
 
+        while (true) {
             this.receiveServerPacket();
             this.sendClientPacket();
             this.receiveClientPacket();
@@ -75,7 +75,7 @@ public class ErrorSimulator {
      */
     public void sendClientPacket() {
         sendPacket = new DatagramPacket(receiveServerPacket.getData(), receiveServerPacket.getLength(),
-                receiveClientPacket.getAddress(), clientPort);
+                receiveServerPacket.getAddress(), clientPort);
         try {
             sendReceiveSocket.send(sendPacket);
         } catch (IOException e) {
@@ -86,13 +86,14 @@ public class ErrorSimulator {
         System.out.println("ErrorSimulator: Sending packet to client:");
         System.out.println("To host: " + sendPacket.getAddress());
         System.out.println("Destination host port: " + sendPacket.getPort() + "\n");
+        receiveServerPacket = null;
     }
 
     /**
      * receiveServerPacket is used to receive packet from server
      */
     public void receiveServerPacket() {
-        byte data[] = new byte[512];
+        byte data[] = new byte[522];
         receiveServerPacket = new DatagramPacket(data, data.length);
         try {
             sendReceiveSocket.receive(receiveServerPacket);
@@ -124,7 +125,7 @@ public class ErrorSimulator {
         System.out.println("ErrorSimulator: Sending packet to server:");
         System.out.println("To host: " + sendPacket.getAddress());
         System.out.println("Destination host port: " + sendPacket.getPort() + "\n");
-
+        receiveClientPacket = null;
     }
 
 
@@ -141,6 +142,7 @@ public class ErrorSimulator {
         System.out.println("ErrorSimulator: Sending packet to server:");
         System.out.println("To host: " + sendPacket.getAddress());
         System.out.println("Destination host port: " + sendPacket.getPort() + "\n");
+        receiveClientPacket = null;
     }
 
 }
