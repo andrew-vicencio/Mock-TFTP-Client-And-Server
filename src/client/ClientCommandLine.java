@@ -35,7 +35,7 @@ public class ClientCommandLine extends CommandLine {
 		}
 		
 		//Check for port 
-		int port = 23;
+		int port = 10023;
 
 		
 		//Dynamically create client thread

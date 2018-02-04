@@ -1,6 +1,8 @@
 package client;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
@@ -116,7 +118,15 @@ public class ClientThread implements Runnable{
 			}
 			
 		}
-		
+		try {
+			FileWriter filewriter = new FileWriter(new File("receivedFile"));
+			String dataString = new String(receivedData,0,receivedData.length);
+			filewriter.write(dataString);
+			filewriter.close();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} 
 		sendReceiveSocket.close();
 	} 
 	

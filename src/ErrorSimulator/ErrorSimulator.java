@@ -23,7 +23,7 @@ public class ErrorSimulator {
 	public ErrorSimulator(){
 		try{
 			//Error simulator will use port 23
-			sendReceiveSocket = new DatagramSocket(23);
+			sendReceiveSocket = new DatagramSocket(10023);
 		}
 		catch (SocketException se){
 			se.printStackTrace();
@@ -113,7 +113,7 @@ public class ErrorSimulator {
 	{
     	//send to port 69 (server)
     	sendPacket = new DatagramPacket(receiveClientPacket.getData(), receiveClientPacket.getLength(),
-    			receiveClientPacket.getAddress(), 69);
+    			receiveClientPacket.getAddress(), 10069);
     	try {
     		sendReceiveSocket.send(sendPacket);
          } catch (IOException e) {
