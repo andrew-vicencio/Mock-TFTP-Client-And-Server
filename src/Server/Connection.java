@@ -11,6 +11,7 @@ import java.nio.ByteBuffer;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
 import tools.*;
 
 public class Connection extends Thread {
@@ -23,7 +24,6 @@ public class Connection extends Thread {
     public Connection(Logger logger, DatagramPacket receivePacket) {
         this.receivePacket = receivePacket;
         this.logger = logger;
-
     }
 
     private DatagramSocket sendReciveSocket;
@@ -34,7 +34,7 @@ public class Connection extends Thread {
     private Pattern readRequest = Pattern.compile("^\\x00([\\x01])(.+?)([\\x00]+)(.+?)([^\\x00]+)\\x00+$");
     private Pattern writeRequest = Pattern.compile("^\\x00([\\x02])(.+?)([\\x00]+)(.+?)([^\\x00]+)\\x00+$");
 
-    public void run(){
+    public void run() {
         System.out.println("Server: Packet received:");
         logger.printPacket(LogLevels.INFO, receivePacket);
 
@@ -59,21 +59,20 @@ public class Connection extends Thread {
 
         Matcher m1 = readRequest.matcher(str);
         Matcher m2 = writeRequest.matcher(str);
-        if(m1.matches()){
+        if (m1.matches()) {
 
             String fileName = m1.group(2);
             System.out.println(fileName);
             buildDataPackets("MobyDick.txt");
             sendPackets();
-        }else if(m2.matches()){
+        } else if (m2.matches()) {
             String fileName = m1.group(2);
             System.out.println(fileName);
 
-        }else{
+        } else {
             System.out.println("Recived Invalid Data");
             System.exit(1);
         }
-
 
 
         System.out.println("Server: packet sent");
@@ -86,8 +85,6 @@ public class Connection extends Thread {
         file = new ArrayList<DatagramPacket>();
 
 
-
-
         byte[] fileBytes = null;
         boolean numberOfByteCheck = false;
         long blockNumber = 0;
@@ -95,8 +92,6 @@ public class Connection extends Thread {
         try {
             File fileItem = new File(fileName);
             FileInputStream reader = new FileInputStream(fileItem);
-            fileBytes = reader.readAllBytes();
-
 
             fileBytes = new byte[(int) fileItem.length()];
             reader.read(fileBytes);
@@ -107,38 +102,34 @@ public class Connection extends Thread {
         }
 
 
+        if (fileBytes.length % 512 == 0) {
+            numberOfByteCheck = true;
+        }
+        for (int x = 0; x < fileBytes.length; x++) {
+            DatagramPacket tempPacket = null;
+            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 
 
-            if (fileBytes.length % 512 == 0) {
-                numberOfByteCheck = true;
+            if (x == 0) {
+                outputStream.write(fileBytes[x]);
+            } else if (x % 512 == 0) {
+                blockNumber++;
+
+                file.add(PacketConstructor.createDatapackets(readResponse, longToBytes(x), outputStream.toByteArray()));
+
+                outputStream.reset();
+
+                outputStream.write(fileBytes[x]);
+            } else {
+                outputStream.write(fileBytes[x]);
             }
-            for (int x = 0; x < fileBytes.length; x++) {
-                DatagramPacket tempPacket = null;
-                ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-
-
-                if (x == 0) {
-                    outputStream.write(fileBytes[x]);
-                } else if (x % 512 == 0) {
-                    blockNumber++;
-
-                    file.add(PacketConstructor.createDatapackets(readResponse, longToBytes(x), outputStream.toByteArray()));
-
-                    outputStream.reset();
-
-                    outputStream.write(fileBytes[x]);
-                } else {
-                    outputStream.write(fileBytes[x]);
-                }
-            }
-
-
+        }
 
 
         //If the file is exactly lenght of around 512 or factor of 512 create a packet that closes connection
 
 
-        if(numberOfByteCheck){
+        if (numberOfByteCheck) {
 
         }
 
@@ -150,7 +141,7 @@ public class Connection extends Thread {
         return buffer.array();
     }
 
-    public void sendPackets(){
+    public void sendPackets() {
 
     }
 
