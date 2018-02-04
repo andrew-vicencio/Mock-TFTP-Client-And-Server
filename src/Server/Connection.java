@@ -81,15 +81,20 @@ public class Connection extends Thread {
 
 
     public void buildDataPackets(String fileName) {
-        file = new ArrayList<DatagramPacket>();
-        byte[] fileBytes = null;
+        file = new ArrayList<>();
+        byte[] fileBytes;
         boolean numberOfByteCheck = false;
         int blockNumber = 0;
 
 
         try {
-            FileInputStream reader = new FileInputStream(new File(fileName));
-            fileBytes = reader.readAllBytes();
+            File fileItem = new File(fileName);
+            FileInputStream reader = new FileInputStream(fileItem);
+
+            fileBytes = new byte[(int) fileItem.length()];
+            reader.read(fileBytes);
+            reader.close();
+
             if (fileBytes.length % 512 == 0) {
                 numberOfByteCheck = true;
             }
@@ -115,7 +120,6 @@ public class Connection extends Thread {
 
 
             }
-            reader.close();
         } catch (IOException e) {
             e.printStackTrace();
             System.exit(1);
