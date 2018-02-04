@@ -1,5 +1,7 @@
 package Packet;
 
+import java.io.IOException;
+
 public abstract class Packet {
 
     static Packet.Packet parse(String str) throws Exception {
@@ -23,5 +25,5 @@ public abstract class Packet {
         throw new Exception("Invalid opCode");
     }
 
-    abstract byte[] toByteArray();
+    abstract byte[] toByteArray() throws IOException;
 }
