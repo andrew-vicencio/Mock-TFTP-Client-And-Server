@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
 
 public class PacketConstructor {
 	private static String mode = "netascii";
@@ -47,4 +48,16 @@ public class PacketConstructor {
 		System.out.println("Client - Packet created successfully.");
     	return pkt;
     }
+
+    public static DatagramPacket createDatapackets(byte[] opCode, byte[] blockNumber, byte[] data){
+
+
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+
+return null;
+
+    }
+
+
+
 }

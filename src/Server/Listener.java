@@ -31,9 +31,12 @@ public class Listener {
         while (true) {
             waitForPacketAndHandle();
         }
+
+
     }
 
     public void waitForPacketAndHandle() {
+        activeConnections = new ArrayList<Connection>();
         byte data[] = new byte[100];
         receivePacket = new DatagramPacket(data, data.length);
         System.out.println("Server: Waiting for Packet.\n");

@@ -7,9 +7,11 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketException;
+import java.nio.ByteBuffer;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import tools.*;
 
 public class Connection extends Thread {
     private Logger logger;
@@ -26,8 +28,8 @@ public class Connection extends Thread {
 
     private DatagramSocket sendReciveSocket;
 
-    final byte readResponse[] = {0, 3, 0, 1};
-    final byte writeResponse[] = {0, 4, 0, 0};
+    final byte readResponse[] = {0, 3};
+    final byte writeResponse[] = {0, 4};
 
     private Pattern readRequest = Pattern.compile("^\\x00([\\x01])(.+?)([\\x00]+)(.+?)([^\\x00]+)\\x00+$");
     private Pattern writeRequest = Pattern.compile("^\\x00([\\x02])(.+?)([\\x00]+)(.+?)([^\\x00]+)\\x00+$");
@@ -82,44 +84,55 @@ public class Connection extends Thread {
 
     public void buildDataPackets(String fileName) {
         file = new ArrayList<DatagramPacket>();
+
+
+
+
         byte[] fileBytes = null;
         boolean numberOfByteCheck = false;
-        int blockNumber = 0;
-
+        long blockNumber = 0;
 
         try {
-            FileInputStream reader = new FileInputStream(new File(fileName));
+            File fileItem = new File(fileName);
+            FileInputStream reader = new FileInputStream(fileItem);
             fileBytes = reader.readAllBytes();
-            if (fileBytes.length % 512 == 0) {
-                numberOfByteCheck = true;
-            }
-            for (int x = 0; x < fileBytes.length; x++) {
-                DatagramPacket tempPacket = null;
-                ArrayList<Byte> tempArray = new ArrayList<Byte>();
 
 
-                if (x == 0) {
-                    tempArray.add(fileBytes[x]);
-                } else if (x % 512 == 0) {
-
-                    byte[] temp = {(byte)connectionID, ((byte)blockNumber)};
-                    System.arraycopy(tempArray.toArray(), 0, temp,4,tempArray.size());
-                            tempPacket = new DatagramPacket(temp, temp.length, address, port);
-                    tempArray.clear();
-
-                    blockNumber++;
-                    tempArray.add(fileBytes[x]);
-                } else {
-                    tempArray.add(fileBytes[x]);
-                }
-
-
-            }
+            fileBytes = new byte[(int) fileItem.length()];
+            reader.read(fileBytes);
             reader.close();
         } catch (IOException e) {
             e.printStackTrace();
             System.exit(1);
         }
+
+
+
+
+            if (fileBytes.length % 512 == 0) {
+                numberOfByteCheck = true;
+            }
+            for (int x = 0; x < fileBytes.length; x++) {
+                DatagramPacket tempPacket = null;
+                ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+
+
+                if (x == 0) {
+                    outputStream.write(fileBytes[x]);
+                } else if (x % 512 == 0) {
+                    blockNumber++;
+
+                    file.add(PacketConstructor.createDatapackets(readResponse, longToBytes(x), outputStream.toByteArray()));
+
+                    outputStream.reset();
+
+                    outputStream.write(fileBytes[x]);
+                } else {
+                    outputStream.write(fileBytes[x]);
+                }
+            }
+
+
 
 
         //If the file is exactly lenght of around 512 or factor of 512 create a packet that closes connection
@@ -129,6 +142,12 @@ public class Connection extends Thread {
 
         }
 
+    }
+
+    public byte[] longToBytes(long x) {
+        ByteBuffer buffer = ByteBuffer.allocate(Long.BYTES);
+        buffer.putLong(x);
+        return buffer.array();
     }
 
     public void sendPackets(){
