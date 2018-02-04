@@ -1,13 +1,16 @@
 package Server;
 
 import Logger.*;
-
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.SocketException;
+import java.util.ArrayList;
+
 
 public class Listener {
+
+    private ArrayList<Connection> activeConnections;
     DatagramPacket receivePacket;
     DatagramSocket receiveSocket;
 
@@ -45,9 +48,8 @@ public class Listener {
             System.exit(1);
         }
 
-        Connection connection = new Connection(logger, receivePacket);
+        Connection connection = new Connection(logger, receivePacket, activeConnections.size());
         connection.start();
-
 
     }
 }
