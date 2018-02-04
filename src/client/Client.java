@@ -2,9 +2,9 @@ package client;
 
 public class Client {
 
-	public static void main(String[] args) {
-		ClientCommandLine client = new ClientCommandLine();
-		client.start();
-	}
+    public static void main(String[] args) {
+        ClientCommandLine client = new ClientCommandLine();
+        client.start();
+    }
 
 }

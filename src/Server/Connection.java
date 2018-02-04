@@ -26,7 +26,7 @@ public class Connection extends Thread {
     /**
      * Construct a connection class, used to handle a packet being received by the server.
      *
-     * @param logger Logger to be used by the connection to log packets, exceptions and errors with variable log levels.
+     * @param logger        Logger to be used by the connection to log packets, exceptions and errors with variable log levels.
      * @param receivePacket Packet that prompted this connection thread to be created
      */
     public Connection(Logger logger, DatagramPacket receivePacket) {

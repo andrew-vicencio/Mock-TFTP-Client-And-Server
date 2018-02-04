@@ -10,7 +10,7 @@ public abstract class Packet {
             throw new Exception("Error must have at least 2 bytes for op-code");
         }
 
-        switch(str.charAt(0) * 255 + str.charAt(1)) {
+        switch (str.charAt(0) * 255 + str.charAt(1)) {
             case 1:
                 return new ReadPacket(str.substring(2));
             case 2:
