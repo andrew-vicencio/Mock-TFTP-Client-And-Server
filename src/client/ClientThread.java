@@ -110,7 +110,7 @@ public class ClientThread implements Runnable {
             
             String dataString = new String(receivedData, 0, receivedData.length);
             try {
-                filewriter = new FileWriter(temp);
+                filewriter = new FileWriter(temp,true);
                 filewriter.write(dataString);
                 filewriter.close();
             } catch (IOException e2) {
