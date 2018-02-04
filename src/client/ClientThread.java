@@ -83,6 +83,14 @@ public class ClientThread implements Runnable {
     public void receivePacket() {
         int blockNumber = 0;
         fileComplete = false;
+        receivedData = new byte[516]; 
+        FileWriter filewriter = null;
+		try {
+			filewriter = new FileWriter(new File("receivedFile"));
+		} catch (IOException e2) {
+			// TODO Auto-generated catch block
+			e2.printStackTrace();
+		}
 
         while (!fileComplete) {
             blockNumber++;
@@ -95,16 +103,24 @@ public class ClientThread implements Runnable {
 
 
             System.out.println("Client - Packet received from " + receivePacket.getAddress() + " Port " + receivePacket.getPort());
-
+            
             ByteArrayOutputStream data = new ByteArrayOutputStream();
             try {
-                data.write(receivedData);
                 data.write(Arrays.copyOfRange(receivePacket.getData(), 4, receivePacket.getLength()));
             } catch (IOException e) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
             }
             receivedData = data.toByteArray();
+            
+            String dataString = new String(receivedData, 0, receivedData.length);
+            try {
+				filewriter.write(dataString);
+				filewriter.close();
+			} catch (IOException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
 
             ByteArrayOutputStream ack = new ByteArrayOutputStream();
             try {
@@ -121,15 +137,6 @@ public class ClientThread implements Runnable {
                 fileComplete = true;
             }
 
-        }
-        try {
-            FileWriter filewriter = new FileWriter(new File("receivedFile"));
-            String dataString = new String(receivedData, 0, receivedData.length);
-            filewriter.write(dataString);
-            filewriter.close();
-        } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
         }
         sendReceiveSocket.close();
     }
