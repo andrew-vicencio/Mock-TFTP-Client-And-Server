@@ -86,7 +86,7 @@ public class ClientThread implements Runnable {
         receivedData = new byte[516]; 
         FileWriter filewriter = null;
 		try {
-			filewriter = new FileWriter(new File("receivedFile"));
+			filewriter = new FileWriter(new File("receivedFile.txt"));
 		} catch (IOException e2) {
 			// TODO Auto-generated catch block
 			e2.printStackTrace();
@@ -127,6 +127,8 @@ public class ClientThread implements Runnable {
                 ack.write(ackBytes);
                 ack.write(blockNumber);
                 byte[] ackPacket = ack.toByteArray();
+                String test = new String(ackPacket, 0 , ackPacket.length);
+                System.out.println(test);
                 sendPacket = PacketConstructor.createPacket(ackPacket, blockNumber);
                 sendReceiveSocket.send(sendPacket);
             } catch (IOException e) {

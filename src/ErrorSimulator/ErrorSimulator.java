@@ -17,11 +17,12 @@ public class ErrorSimulator {
 
     private DatagramSocket sendReceiveSocket;
     private DatagramPacket receiveClientPacket, receiveServerPacket, sendPacket;
+    private int clientPort, connectionPort;
 
     public ErrorSimulator() {
         try {
             //Error simulator will use port 23
-            sendReceiveSocket = new DatagramSocket(10023);
+            sendReceiveSocket = new DatagramSocket(23);
         } catch (SocketException se) {
             se.printStackTrace();
             System.exit(1);
@@ -38,11 +39,14 @@ public class ErrorSimulator {
      * packets between the client and server
      */
     public void start() {
+        this.receiveClientPacket();
+        this.sendServerPacket();
         while (true) {
-            this.receiveClientPacket();
-            this.sendServerPacket();
+
             this.receiveServerPacket();
             this.sendClientPacket();
+            this.receiveClientPacket();
+            this.sendResponsePacket();
         }
     }
 
@@ -63,6 +67,7 @@ public class ErrorSimulator {
         System.out.println("ErrorSimulator: Received packet from client:");
         System.out.println("From host: " + receiveClientPacket.getAddress());
         System.out.println("Host port: " + receiveClientPacket.getPort() + "\n");
+        clientPort = receiveClientPacket.getPort();
     }
 
     /**
@@ -70,7 +75,7 @@ public class ErrorSimulator {
      */
     public void sendClientPacket() {
         sendPacket = new DatagramPacket(receiveServerPacket.getData(), receiveServerPacket.getLength(),
-                receiveClientPacket.getAddress(), receiveClientPacket.getPort());
+                receiveClientPacket.getAddress(), clientPort);
         try {
             sendReceiveSocket.send(sendPacket);
         } catch (IOException e) {
@@ -99,7 +104,7 @@ public class ErrorSimulator {
         System.out.println("ErrorSimulator: Received packet from server:");
         System.out.println("From host: " + receiveServerPacket.getAddress());
         System.out.println("Host port: " + receiveServerPacket.getPort() + "\n");
-
+        connectionPort = receiveServerPacket.getPort();
     }
 
     /**
@@ -108,7 +113,7 @@ public class ErrorSimulator {
     public void sendServerPacket() {
         //send to port 69 (server)
         sendPacket = new DatagramPacket(receiveClientPacket.getData(), receiveClientPacket.getLength(),
-                receiveClientPacket.getAddress(), 10069);
+                receiveClientPacket.getAddress(), 69);
         try {
             sendReceiveSocket.send(sendPacket);
         } catch (IOException e) {
@@ -120,6 +125,22 @@ public class ErrorSimulator {
         System.out.println("To host: " + sendPacket.getAddress());
         System.out.println("Destination host port: " + sendPacket.getPort() + "\n");
 
+    }
+
+
+    public void sendResponsePacket(){
+        sendPacket = new DatagramPacket(receiveClientPacket.getData(), receiveClientPacket.getLength(),
+                receiveClientPacket.getAddress(), connectionPort);
+        try {
+            sendReceiveSocket.send(sendPacket);
+        } catch (IOException e) {
+            e.printStackTrace();
+            System.exit(1);
+        }
+
+        System.out.println("ErrorSimulator: Sending packet to server:");
+        System.out.println("To host: " + sendPacket.getAddress());
+        System.out.println("Destination host port: " + sendPacket.getPort() + "\n");
     }
 
 }

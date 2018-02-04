@@ -194,6 +194,7 @@ public class Connection extends Thread {
 
 
             try {
+                System.out.println("Waiting");
                 sendReceiveSocket.receive(recivePkt);
             } catch (IOException e) {
                 e.printStackTrace();
