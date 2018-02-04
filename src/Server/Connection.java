@@ -127,37 +127,37 @@ public class Connection extends Thread {
             numberOfByteCheck = true;
         }
         try {
-        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        for (int x = 0; x < fileBytes.length; x++) {
+            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+            for (int x = 0; x < fileBytes.length; x++) {
 
 
-            if (x == 0 || x % 512 != 0) {
-                outputStream.write(fileBytes[x]);
-            } else {
-                blockNumber++;
-                file.add(PacketConstructor.createDatapackets(readResponse, longToBytes(blockNumber), outputStream.toByteArray(), address, port));
-                outputStream.reset();
+                if (x == 0 || x % 512 != 0) {
+                    outputStream.write(fileBytes[x]);
+                } else {
+                    blockNumber++;
+                    file.add(PacketConstructor.createDatapackets(readResponse, longToBytes(blockNumber), outputStream.toByteArray(), address, port));
+                    outputStream.reset();
 
-                outputStream.write(fileBytes[x]);
+                    outputStream.write(fileBytes[x]);
+                }
             }
-        }
 
-        if(outputStream.size() != 0){
-            blockNumber++;
-            file.add(PacketConstructor.createDatapackets(readResponse, longToBytes(blockNumber), outputStream.toByteArray(), address, port));
-        } else {
-            file.add(PacketConstructor.createDatapackets(readResponse, longToBytes(blockNumber), outputStream.toByteArray(), address, port));
-        }
-
-
-        //If the file is exactly length of around 512 or factor of 512 create a packet that closes connection
-
-
-            if(outputStream.size() != 0){
+            if (outputStream.size() != 0) {
                 blockNumber++;
                 file.add(PacketConstructor.createDatapackets(readResponse, longToBytes(blockNumber), outputStream.toByteArray(), address, port));
             } else {
-                file.add(PacketConstructor.createEmptyPacket(address,port));
+                file.add(PacketConstructor.createDatapackets(readResponse, longToBytes(blockNumber), outputStream.toByteArray(), address, port));
+            }
+
+
+            //If the file is exactly length of around 512 or factor of 512 create a packet that closes connection
+
+
+            if (outputStream.size() != 0) {
+                blockNumber++;
+                file.add(PacketConstructor.createDatapackets(readResponse, longToBytes(blockNumber), outputStream.toByteArray(), address, port));
+            } else {
+                file.add(PacketConstructor.createEmptyPacket(address, port));
             }
 
             outputStream.close();
@@ -185,22 +185,22 @@ public class Connection extends Thread {
 
         byte[] temp = new byte[100];
         DatagramPacket recivePkt = new DatagramPacket(temp, temp.length);
-        for(int x =0; x < file.size(); x++){
-            try{
+        for (int x = 0; x < file.size(); x++) {
+            try {
                 sendReceiveSocket.send(file.get(x));
             } catch (IOException e) {
                 e.printStackTrace();
             }
 
 
-            try{
-                 sendReceiveSocket.receive(recivePkt);
-            }catch (IOException e){
+            try {
+                sendReceiveSocket.receive(recivePkt);
+            } catch (IOException e) {
                 e.printStackTrace();
             }
 
             String pktString = new String(receivePacket.getData(), 0, receivePacket.getLength());
-            AcknowledgementPacket writeSucc= null;
+            AcknowledgementPacket writeSucc = null;
             try {
                 writeSucc = (AcknowledgementPacket) Packet.parse(pktString);
             } catch (Exception e) {
@@ -209,7 +209,6 @@ public class Connection extends Thread {
             }
 
         }
-
 
 
     }
