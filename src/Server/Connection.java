@@ -21,23 +21,36 @@ public class Connection extends Thread {
     private int port;
     private InetAddress address;
 
+    /**
+     * Construct a connection class, used to handle a packet being received by the server.
+     *
+     * @param logger Logger to be used by the connection to log packets, exceptions and errors with variable log levels.
+     * @param receivePacket Packet that prompted this connection thread to be created
+     */
     public Connection(Logger logger, DatagramPacket receivePacket) {
         this.receivePacket = receivePacket;
         this.logger = logger;
     }
 
-    private DatagramSocket sendReciveSocket;
+    // socket to be used to send / receive data.
+    private DatagramSocket sendReceiveSocket;
 
+    // pre created read and write response headers
     final byte readResponse[] = {0, 3};
     final byte writeResponse[] = {0, 4};
 
+    // Regexes to match read and write requests from the client.
     private Pattern readRequest = Pattern.compile("^\\x00([\\x01])(.+?)([\\x00]+)(.+?)([^\\x00]+)\\x00+$");
     private Pattern writeRequest = Pattern.compile("^\\x00([\\x02])(.+?)([\\x00]+)(.+?)([^\\x00]+)\\x00+$");
 
+    /**
+     * Method called when thread is initialised to handle the packet it was created to handle.
+     */
     public void run() {
         System.out.println("Server: Packet received:");
         logger.printPacket(LogLevels.INFO, receivePacket);
 
+        // attempt to wait 100ms.
         try {
             Thread.sleep(100);
         } catch (InterruptedException e) {
@@ -45,8 +58,9 @@ public class Connection extends Thread {
             System.exit(1);
         }
 
+        // create a new socket to send data on.
         try {
-            sendReciveSocket = new DatagramSocket();
+            sendReceiveSocket = new DatagramSocket();
         } catch (SocketException e) {
             e.printStackTrace();
             System.exit(1);
@@ -77,10 +91,15 @@ public class Connection extends Thread {
 
         System.out.println("Server: packet sent");
 
-        sendReciveSocket.close();
+        sendReceiveSocket.close();
     }
 
 
+    /**
+     * Read a file from disk, into an array of datagram packets to be send to the client.
+     *
+     * @param fileName The name of the file to read from
+     */
     public void buildDataPackets(String fileName) {
         file = new ArrayList<DatagramPacket>();
 
@@ -126,7 +145,7 @@ public class Connection extends Thread {
         }
 
 
-        //If the file is exactly lenght of around 512 or factor of 512 create a packet that closes connection
+        //If the file is exactly length of around 512 or factor of 512 create a packet that closes connection
 
 
         if (numberOfByteCheck) {
@@ -135,12 +154,21 @@ public class Connection extends Thread {
 
     }
 
+    /**
+     * Allocate a byte array of a specific size
+     *
+     * @param x length of the byte array to return to the client
+     * @return An empty byte array of the given length
+     */
     public byte[] longToBytes(long x) {
         ByteBuffer buffer = ByteBuffer.allocate(Long.BYTES);
         buffer.putLong(x);
         return buffer.array();
     }
 
+    /**
+     * Send the datagram packets read from a file, to the client.
+     */
     public void sendPackets() {
 
     }
