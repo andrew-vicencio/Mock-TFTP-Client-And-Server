@@ -50,11 +50,9 @@ public class PacketConstructor {
     }
 
     public static DatagramPacket createDatapackets(byte[] opCode, byte[] blockNumber, byte[] data){
-
-
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 
-return null;
+        return null;
 
     }
 
