@@ -40,6 +40,11 @@ public class PacketConstructor {
     	return createPacket(write, filename, InetAddress.getLocalHost(), port);
     }
     
+    public static DatagramPacket createPacket(byte[] ack, int blockNumber) throws UnknownHostException, IOException
+    {
+    	return new DatagramPacket(ack, blockNumber, InetAddress.getLocalHost(), 23);
+    }
+    
     public static DatagramPacket createPacket(boolean write, String filename, InetAddress address, int port) throws IOException
     {
     	DatagramPacket pkt = null;
