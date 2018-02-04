@@ -10,7 +10,7 @@ import java.util.ArrayList;
 
 public class Listener {
 
-    private ArrayList<Connection> activeConnections;
+
     DatagramPacket receivePacket;
     DatagramSocket receiveSocket;
 
@@ -36,7 +36,7 @@ public class Listener {
     }
 
     public void waitForPacketAndHandle() {
-        activeConnections = new ArrayList<Connection>();
+
         byte data[] = new byte[100];
         receivePacket = new DatagramPacket(data, data.length);
         System.out.println("Server: Waiting for Packet.\n");
@@ -51,7 +51,7 @@ public class Listener {
             System.exit(1);
         }
 
-        Connection connection = new Connection(logger, receivePacket, activeConnections.size());
+        Connection connection = new Connection(logger, receivePacket);
         connection.start();
 
     }

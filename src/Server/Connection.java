@@ -17,13 +17,13 @@ public class Connection extends Thread {
     private Logger logger;
     private DatagramPacket receivePacket;
     private ArrayList<DatagramPacket> file;
-    private int port, connectionID;
+    private int port;
     private InetAddress address;
 
-    public Connection(Logger logger, DatagramPacket receivePacket, int x) {
+    public Connection(Logger logger, DatagramPacket receivePacket) {
         this.receivePacket = receivePacket;
         this.logger = logger;
-        this.connectionID = x;
+
     }
 
     private DatagramSocket sendReciveSocket;
