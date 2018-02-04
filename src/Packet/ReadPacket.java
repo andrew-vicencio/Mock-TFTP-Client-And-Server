@@ -3,7 +3,7 @@ package Packet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class ReadPacket extends Packet.Packet {
+public class ReadPacket extends Packet {
 
     private Pattern readRequest = Pattern.compile("^(.+?)([\\x00]+)(.+?)([^\\x00]+)\\x00+$");
 

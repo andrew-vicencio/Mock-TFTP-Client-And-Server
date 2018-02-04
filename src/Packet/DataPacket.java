@@ -1,6 +1,6 @@
 package Packet;
 
-public class DataPacket extends Packet.Packet {
+public class DataPacket extends Packet {
     public DataPacket(String substring) {
 
     }

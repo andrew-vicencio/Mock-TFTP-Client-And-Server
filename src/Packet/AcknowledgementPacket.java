@@ -5,7 +5,8 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 
-public class AcknowledgementPacket extends Packet.Packet {
+public class AcknowledgementPacket extends Packet {
+
     private long blockNumber;
 
     AcknowledgementPacket(long blockNumber) throws IOException {

@@ -8,6 +8,6 @@ public class Filter {
     }
 
     boolean checkLevel(LogLevels level) {
-        return printLogLevel.compareTo(level) >= 0;
+        return printLogLevel.compareTo(level) <= 0;
     }
 }

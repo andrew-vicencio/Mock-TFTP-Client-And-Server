@@ -12,6 +12,8 @@ import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import Packet.AcknowledgementPacket;
+import Packet.Packet;
 import tools.*;
 
 public class Connection extends Thread {
@@ -77,7 +79,7 @@ public class Connection extends Thread {
 
             String fileName = m1.group(2);
             System.out.println(fileName);
-            buildDataPackets("MobyDick.txt");
+            buildDataPackets(fileName);
             sendPackets();
         } else if (m2.matches()) {
             String fileName = m1.group(2);
@@ -88,10 +90,8 @@ public class Connection extends Thread {
             System.exit(1);
         }
 
-
-        System.out.println("Server: packet sent");
-
         sendReceiveSocket.close();
+
     }
 
 
@@ -180,6 +180,34 @@ public class Connection extends Thread {
      * Send the datagram packets read from a file, to the client.
      */
     public void sendPackets() {
+        DatagramPacket recivePkt = null;
+
+
+
+        for(int x =0; x < file.size(); x++){
+            try{
+                sendReceiveSocket.send(file.get(x));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+
+            try{
+                 sendReceiveSocket.receive(recivePkt);
+            }catch (IOException e){
+                e.printStackTrace();
+            }
+
+            String pktString = new String(receivePacket.getData(), 0, receivePacket.getLength());
+            AcknowledgementPacket writeSucc= null;
+            try {
+                writeSucc = (AcknowledgementPacket) Packet.parse(pktString);
+            } catch (Exception e) {
+                e.printStackTrace();
+                System.exit(1);
+            }
+
+        }
 
 
 
