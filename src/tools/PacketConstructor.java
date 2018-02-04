@@ -54,10 +54,18 @@ public class PacketConstructor {
     	return pkt;
     }
 
-    public static DatagramPacket createDatapackets(byte[] opCode, byte[] blockNumber, byte[] data){
+    public static DatagramPacket createDatapackets(byte[] opCode, byte[] blockNumber, byte[] data, InetAddress address, int port){
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-
-        return null;
+        DatagramPacket newPkt = null;
+        try {
+            outputStream.write(opCode);
+            outputStream.write(blockNumber);
+            outputStream.write(data);
+            newPkt = new DatagramPacket(outputStream.toByteArray(), outputStream.toByteArray().length, address, port);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return newPkt;
 
     }
 

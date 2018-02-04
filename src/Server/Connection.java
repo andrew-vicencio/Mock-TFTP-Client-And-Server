@@ -124,34 +124,44 @@ public class Connection extends Thread {
         if (fileBytes.length % 512 == 0) {
             numberOfByteCheck = true;
         }
+        try {
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         for (int x = 0; x < fileBytes.length; x++) {
-            DatagramPacket tempPacket = null;
-            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 
 
-            if (x == 0) {
+            if (x == 0 || x % 512 == 0) {
                 outputStream.write(fileBytes[x]);
-            } else if (x % 512 == 0) {
+            } else {
                 blockNumber++;
-
-                file.add(PacketConstructor.createDatapackets(readResponse, longToBytes(x), outputStream.toByteArray()));
-
+                file.add(PacketConstructor.createDatapackets(readResponse, longToBytes(blockNumber), outputStream.toByteArray(), address, port));
                 outputStream.reset();
 
                 outputStream.write(fileBytes[x]);
-            } else {
-                outputStream.write(fileBytes[x]);
             }
+        }
+
+        if(outputStream.size() != 0){
+            blockNumber++;
+            file.add(PacketConstructor.createDatapackets(readResponse, longToBytes(blockNumber), outputStream.toByteArray(), address, port));
+        } else {
+            file.add(PacketConstructor.createDatapackets(readResponse, longToBytes(blockNumber), outputStream.toByteArray(), address, port));
         }
 
 
         //If the file is exactly length of around 512 or factor of 512 create a packet that closes connection
 
 
-        if (numberOfByteCheck) {
+            if(outputStream.size() != 0){
+                blockNumber++;
+                file.add(PacketConstructor.createDatapackets(readResponse, longToBytes(blockNumber), outputStream.toByteArray(), address, port));
+            } else {
+                file.add(PacketConstructor.createDatapackets(readResponse, longToBytes(blockNumber), outputStream.toByteArray(), address, port));
+            }
 
+            outputStream.close();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
-
     }
 
     /**
