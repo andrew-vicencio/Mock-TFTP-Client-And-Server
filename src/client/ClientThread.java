@@ -1,11 +1,13 @@
 package client;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketException;
 import java.net.UnknownHostException;
+import java.util.Arrays;
 
 import tools.PacketConstructor;
 
@@ -14,8 +16,12 @@ public class ClientThread implements Runnable{
 	private DatagramPacket sendPacket;
 	private DatagramPacket receivePacket;
 	private boolean write;
+	private boolean fileComplete;
 	private String filename;
 	private int port;
+	private byte[] receivedData;
+	
+	final byte[] ackBytes = {0,4};
 	
 	/*
 	 * Public constructor initializes the socket used to send and receive packets.
@@ -69,21 +75,50 @@ public class ClientThread implements Runnable{
 	 * receives a packet.
 	 */
 	public void receivePacket() {
-		try {
-			sendReceiveSocket.receive(receivePacket);
-		} catch (IOException e) {
-			e.printStackTrace();
-			System.exit(1);
+		int blockNumber = 0;
+		fileComplete = false;
+		
+		while(!fileComplete) {
+			blockNumber++;
+			try {
+				sendReceiveSocket.receive(receivePacket);
+			} catch (IOException e) {
+				e.printStackTrace();
+				System.exit(1);
+			}
+			
+			
+			System.out.println("Client - Packet received from " + receivePacket.getAddress() + " Port " + receivePacket.getPort());
+			
+			ByteArrayOutputStream data = new ByteArrayOutputStream();
+			try {
+				data.write(receivedData);
+				data.write(Arrays.copyOfRange(receivePacket.getData(), 4,receivePacket.getLength()));
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			receivedData = data.toByteArray();
+			
+			ByteArrayOutputStream ack = new ByteArrayOutputStream();
+			try {
+				ack.write(ackBytes);
+				ack.write(blockNumber);
+				byte[] ackPacket = ack.toByteArray();
+				sendPacket = PacketConstructor.createPacket(ackPacket, blockNumber);
+				sendReceiveSocket.send(sendPacket);
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			if(receivedData.length < 512) {
+				fileComplete = true;
+			}
+			
 		}
 		
-		System.out.println("Client - Packet received from " + receivePacket.getAddress() + " Port " + receivePacket.getPort());
-		
-		byte[] data = receivePacket.getData();
-		String received = new String(data, 0, data.length);
-		System.out.println(received);
-		
 		sendReceiveSocket.close();
-	}
+	} 
 	
 	/*
 	 * sendPacket is used to send DatagramPacket sendPacket to the specified address and port
