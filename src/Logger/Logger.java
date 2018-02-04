@@ -22,4 +22,16 @@ public class Logger {
             printer.printString(string);
         }
     }
+
+    public void println(LogLevels logLevel, String string) {
+        if (filter.checkLevel(logLevel)) {
+            printer.printString(string + "\n");
+        }
+    }
+
+    public void printException(LogLevels logLevel, Exception e) {
+        if (filter.checkLevel(logLevel)) {
+            printer.printException(e);
+        }
+    }
 }
