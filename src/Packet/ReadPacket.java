@@ -1,17 +1,29 @@
 package Packet;
 
+import javafx.util.Pair;
+
 import java.net.InetAddress;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class ReadPacket extends Packet {
 
-    private Pattern readRequest = Pattern.compile("^(.+?)([\\x00]+)(.+?)([^\\x00]+)\\x00+$");
+    String fileName;
+    String mode;
 
     public ReadPacket(InetAddress address, int port, byte[] remaining) {
         super(address, port);
-        String str = new String(remaining);
-        Matcher m2 = readRequest.matcher(str);
+        Pair<String, String> pair = decomposeReadWriteData(remaining);
+        this.fileName = pair.getKey();
+        this.mode = pair.getValue();
+    }
+
+    public String getFileName() {
+        return fileName;
+    }
+
+    public String getFileMode() {
+        return mode;
     }
 
     @Override

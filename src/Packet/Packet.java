@@ -2,15 +2,30 @@ package Packet;
 
 
 
+import javafx.util.Pair;
+
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.InetAddress;
 import java.util.Arrays;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public abstract class Packet {
 
     private InetAddress address;
     private int port;
+
+    public static Pair<String, String> decomposeReadWriteData(byte[] data) {
+        String str = new String(data);
+        Matcher matcher = Pattern.compile("^(.+?)\\x00(.+?)\\x00$").matcher(str);
+        if (!matcher.matches()) {
+            throw new Error("Invalid packet content");
+        }
+        String fileName = matcher.group(0);
+        String mode = matcher.group(1);
+        return new Pair<>(fileName, mode);
+    }
 
     public Packet(InetAddress address, int port){
         this.address = address;
