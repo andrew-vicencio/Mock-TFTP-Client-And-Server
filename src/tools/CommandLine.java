@@ -69,7 +69,8 @@ public abstract class CommandLine extends Thread {
 	/**
 	 * run is the main logic
 	 */
-	public void run() { //TODO: Handle quit or exit statements
+	public void run() { //TODO: Make quit handel exiting server and
+        //TODO: Make this class for all mains for exiting
 		while(!exit) {
 			System.out.println("What would you like to do?");
 			String input = in.next();				//User input
@@ -113,8 +114,10 @@ public abstract class CommandLine extends Thread {
 				send();
 			} else if (token[0].equalsIgnoreCase("receive")) {
 				receive();
-			} else {
-				System.out.println("Error: There is no such command. Please type send or receive.");
+			} else if(token[0].equalsIgnoreCase("quit")) {
+			    System.exit(1);
+            }else{
+				System.out.println("Error: There is no such command. Please type send, receive, or quit.");
 			}
 		}
 		in.close();

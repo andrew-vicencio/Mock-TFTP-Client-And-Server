@@ -3,17 +3,12 @@ package Server;
 import Logger.*;
 
 import java.io.*;
-import java.net.DatagramPacket;
-import java.net.DatagramSocket;
-import java.net.InetAddress;
-import java.net.SocketException;
+import java.net.*;
 import java.nio.ByteBuffer;
 import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.util.regex.*;
 
-import Packet.AcknowledgementPacket;
-import Packet.Packet;
+import Packet.*;
 import tools.*;
 
 public class Connection extends Thread {
@@ -200,6 +195,13 @@ public class Connection extends Thread {
                 e.printStackTrace();
             }
 
+
+            try{
+                AcknowledgementPacket test = (AcknowledgementPacket)Packet.parse(recivePkt.getData());
+
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
 
 
         }

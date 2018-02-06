@@ -1,8 +1,14 @@
 package Packet;
 
-public class DataPacket extends Packet {
-    public DataPacket(String substring) {
+import java.net.InetAddress;
 
+public class DataPacket extends Packet {
+
+    private int blocknumber;
+    private byte[] data;
+
+    public DataPacket(String str) {
+        super(null, 0);
     }
 
     @Override

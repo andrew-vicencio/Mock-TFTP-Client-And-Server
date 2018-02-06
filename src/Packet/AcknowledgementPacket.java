@@ -6,18 +6,17 @@ import java.nio.ByteBuffer;
 import java.util.Arrays;
 
 public class AcknowledgementPacket extends Packet {
+    //TODO: Finish making all datapacket classes
     private long blockNumber;
 
     AcknowledgementPacket(long blockNumber) {
+        super(null, 0);
         this.blockNumber = blockNumber;
     }
 
-    AcknowledgementPacket(String blockString) throws Exception {
-        if (blockString.length() > 2) {
-            throw new Exception("Invalid blockNumber byte length");
-        }
+    public AcknowledgementPacket(String blockString) throws Exception {
+        super(null, 0);
 
-        blockNumber = blockString.charAt(0) * 256 + blockString.charAt(1);
     }
 
     long getBlockNumber() {

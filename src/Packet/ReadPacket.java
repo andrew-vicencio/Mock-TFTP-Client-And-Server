@@ -8,8 +8,8 @@ public class ReadPacket extends Packet {
     private Pattern readRequest = Pattern.compile("^(.+?)([\\x00]+)(.+?)([^\\x00]+)\\x00+$");
 
 
-    ReadPacket(String str) {
-
+    public ReadPacket(String str) {
+        super(null, 0);
         Matcher m2 = readRequest.matcher(str);
     }
 

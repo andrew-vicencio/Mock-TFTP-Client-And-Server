@@ -41,12 +41,15 @@ public class ErrorSimulator {
     public void start() {
         this.receiveClientPacket();
         this.sendServerPacket();
+        this.receiveServerPacket();
+        this.sendClientPacket();
 
         while (true) {
-            this.receiveServerPacket();
-            this.sendClientPacket();
+
             this.receiveClientPacket();
             this.sendResponsePacket();
+            this.receiveServerPacket();
+            this.sendClientPacket();
         }
     }
 
@@ -68,25 +71,7 @@ public class ErrorSimulator {
         System.out.println("From host: " + receiveClientPacket.getAddress());
         System.out.println("Host port: " + receiveClientPacket.getPort() + "\n");
         clientPort = receiveClientPacket.getPort();
-    }
 
-    /**
-     * sendClientPacket is used to send packet from server to client
-     */
-    public void sendClientPacket() {
-        sendPacket = new DatagramPacket(receiveServerPacket.getData(), receiveServerPacket.getLength(),
-                receiveServerPacket.getAddress(), clientPort);
-        try {
-            sendReceiveSocket.send(sendPacket);
-        } catch (IOException e) {
-            e.printStackTrace();
-            System.exit(1);
-        }
-
-        System.out.println("ErrorSimulator: Sending packet to client:");
-        System.out.println("To host: " + sendPacket.getAddress());
-        System.out.println("Destination host port: " + sendPacket.getPort() + "\n");
-        receiveServerPacket = null;
     }
 
     /**
@@ -109,6 +94,25 @@ public class ErrorSimulator {
     }
 
     /**
+     * sendClientPacket is used to send packet from server to client
+     */
+    public void sendClientPacket() {
+        sendPacket = new DatagramPacket(receiveServerPacket.getData(), receiveServerPacket.getLength(),
+                receiveServerPacket.getAddress(), clientPort);
+        try {
+            sendReceiveSocket.send(sendPacket);
+        } catch (IOException e) {
+            e.printStackTrace();
+            System.exit(1);
+        }
+
+        System.out.println("ErrorSimulator: Sending packet to client:");
+        System.out.println("To host: " + sendPacket.getAddress());
+        System.out.println("Destination host port: " + sendPacket.getPort() + "\n");
+        receiveServerPacket = null;
+    }
+
+     /**
      * sendServerPacket is used to send packet to server
      */
     public void sendServerPacket() {
@@ -128,7 +132,9 @@ public class ErrorSimulator {
         receiveClientPacket = null;
     }
 
-
+    /**
+     * sendServerPacket is used to send packet to connection's random port
+     */
     public void sendResponsePacket(){
         sendPacket = new DatagramPacket(receiveClientPacket.getData(), receiveClientPacket.getLength(),
                 receiveClientPacket.getAddress(), connectionPort);

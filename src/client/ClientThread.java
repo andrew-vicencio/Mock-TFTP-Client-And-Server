@@ -50,9 +50,9 @@ public class ClientThread implements Runnable {
      * This constructor only looks for write, filename, and port as it defaults the address
      * to the local host.
      *
-     * @param write true if the packet is a write packet
+     * @param write    true if the packet is a write packet
      * @param filename filename to write
-     * @param port port to listen on.
+     * @param port     port to listen on.
      */
     public ClientThread(boolean write, String filename, int port) throws UnknownHostException {
         this(write, filename, InetAddress.getLocalHost(), port);
@@ -83,12 +83,14 @@ public class ClientThread implements Runnable {
     public void receivePacket() {
         int blockNumber = 0;
         fileComplete = false;
-        receivedData = new byte[516]; 
+        receivedData = new byte[516];
         FileWriter filewriter = null;
         File temp = new File("receivedFile.txt");
 
         while (!fileComplete) {
             blockNumber++;
+
+            //Try and recive from server
             try {
                 sendReceiveSocket.receive(receivePacket);
             } catch (IOException e) {
@@ -96,9 +98,9 @@ public class ClientThread implements Runnable {
                 System.exit(1);
             }
 
-
+            //Write out where the packet came from
             System.out.println("Client - Packet received from " + receivePacket.getAddress() + " Port " + receivePacket.getPort());
-            
+
             ByteArrayOutputStream data = new ByteArrayOutputStream();
             try {
                 data.write(Arrays.copyOfRange(receivePacket.getData(), 4, receivePacket.getLength()));
@@ -107,29 +109,39 @@ public class ClientThread implements Runnable {
                 e.printStackTrace();
             }
             receivedData = data.toByteArray();
-            
+
+            //Try and write to file from the new data string
             String dataString = new String(receivedData, 0, receivedData.length);
             try {
-                filewriter = new FileWriter(temp,true);
+                filewriter = new FileWriter(temp, true);
                 filewriter.write(dataString);
                 filewriter.close();
             } catch (IOException e2) {
                 // TODO Auto-generated catch block
                 e2.printStackTrace();
             }
+
+            //Send Response Packet to server
             ByteArrayOutputStream ack = new ByteArrayOutputStream();
             try {
                 ack.write(ackBytes);
                 ack.write(blockNumber);
                 byte[] ackPacket = ack.toByteArray();
-                String test = new String(ackPacket, 0 , ackPacket.length);
+                String test = new String(ackPacket, 0, ackPacket.length);
                 System.out.println(test);
                 sendPacket = PacketConstructor.createPacket(ackPacket, blockNumber);
-                sendReceiveSocket.send(sendPacket);
+
             } catch (IOException e) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
             }
+            try {
+                Thread.sleep(5);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            sendPacket();
+
             if (receivedData.length < 511) {
                 fileComplete = true;
             }

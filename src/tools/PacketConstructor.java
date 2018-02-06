@@ -1,5 +1,7 @@
 package tools;
 
+import Packet.Packet;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.DatagramPacket;
@@ -11,8 +13,6 @@ public class PacketConstructor {
     private static final byte writeHeader[] = {0, 2};
     private static final byte readHeader[] = {0, 1};
 
-    public PacketConstructor() {
-    }
 
     private static byte[] getHeader(boolean write, String filename) throws IOException {
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
@@ -69,6 +69,13 @@ public class PacketConstructor {
         byte[] newArray = new byte[1];
         DatagramPacket newPtk = new DatagramPacket(newArray, 1, address, port);
         return newPtk;
+    }
+
+
+    public static DatagramPacket createDatagramPacket(Packet pkt){
+        //TODO: Make this disasemble pkt into needed DatagramOacket
+
+        return null;
     }
 
 
