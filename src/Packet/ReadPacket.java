@@ -8,8 +8,8 @@ import java.util.regex.Pattern;
 
 public class ReadPacket extends Packet {
 
-    String fileName;
-    String mode;
+    private String fileName;
+    private String mode;
 
     public ReadPacket(InetAddress address, int port, byte[] remaining) {
         super(address, port);

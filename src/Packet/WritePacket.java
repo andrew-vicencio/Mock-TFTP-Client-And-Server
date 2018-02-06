@@ -6,8 +6,8 @@ import java.net.InetAddress;
 
 public class WritePacket extends Packet {
 
-    String fileName;
-    String mode;
+    private String fileName;
+    private String mode;
 
     public WritePacket(InetAddress address, int port, byte[] remaining) {
         super(address, port);
