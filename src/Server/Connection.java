@@ -197,7 +197,7 @@ public class Connection extends Thread {
 
 
             try{
-                AcknowledgementPacket test = (AcknowledgementPacket)Packet.parse(recivePkt.getData());
+                AcknowledgementPacket test = (AcknowledgementPacket)Packet.parse(recivePkt);
 
             } catch (Exception e) {
                 e.printStackTrace();

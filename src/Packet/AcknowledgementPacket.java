@@ -2,6 +2,7 @@ package Packet;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.net.InetAddress;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 
@@ -9,17 +10,20 @@ public class AcknowledgementPacket extends Packet {
     //TODO: Finish making all datapacket classes
     private long blockNumber;
 
-    AcknowledgementPacket(long blockNumber) {
-        super(null, 0);
+    public AcknowledgementPacket(InetAddress address, int port, long blockNumber) {
+        super(address, port);
         this.blockNumber = blockNumber;
     }
 
-    public AcknowledgementPacket(String blockString) throws Exception {
-        super(null, 0);
-
+    public AcknowledgementPacket(InetAddress address, int port, byte[] blockString) throws Exception {
+        super(address, port);
+        if (blockString.length != 2) {
+            throw new Exception("Invalid Acknowledgement packet length");
+        }
+        this.blockNumber = blockString[0] * 256 + blockString[1];
     }
 
-    long getBlockNumber() {
+    public long getBlockNumber() {
         return blockNumber;
     }
 

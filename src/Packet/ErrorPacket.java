@@ -1,8 +1,10 @@
 package Packet;
 
+import java.net.InetAddress;
+
 public class ErrorPacket extends Packet {
-    public ErrorPacket(String substring) {
-        super(null, 0);
+    public ErrorPacket(InetAddress address, int port, byte[] remaining) {
+        super(address, port);
     }
 
     @Override

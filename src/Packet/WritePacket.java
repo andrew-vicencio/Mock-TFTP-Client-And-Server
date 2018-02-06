@@ -1,8 +1,10 @@
 package Packet;
 
+import java.net.InetAddress;
+
 public class WritePacket extends Packet {
-    public WritePacket(String substring) {
-        super(null, 0);
+    public WritePacket(InetAddress address, int port, byte[] remaining) {
+        super(address, port);
 
     }
 
