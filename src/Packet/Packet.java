@@ -22,8 +22,8 @@ public abstract class Packet {
         if (!matcher.matches()) {
             throw new Error("Invalid packet content");
         }
-        String fileName = matcher.group(0);
-        String mode = matcher.group(1);
+        String fileName = matcher.group(1);
+        String mode = matcher.group(2);
         return new Pair<>(fileName, mode);
     }
 
