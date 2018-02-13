@@ -2,6 +2,7 @@ package client;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.net.DatagramPacket;
@@ -9,8 +10,12 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketException;
 import java.net.UnknownHostException;
+import java.nio.ByteBuffer;
+import java.util.ArrayList;
 import java.util.Arrays;
 
+import Packet.AcknowledgementPacket;
+import Packet.Packet;
 import tools.PacketConstructor;
 
 public class ClientThread implements Runnable {
@@ -19,11 +24,13 @@ public class ClientThread implements Runnable {
     private DatagramPacket receivePacket;
     private boolean write;
     private boolean fileComplete;
-    private String filename;
+    private String fileName;
     private int port;
     private byte[] receivedData;
+    private InetAddress address;
 
-    final byte[] ackBytes = {0, 4};
+    final byte[] readResponse = {0, 3};
+    final byte[] writeResponse = {0, 4};
 
     /*
      * Public constructor initializes the socket used to send and receive packets.
@@ -35,9 +42,10 @@ public class ClientThread implements Runnable {
         try {
             sendReceiveSocket = new DatagramSocket();
             this.write = write;
-            this.filename = filename;
+            this.fileName = filename;
             this.port = port;
             sendPacket = null;
+            this.address = address;
         } catch (SocketException e) {
             e.printStackTrace();
             System.exit(1);
@@ -65,7 +73,7 @@ public class ClientThread implements Runnable {
      */
     public void run() {
         try {
-            sendPacket = PacketConstructor.createPacket(write, filename, port);
+            sendPacket = PacketConstructor.createPacket(write, fileName, port);
         } catch (IOException e) {
             System.out.println("Error: Packet creation has failed.");
             e.printStackTrace();
@@ -80,7 +88,7 @@ public class ClientThread implements Runnable {
      * receivePacket is used to wait for confirmation packets from the host. This method will block until it
      * receives a packet.
      */
-    public void receivePacket() {
+    public void receivePacket() { //TODO: Breakdown into receive file and receive acknowledgments
         int blockNumber = 0;
         fileComplete = false;
         receivedData = new byte[516];
@@ -90,7 +98,7 @@ public class ClientThread implements Runnable {
         while (!fileComplete) {
             blockNumber++;
 
-            //Try and recive from server
+            //Try and receive from server
             try {
                 sendReceiveSocket.receive(receivePacket);
             } catch (IOException e) {
@@ -105,7 +113,6 @@ public class ClientThread implements Runnable {
             try {
                 data.write(Arrays.copyOfRange(receivePacket.getData(), 4, receivePacket.getLength()));
             } catch (IOException e) {
-                // TODO Auto-generated catch block
                 e.printStackTrace();
             }
             receivedData = data.toByteArray();
@@ -117,14 +124,13 @@ public class ClientThread implements Runnable {
                 filewriter.write(dataString);
                 filewriter.close();
             } catch (IOException e2) {
-                // TODO Auto-generated catch block
                 e2.printStackTrace();
             }
 
             //Send Response Packet to server
             ByteArrayOutputStream ack = new ByteArrayOutputStream();
             try {
-                ack.write(ackBytes);
+                ack.write(writeResponse);
                 ack.write(blockNumber);
                 byte[] ackPacket = ack.toByteArray();
                 String test = new String(ackPacket, 0, ackPacket.length);
@@ -132,7 +138,6 @@ public class ClientThread implements Runnable {
                 sendPacket = PacketConstructor.createPacket(ackPacket, blockNumber);
 
             } catch (IOException e) {
-                // TODO Auto-generated catch block
                 e.printStackTrace();
             }
             try {
@@ -153,7 +158,7 @@ public class ClientThread implements Runnable {
     /**
      * sendPacket is used to send DatagramPacket sendPacket to the specified address and port
      */
-    public void sendPacket() {
+    public void sendPacket() { //TODO: Breakdown to handle acknowledgments and sendFilePackets
         if (sendPacket == null) {
             System.out.println("Error: No packet to be sent.");
             System.exit(1);
@@ -170,5 +175,91 @@ public class ClientThread implements Runnable {
 
         System.out.println("Client - Packet sent.");
         receivePacket = new DatagramPacket(new byte[522], 522);
+    }
+    
+    /**
+     * Allocate a byte array of a specific size
+     *
+     * @param x length of the byte array to return to the client
+     * @return An empty byte array of the given length
+     */
+    public byte[] longToBytes(long x) {
+        ByteBuffer buffer = ByteBuffer.allocate(Long.BYTES);
+        buffer.putLong(x);
+        return buffer.array();
+    }
+    
+    /**
+     * Breaks down a File into 512-byte blocks and puts it into array to iterate
+     * and send for later
+     * 
+     * @return an arraylist of datagram packets to iterate and send
+     */
+    public ArrayList<DatagramPacket> createFilePackets() {
+    	byte[] fileBytes = null;
+    	ByteArrayOutputStream output = null;
+    	ArrayList<DatagramPacket> fileArr = new ArrayList<DatagramPacket>();
+    	long blockNum = 0;
+    	try {
+            File file = new File(fileName);
+            FileInputStream reader = new FileInputStream(file);
+            output = new ByteArrayOutputStream();
+            
+            fileBytes = new byte[(int) file.length()];
+            reader.read(fileBytes);
+            reader.close();
+    	} catch (IOException e) {
+    		System.out.println("Error: File unable to be read. Might not exist.");
+    		e.printStackTrace();
+    	}
+    	
+    	for (int i = 0; i < fileBytes.length; i++) {
+    		if (i % 512 == 0 && i != 0) {
+    			blockNum++;
+    			fileArr.add(PacketConstructor.createDatapackets(readResponse, longToBytes(blockNum), output.toByteArray(), address, port));
+                output.reset();
+    		}
+            output.write(fileBytes[i]);
+    	}
+    	
+    	//For either an incomplete packet with <512 bytes or an empty byte to signal end of file (EoF)
+    	blockNum++;
+        fileArr.add(PacketConstructor.createDatapackets(readResponse, longToBytes(blockNum), output.toByteArray(), address, port));
+    	
+        try {
+        	output.close();
+        } catch (IOException e) {
+        	e.printStackTrace();
+        }
+    	return fileArr;
+    }
+    
+    public void sendFilePackets() {
+    	ArrayList<DatagramPacket> file = new ArrayList<DatagramPacket>();
+        byte[] temp = new byte[100];
+        DatagramPacket recivePkt = new DatagramPacket(temp, temp.length);
+    	for (int i = 0; i < file.size(); i++) {
+            try {
+                sendReceiveSocket.send(file.get(i));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+
+            try {
+                System.out.println("Waiting2.0");
+                sendReceiveSocket.receive(recivePkt); //TODO: Call receivePacket()
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+
+            try{
+                AcknowledgementPacket test = (AcknowledgementPacket)Packet.parse(recivePkt);
+
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+    	}
     }
 }

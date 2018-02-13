@@ -3,7 +3,7 @@ package tools;
 import java.io.*;
 import java.util.*;
 
-public abstract class CommandLine extends Thread {
+public abstract class CommandLine extends Thread { //TODO: Does not need to extend thread
 	private boolean exit;
 	private boolean verbose;
 	private boolean test;
@@ -24,7 +24,7 @@ public abstract class CommandLine extends Thread {
 	
 	public abstract void receive();
 	
-	public abstract void print();
+	public abstract void print(); //TODO: Change to a synchronized method so that only one thread can run it at a time
 	
 	public abstract void exit();
 

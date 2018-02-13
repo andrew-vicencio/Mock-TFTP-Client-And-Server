@@ -137,13 +137,6 @@ public class Connection extends Thread {
                 }
             }
 
-            if (outputStream.size() != 0) {
-                blockNumber++;
-                file.add(PacketConstructor.createDatapackets(readResponse, longToBytes(blockNumber), outputStream.toByteArray(), address, port));
-            } else {
-                file.add(PacketConstructor.createDatapackets(readResponse, longToBytes(blockNumber), outputStream.toByteArray(), address, port));
-            }
-
 
             //If the file is exactly length of around 512 or factor of 512 create a packet that closes connection
 
