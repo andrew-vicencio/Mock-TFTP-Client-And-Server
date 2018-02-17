@@ -126,6 +126,26 @@ public abstract class ToolThreadClass extends Thread {
      */
     public abstract void receivePackets();
 
-
+    public int ErrorCodeHandler(Exception e){
+    	if (e instanceof FileNotFoundException){
+    		//Error Code 1 - File not found.
+    		return 1;
+    	} else if (e instanceof AccessViolationException){
+    		//Error Code 2 - Access Violation
+    		return 2;
+    	} else if (e instanceof DiskFullException){
+    		//Error Code 3 - Disk full or allocation exceeded.
+    		return 3;
+    	} else if (e instanceof FileAlreadyExistsException){
+    		//Error Code 6 - File Already Exists
+    		return 6;
+    	}
+    	return 0;
+    }
+    
+    public class AccessViolationException extends IOException{}
+    public class FileAlreadyExistsException extends IOException{}
+    public class DiskFullException extends IOException{}
+    
 
 }
