@@ -13,7 +13,11 @@ public class PacketConstructor {
     private static final byte writeHeader[] = {0, 2};
     private static final byte readHeader[] = {0, 1};
 
-
+    /*
+     * write - boolean to see if read or write
+     * write = true if write
+     * write = false if read
+     */
     private static byte[] getHeader(boolean write, String filename) throws IOException {
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         if (write) {

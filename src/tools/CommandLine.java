@@ -23,8 +23,6 @@ public abstract class CommandLine extends Thread { //TODO: Does not need to exte
 	public abstract void send();
 	
 	public abstract void receive();
-	
-	public abstract void print(); //TODO: Change to a synchronized method so that only one thread can run it at a time
 
 	/**
 	 * isTest checks if the test has been toggled on
@@ -62,6 +60,10 @@ public abstract class CommandLine extends Thread { //TODO: Does not need to exte
 	public boolean toggleVerbose() {
 		verbose = !verbose;
 		return verbose;
+	}
+	
+	public synchronized void print(String str) {
+		System.out.println(str);
 	}
 	
 	/**

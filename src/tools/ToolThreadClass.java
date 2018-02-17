@@ -13,7 +13,7 @@ import java.util.Arrays;
 public abstract class ToolThreadClass implements Runnable {
     // pre created read and write response headers
     final byte dataResponse[] = {0, 3};
-    final byte acKnolageResopnse[] = {0, 4};
+    final byte acknowledgeResponse[] = {0, 4};
 
     /**
      * Read a file from disk, into an array of datagram packets to be send to the client.
