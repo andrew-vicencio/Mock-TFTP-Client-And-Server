@@ -60,8 +60,5 @@ public class ClientCommandLine extends CommandLine {
         // TODO Auto-generated method stub
     }
 
-    @Override
-    public void exit() { //TODO: Create exit
-        //TODO Auto-generated method stub
-    }
+
 }

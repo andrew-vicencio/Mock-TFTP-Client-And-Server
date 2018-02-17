@@ -17,8 +17,9 @@ import java.util.Arrays;
 import Packet.AcknowledgementPacket;
 import Packet.Packet;
 import tools.PacketConstructor;
+import tools.ToolThreadClass;
 
-public class ClientThread implements Runnable {
+public class ClientThread extends ToolThreadClass {
     private DatagramSocket sendReceiveSocket;
     private DatagramPacket sendPacket;
     private DatagramPacket receivePacket;
@@ -167,8 +168,8 @@ public class ClientThread implements Runnable {
         System.out.println("Client - Sending packet to " + sendPacket.getAddress() + " Port " + sendPacket.getPort());
 
         try {
-            sendReceiveSocket.send(sendPacket);
-        } catch (IOException e) {
+            sendFilePackets();
+        } catch (Exception e) {
             e.printStackTrace();
             System.exit(1);
         }
@@ -188,7 +189,17 @@ public class ClientThread implements Runnable {
         buffer.putLong(x);
         return buffer.array();
     }
-    
+
+    @Override
+    public void sendPackets() {
+
+    }
+
+    @Override
+    public void receivePackets() {
+
+    }
+
     /**
      * Breaks down a File into 512-byte blocks and puts it into array to iterate
      * and send for later

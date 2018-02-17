@@ -25,8 +25,6 @@ public abstract class CommandLine extends Thread { //TODO: Does not need to exte
 	public abstract void receive();
 	
 	public abstract void print(); //TODO: Change to a synchronized method so that only one thread can run it at a time
-	
-	public abstract void exit();
 
 	/**
 	 * isTest checks if the test has been toggled on

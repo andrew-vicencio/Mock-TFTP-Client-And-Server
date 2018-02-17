@@ -10,7 +10,7 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-public abstract class ToolThreadClass extends Thread {
+public abstract class ToolThreadClass implements Runnable {
     // pre created read and write response headers
     final byte dataResponse[] = {0, 3};
     final byte acKnolageResopnse[] = {0, 4};
@@ -96,6 +96,7 @@ public abstract class ToolThreadClass extends Thread {
         } catch (IOException e) {
             e.printStackTrace();
         }
+
         receivedData = data.toByteArray();
 
         //Try and write to file from the new data string

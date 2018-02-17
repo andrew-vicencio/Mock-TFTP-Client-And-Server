@@ -1,6 +1,7 @@
 package Server;
 
 import Logger.*;
+import client.ClientThread;
 
 import java.io.IOException;
 import java.net.DatagramPacket;
@@ -57,8 +58,14 @@ public class Listener {
             System.exit(1);
         }
 
-        Connection connection = new Connection(logger, receivePacket);
-        connection.start();
+        try {
+            Thread thread = new Thread(new Connection(logger, receivePacket), "Server Connection");
+            thread.start();
+        } catch (Exception e) {
+            System.out.println("Error: Client thread not created successfully.");
+            e.printStackTrace();
+            System.exit(1);
+        }
 
     }
 }
