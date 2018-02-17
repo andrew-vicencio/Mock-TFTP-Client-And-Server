@@ -120,7 +120,7 @@ public class ClientThread extends ToolThreadClass {
      * receivePacket is used to wait for confirmation packets from the host. This method will block until it
      * receives a packet.
      */
-    public void receiveFilePackets() { //TODO: Breakdown into receive file and receive acknowledgments
+    public void receiveFilePackets() {
         int blockNumber = 0;
         boolean fileComplete = false;
         receivedData = new byte[516];
@@ -200,7 +200,7 @@ public class ClientThread extends ToolThreadClass {
         System.out.println("Client - Sending packet to " + sendPacket.getAddress() + " Port " + sendPacket.getPort());
 
         try {
-            sendFilePackets();
+        	sendReceiveSocket.send(sendPacket);
         } catch (Exception e) {
             e.printStackTrace();
             System.exit(1);
