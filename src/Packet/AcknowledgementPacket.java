@@ -18,8 +18,8 @@ public class AcknowledgementPacket extends Packet {
 
     public AcknowledgementPacket(InetAddress address, int port, byte[] blockString) throws Exception {
         super(address, port);
-        if (blockString.length != 2) {
-            throw new Exception("Invalid Acknowledgement packet length");
+        if (blockString.length != 2 || blockString.length != 0) {
+            throw new Exception("Invalid Acknowledgement packet length: +");
         }
         this.blockNumber = blockString[0] * 256 + blockString[1];
     }
