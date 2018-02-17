@@ -13,11 +13,6 @@ public class DataPacket extends Packet {
     private byte[] data;
 
 
-
-
-
-
-
     public DataPacket(InetAddress address, int port, byte[] remaining) {
         super(address, port);
 
@@ -40,6 +35,7 @@ public class DataPacket extends Packet {
     DatagramPacket toDataGramPacket() {
         return null;
     }
+
 
     @Override
     public byte[] toByteArray() throws IOException {

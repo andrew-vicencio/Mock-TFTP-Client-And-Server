@@ -82,11 +82,6 @@ public abstract class ToolThreadClass extends Thread {
         return buffer.array();
     }
 
-    public long bytesToLong(byte[] x){
-return 0;
-    }
-
-
 
     public boolean writeRecivedDataPacket(DataPacket receivePacket){
         //TODO: Fix to be more integrated with packet classes
