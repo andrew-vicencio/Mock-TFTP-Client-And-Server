@@ -65,18 +65,4 @@ public class PacketConstructor {
 
     }
 
-    public static DatagramPacket createEmptyPacket(InetAddress address, int port) {
-        byte[] newArray = new byte[1];
-        DatagramPacket newPtk = new DatagramPacket(newArray, 1, address, port);
-        return newPtk;
-    }
-
-
-    public static DatagramPacket createDatagramPacket(Packet pkt){
-        //TODO: Make this disasemble pkt into needed DatagramOacket
-
-        return null;
-    }
-
-
 }

@@ -42,7 +42,7 @@ public class AcknowledgementPacket extends Packet {
     byte[] toByteArray() throws IOException {
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 
-        outputStream.write(new byte[]{0, 4});
+        outputStream.write(acKnolageResopnse);
 
         ByteBuffer buffer = ByteBuffer.allocate(Long.BYTES);
         buffer.putLong(blockNumber);

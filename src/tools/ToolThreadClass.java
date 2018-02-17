@@ -1,6 +1,7 @@
 package tools;
 
 import Packet.DataPacket;
+import Packet.Packet;
 
 import java.io.*;
 import java.net.DatagramPacket;
@@ -60,7 +61,7 @@ public abstract class ToolThreadClass extends Thread {
                 blockNumber++;
                 file.add(PacketConstructor.createDatapackets(dataResponse, longToBytes(blockNumber), outputStream.toByteArray(),address, port));
             } else {
-                file.add(PacketConstructor.createEmptyPacket(address, port));
+                file.add(Packet.createEmptyPacket(address, port));
             }
 
             outputStream.close();

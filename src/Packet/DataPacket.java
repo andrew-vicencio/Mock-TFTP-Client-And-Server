@@ -33,6 +33,11 @@ public class DataPacket extends Packet {
 
     @Override
     DatagramPacket toDataGramPacket() {
+        try {
+            return new DatagramPacket(toByteArray(), toByteArray().length , address, port);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         return null;
     }
 
@@ -41,7 +46,7 @@ public class DataPacket extends Packet {
     public byte[] toByteArray() throws IOException {
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 
-        outputStream.write(new byte[]{0, 3});
+        outputStream.write(dataResponse);
 
         ByteBuffer buffer = ByteBuffer.allocate(Long.BYTES);
         buffer.putLong(blockNumber);
