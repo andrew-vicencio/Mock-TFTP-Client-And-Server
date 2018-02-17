@@ -2,6 +2,7 @@ package Packet;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.net.DatagramPacket;
 import java.net.InetAddress;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
@@ -10,6 +11,12 @@ public class DataPacket extends Packet {
 
     private int blockNumber;
     private byte[] data;
+
+
+
+
+
+
 
     public DataPacket(InetAddress address, int port, byte[] remaining) {
         super(address, port);
@@ -30,6 +37,11 @@ public class DataPacket extends Packet {
     }
 
     @Override
+    DatagramPacket toDataGramPacket() {
+        return null;
+    }
+
+    @Override
     public byte[] toByteArray() throws IOException {
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 
@@ -42,5 +54,15 @@ public class DataPacket extends Packet {
         outputStream.write(Arrays.copyOfRange(byteArray, byteArray.length - 2, byteArray.length));
         outputStream.write(data);
         return outputStream.toByteArray();
+    }
+
+
+
+    public byte[] getData() {
+        return data;
+    }
+
+    public void setData(byte[] data) {
+        this.data = data;
     }
 }

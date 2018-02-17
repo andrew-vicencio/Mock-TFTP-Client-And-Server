@@ -4,14 +4,13 @@ import Logger.*;
 
 import java.io.*;
 import java.net.*;
-import java.nio.ByteBuffer;
 import java.util.*;
 import java.util.regex.*;
 
 import Packet.*;
 import tools.*;
 
-public class Connection extends Thread {
+public class Connection extends ToolThreadClass {
     private Logger logger;
     private DatagramPacket receivePacket;
     private ArrayList<DatagramPacket> file;
@@ -34,9 +33,7 @@ public class Connection extends Thread {
     // socket to be used to send / receive data.
     private DatagramSocket sendReceiveSocket;
 
-    // pre created read and write response headers
-    final byte readResponse[] = {0, 3};
-    final byte writeResponse[] = {0, 4};
+
 
     // Regexes to match read and write requests from the client.
     private Pattern readRequest = Pattern.compile("^\\x00([\\x01])(.+?)([\\x00]+)(.+?)([^\\x00]+)\\x00+$");
@@ -73,14 +70,14 @@ public class Connection extends Thread {
         Matcher m1 = readRequest.matcher(str);
         Matcher m2 = writeRequest.matcher(str);
         if (m1.matches()) {
-
+        //Send data gram packets
             String fileName = m1.group(2);
-            System.out.println(fileName);
-            buildDataPackets(fileName);
+
+           file = buildDataPackets(fileName, address, port);
             sendPackets();
         } else if (m2.matches()) {
-            String fileName = m1.group(2);
-            System.out.println(fileName);
+            //Write acknolagement packets
+            receivePackets();
 
         } else {
             System.out.println("Recived Invalid Data");
@@ -93,84 +90,10 @@ public class Connection extends Thread {
 
 
     /**
-     * Read a file from disk, into an array of datagram packets to be send to the client.
-     *
-     * @param fileName The name of the file to read from
-     */
-    public void buildDataPackets(String fileName) {
-        file = new ArrayList<DatagramPacket>();
-
-
-        byte[] fileBytes = null;
-        boolean numberOfByteCheck = false;
-        long blockNumber = 0;
-
-        try {
-            File fileItem = new File(fileName);
-            FileInputStream reader = new FileInputStream(fileItem);
-
-            fileBytes = new byte[(int) fileItem.length()];
-            reader.read(fileBytes);
-            reader.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-            System.exit(1);
-        }
-
-
-        if (fileBytes.length % 512 == 0) {
-            numberOfByteCheck = true;
-        }
-        try {
-            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-            for (int x = 0; x < fileBytes.length; x++) {
-
-
-                if (x == 0 || x % 512 != 0) {
-                    outputStream.write(fileBytes[x]);
-                } else {
-                    blockNumber++;
-                    file.add(PacketConstructor.createDatapackets(readResponse, longToBytes(blockNumber), outputStream.toByteArray(), address, port));
-                    outputStream.reset();
-
-                    outputStream.write(fileBytes[x]);
-                }
-            }
-
-
-            //If the file is exactly length of around 512 or factor of 512 create a packet that closes connection
-
-
-            if (outputStream.size() != 0) {
-                blockNumber++;
-                file.add(PacketConstructor.createDatapackets(readResponse, longToBytes(blockNumber), outputStream.toByteArray(), address, port));
-            } else {
-                file.add(PacketConstructor.createEmptyPacket(address, port));
-            }
-
-            outputStream.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    /**
-     * Allocate a byte array of a specific size
-     *
-     * @param x length of the byte array to return to the client
-     * @return An empty byte array of the given length
-     */
-    public byte[] longToBytes(long x) {
-        ByteBuffer buffer = ByteBuffer.allocate(Long.BYTES);
-        buffer.putLong(x);
-        return buffer.array();
-    }
-
-    /**
      * Send the datagram packets read from a file, to the client.
      */
+    @Override
     public void sendPackets() {
-
         byte[] temp = new byte[100];
         DatagramPacket recivePkt = new DatagramPacket(temp, temp.length);
         for (int x = 0; x < file.size(); x++) {
@@ -182,7 +105,6 @@ public class Connection extends Thread {
 
 
             try {
-                System.out.println("Waiting2.0");
                 sendReceiveSocket.receive(recivePkt);
             } catch (IOException e) {
                 e.printStackTrace();
@@ -195,11 +117,64 @@ public class Connection extends Thread {
             } catch (Exception e) {
                 e.printStackTrace();
             }
+    }
+}
+
+    @Override
+    public void receivePackets() {
+        //TODO: build first response packet
+        DatagramPacket recivedDataPacket = new DatagramPacket(new byte[522], 522);
+
+
+        DatagramPacket sendPacket = null;
+        AcknowledgementPacket reviedResponse = null;
+
+
+        boolean fileComplete = false;
+
+        while (!fileComplete) {
+
+
+            //Try and receive from server
+            try {
+                sendReceiveSocket.receive(recivedDataPacket);
+            } catch (IOException e) {
+                e.printStackTrace();
+                System.exit(1);
+            }
+
+            //Write out where the packet came from
+            System.out.println("Client - Packet received from " + recivedDataPacket.getAddress() + " Port " + recivedDataPacket.getPort());
+
+            //Write to file
+            DataPacket recivedData = null;
+            try {
+                recivedData = (DataPacket) (Packet.parse(recivedDataPacket));
+            }catch (Exception e ){
+                e.printStackTrace();
+            }
+            fileComplete = writeRecivedDataPacket(recivedData);
+
+            //Send Response Packet to server
+
+            //build response packet constrontur
+            reviedResponse = new AcknowledgementPacket(recivedData.getAddress(), recivedData.getPort(), recivedData.getBlockNumber());
+
+
+            try {
+                sendPacket = reviedResponse.toDataGramPacket();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            //send the packet on the way
+            try {
+                sendReceiveSocket.send(sendPacket);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
 
 
         }
 
-
     }
-
 }

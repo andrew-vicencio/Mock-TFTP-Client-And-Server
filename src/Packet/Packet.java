@@ -3,7 +3,6 @@ package Packet;
 
 
 import javafx.util.Pair;
-
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.InetAddress;
@@ -13,8 +12,8 @@ import java.util.regex.Pattern;
 
 public abstract class Packet {
 
-    private InetAddress address;
-    private int port;
+    protected InetAddress address;
+    protected int port;
 
     public static Pair<String, String> decomposeReadWriteData(byte[] data) {
         String str = new String(data);
@@ -32,11 +31,11 @@ public abstract class Packet {
         this.port = port;
     }
 
-    InetAddress getAddress() {
+    public InetAddress getAddress() {
         return address;
     }
 
-    int getPort() {
+   public int getPort() {
         return port;
     }
 
@@ -71,6 +70,8 @@ public abstract class Packet {
     public DataPacket toDataPacket() throws IOException {
         return new DataPacket(getAddress(), getPort(), toByteArray());
     }
+
+    abstract DatagramPacket toDataGramPacket();
 
     abstract byte[] toByteArray() throws IOException;
 }

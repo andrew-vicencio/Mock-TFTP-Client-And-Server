@@ -2,6 +2,7 @@ package Packet;
 
 import javafx.util.Pair;
 
+import java.net.DatagramPacket;
 import java.net.InetAddress;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -24,6 +25,11 @@ public class ReadPacket extends Packet {
 
     public String getFileMode() {
         return mode;
+    }
+
+    @Override
+    DatagramPacket toDataGramPacket() {
+        return null;
     }
 
     @Override

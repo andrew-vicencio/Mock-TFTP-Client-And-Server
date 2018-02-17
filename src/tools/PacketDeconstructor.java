@@ -30,7 +30,7 @@ public class PacketDeconstructor {
 
             switch (str.charAt(1) * 255 + str.charAt(1)) {
                 case 1:
-                    return new ReadPacket(str.substring(2));
+                    return new ReadPacket();
                 case 2:
                     return new WritePacket(str.substring(2));
                 case 3:

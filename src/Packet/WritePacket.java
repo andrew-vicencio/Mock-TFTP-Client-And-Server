@@ -2,6 +2,7 @@ package Packet;
 
 import javafx.util.Pair;
 
+import java.net.DatagramPacket;
 import java.net.InetAddress;
 
 public class WritePacket extends Packet {
@@ -22,6 +23,11 @@ public class WritePacket extends Packet {
 
     public String getFileMode() {
         return mode;
+    }
+
+    @Override
+    DatagramPacket toDataGramPacket() {
+        return null;
     }
 
     @Override

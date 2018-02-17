@@ -2,6 +2,7 @@ package Packet;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.net.DatagramPacket;
 import java.net.InetAddress;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
@@ -25,6 +26,16 @@ public class AcknowledgementPacket extends Packet {
 
     public long getBlockNumber() {
         return blockNumber;
+    }
+
+    @Override
+    public DatagramPacket toDataGramPacket()  {
+        try {
+            return new DatagramPacket(toByteArray(), toByteArray().length , address, port);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 
     @Override
