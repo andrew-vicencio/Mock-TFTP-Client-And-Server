@@ -15,7 +15,7 @@ public abstract class Packet {
     protected static final byte writeHeader[] = {0, 2};
     protected static final byte readHeader[] = {0, 1};
     protected static final byte dataResponse[] = {0, 3};
-    protected static final byte acKnolageResopnse[] = {0, 4};
+    protected static final byte acknowledgeResponse[] = {0, 4};
     public static Pair<String, String> decomposeReadWriteData(byte[] data) {
         String str = new String(data);
         Matcher matcher = Pattern.compile("^(.+?)\\x00(.+?)\\x00$").matcher(str);
@@ -62,7 +62,7 @@ public abstract class Packet {
             case 4:
                 return new AcknowledgementPacket(address, port, remaining);
             case 5:
-                return new ErrorPacket(address, port, remaining);
+                return new ErrorPacket(address, port, 01);
         }
 
         throw new Exception("Invalid opCode");
