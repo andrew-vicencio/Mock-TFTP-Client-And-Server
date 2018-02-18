@@ -53,7 +53,7 @@ Command Line
 
 Server:
   * Jacob MacDonald
-  * Benny Bichel
+  * Benjamin Bichel
   
 Logger:
   * Jacob MacDonald
@@ -65,9 +65,11 @@ Tools:
   * Jacob MacDonald
   * Paul Hewson
   * Andrew Vicencio
+  * Geoffrey Scornaienchi
+  * Benjamin Bichel
   
 Error Simulator:
-  * Jeff Scornaienchi
+  * Geoffrey Scornaienchi
   
 Client:
   * Paul Hewson
@@ -75,3 +77,6 @@ Client:
   
 ReadMe:
   * Jacob MacDonald
+  
+UML Class Diagram: 
+  * Geoffrey Scornaienchi
