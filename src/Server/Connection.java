@@ -134,6 +134,9 @@ public class Connection extends ToolThreadClass {
     }
 }
 
+    /**
+     * When the connection gets a write request get all datagram values from client
+     */
     @Override
     public void receivePackets() {
         //TODO: build first response packet
@@ -167,29 +170,35 @@ public class Connection extends ToolThreadClass {
             }catch (Exception e ){
                 e.printStackTrace();
             }
+
+            //Try and write data packets
             try {
                 fileComplete = writeRecivedDataPacket(recivedData);
             } catch (IOException e) {
+                //Caught error, try and create error data packet
                 errorPkt = ErrorCodeHandler(address,port,e);
+
                 if(errorPkt != null){
+                    //Send error Datagrampacket
                     DatagramPacket x = errorPkt.toDataGramPacket();
                     try {
                         sendReceiveSocket.send(x);
                     } catch (IOException e1) {
                         e1.printStackTrace();
                     }
+                    //Exit
                     System.exit(1);
                 }
             }
 
 
 
-            //Send Response Packet to server
+
 
             //build response packet constrontur
             reviedResponse = new AcknowledgementPacket(recivedData.getAddress(), recivedData.getPort(), recivedData.getBlockNumber());
 
-
+            //Send Response Packet to server
             try {
                 sendPacket = reviedResponse.toDataGramPacket();
             } catch (Exception e) {

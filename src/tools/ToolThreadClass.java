@@ -75,9 +75,16 @@ public abstract class ToolThreadClass implements Runnable {
         return buffer.array();
     }
 
-
+    /**
+     * Write the packet to a file
+     *
+     * @param receivePacket
+     * @return boolean checks if data packet is final data packet
+     * @throws IOException
+     */
     public boolean writeRecivedDataPacket(DataPacket receivePacket) throws IOException {
         //TODO: Fix to be more integrated with packet classes
+        //TODO: Paul ur code here check to see if able to write to file for size
         FileWriter filewriter = null;
         File temp = new File("receivedFile.txt");
         byte[] receivedData = new byte[512];
@@ -115,6 +122,13 @@ public abstract class ToolThreadClass implements Runnable {
      */
     public abstract void receivePackets();
 
+    /**
+     * Determines what error packet to create
+     * @param address
+     * @param port
+     * @param e
+     * @return Error Packet with correct error code or nothing
+     */
     public ErrorPacket ErrorCodeHandler(InetAddress address, int port, Exception e){
     	if (e instanceof FileNotFoundException){
     		//Error Code 1 - File not found.
