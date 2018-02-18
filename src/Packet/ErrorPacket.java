@@ -36,16 +36,25 @@ public class ErrorPacket extends Packet {
     }
 
     private String getDefaultErrorMessage(char errorCode) {
-        if (errorCode == 1) {
-            return "File not found.";
-        } else if (errorCode == 2) {
-            return "Access Violation - You are not authorized to access this file.";
-        } else if (errorCode == 3) {
-            return "Disk full or allocation exceeded.";
-        } else if (errorCode == 6) {
-            return "File Already Exists";
-        }  else {
-            return "Unknown error";
+        switch(errorCode) {
+            case 0:
+                return "Error not defined";
+            case 1:
+                return "File not found.";
+            case 2:
+                return "Access Violation - Application is not authorized to access this file.";
+            case 3:
+                return "Disk full or allocation exceeded.";
+            case 4:
+                return "Illegal TFTP operation";
+            case 5:
+                return "Unknown transfer ID.";
+            case 6:
+                return "File already exists.";
+            case 7:
+                return "No such user.";
+            default:
+                return "Invalid error message code";
         }
     }
 
