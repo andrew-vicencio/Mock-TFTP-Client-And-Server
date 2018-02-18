@@ -1,7 +1,5 @@
 package Packet;
 
-import javafx.util.Pair;
-
 import java.net.InetAddress;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
