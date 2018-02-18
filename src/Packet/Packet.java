@@ -51,7 +51,7 @@ public abstract class Packet {
      * @param address
      * @param port
      */
-    public Packet(InetAddress address, int port){
+    public Packet(InetAddress address, int port) {
         this.address = address;
         this.port = port;
     }
@@ -63,9 +63,9 @@ public abstract class Packet {
         return address;
     }
 
-   /**
- * @return
- */
+    /**
+     * @return
+     */
     public int getPort() {
         return port;
     }
