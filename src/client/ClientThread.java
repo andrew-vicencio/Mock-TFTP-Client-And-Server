@@ -37,6 +37,12 @@ public class ClientThread extends ToolThreadClass {
      * This constructor looks for write, filename, address, and port.
      * Chose to store write request, filename, and port. This is for future functionality
      * where it retries a few requests before stopping.
+     *
+     * @param write
+     * @param filename
+     * @param address
+     * @param port
+     * @param cl
      */
     public ClientThread(boolean write, String filename, InetAddress address, int port, ClientCommandLine cl) {
         try {
@@ -62,6 +68,7 @@ public class ClientThread extends ToolThreadClass {
      * @param write    true if the packet is a write packet
      * @param filename filename to write
      * @param port     port to listen on.
+     * @throws UnknownHostException
      */
     public ClientThread(boolean write, String filename, int port) throws UnknownHostException {
         this(write, filename, InetAddress.getLocalHost(), port, null);
@@ -71,6 +78,8 @@ public class ClientThread extends ToolThreadClass {
     /**
      * run is used to create packets and send them then wait for confirmation from the server
      * that it has been received.
+     * 
+     * @see java.lang.Runnable#run()
      */
     public void run() {
         try {
@@ -84,6 +93,9 @@ public class ClientThread extends ToolThreadClass {
         receivePackets();
     }
     
+    /* (non-Javadoc)
+     * @see tools.ToolThreadClass#receivePackets()
+     */
     public void receivePackets() {
     	if(!write) {
     		receiveFilePackets();
@@ -121,7 +133,6 @@ public class ClientThread extends ToolThreadClass {
      * receivePacket is used to wait for confirmation packets from the host. This method will block until it
      * receives a packet.
      */
-
     public void receiveFilePackets() {
         int blockNumber = 0;
         boolean fileComplete = false;
@@ -192,12 +203,18 @@ public class ClientThread extends ToolThreadClass {
 
     /**
      * sendPacket is used to send DatagramPacket sendPacket to the specified address and port
+     * (non-Javadoc)
+     * 
+     * @see tools.ToolThreadClass#sendPackets()
      */
     public void sendPackets() {
     	sendPackets(sendPacket);
     }
     
-    public void sendPackets(DatagramPacket sndPacket) { //TODO: Breakdown to handle acknowledgments and sendFilePackets
+    /**
+     * @param sndPkt
+     */
+    public void sendPackets(DatagramPacket sndPkt) { //TODO: Breakdown to handle acknowledgments and sendFilePackets
         if (sendPacket == null) {
             System.out.println("Error: No packet to be sent.");
             System.exit(1);
@@ -206,7 +223,7 @@ public class ClientThread extends ToolThreadClass {
         System.out.println("Client - Sending packet to " + sendPacket.getAddress() + " Port " + sendPacket.getPort());
 
         try {
-            sendReceiveSocket.send(sndPacket);
+            sendReceiveSocket.send(sndPkt);
         } catch (IOException e) {
             e.printStackTrace();
             System.exit(1);
@@ -214,20 +231,11 @@ public class ClientThread extends ToolThreadClass {
 
         System.out.println("Client - Packet sent.");
     }
-    
-    /**
-     * Allocate a byte array of a specific size
-     *
-     * @param x length of the byte array to return to the client
-     * @return An empty byte array of the given length
-     */
-    public byte[] longToBytes(long x) {
-        ByteBuffer buffer = ByteBuffer.allocate(Long.BYTES);
-        buffer.putLong(x);
-        return buffer.array();
-    }
 
     
+    /**
+     * 
+     */
     public void sendFilePackets() {
     	ArrayList<DatagramPacket> file = null;
 		try {
