@@ -1,6 +1,7 @@
 package tools;
 
 import Packet.DataPacket;
+import Packet.ErrorPacket;
 import Packet.Packet;
 
 import java.io.*;
@@ -21,53 +22,44 @@ public abstract class ToolThreadClass extends Thread {
      * @param fileName The name of the file to read from
      */
 
-    public  ArrayList<DatagramPacket> buildDataPackets(String fileName, InetAddress address, int port) {
+    public  ArrayList<DatagramPacket> buildDataPackets(String fileName, InetAddress address, int port) throws IOException {
         ArrayList<DatagramPacket> file = new ArrayList<DatagramPacket>();
 
         byte[] fileBytes = null;
         long blockNumber = 0;
+        
+        File fileItem = new File(fileName);
+        FileInputStream reader = new FileInputStream(fileItem);
 
-        try {
-            File fileItem = new File(fileName);
-            FileInputStream reader = new FileInputStream(fileItem);
-
-            fileBytes = new byte[(int) fileItem.length()];
-            reader.read(fileBytes);
-            reader.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-            System.exit(1);
-        }
-
-        try {
-            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-            for (int x = 0; x < fileBytes.length; x++) {
+        fileBytes = new byte[(int) fileItem.length()];
+        reader.read(fileBytes);
+        reader.close();
+        
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        for (int x = 0; x < fileBytes.length; x++) {
 
 
-                if (x == 0 || x % 512 != 0) {
-                    outputStream.write(fileBytes[x]);
-                } else {
-                    blockNumber++;
-                    file.add(PacketConstructor.createDatapackets(dataResponse, longToBytes(blockNumber), outputStream.toByteArray(), address, port));
-                    outputStream.reset();
-
-                    outputStream.write(fileBytes[x]);
-                }
-            }
-
-            //If the file is exactly length of around 512 or factor of 512 create a packet that closes connection
-
-            if (outputStream.size() != 0) {
-                blockNumber++;
-                file.add(PacketConstructor.createDatapackets(dataResponse, longToBytes(blockNumber), outputStream.toByteArray(),address, port));
+            if (x == 0 || x % 512 != 0) {
+                outputStream.write(fileBytes[x]);
             } else {
-                file.add(Packet.createEmptyPacket(address, port));
-            }
+                blockNumber++;
+                file.add(PacketConstructor.createDatapackets(dataResponse, longToBytes(blockNumber), outputStream.toByteArray(), address, port));
+                outputStream.reset();
 
-            outputStream.close();
-        } catch (IOException e) {
-            e.printStackTrace();
+                outputStream.write(fileBytes[x]);
+            }
         }
+
+        //If the file is exactly length of around 512 or factor of 512 create a packet that closes connection
+
+        if (outputStream.size() != 0) {
+            blockNumber++;
+            file.add(PacketConstructor.createDatapackets(dataResponse, longToBytes(blockNumber), outputStream.toByteArray(),address, port));
+        } else {
+            file.add(Packet.createEmptyPacket(address, port));
+        }
+
+        outputStream.close();
         return file;
     }
 
@@ -84,29 +76,22 @@ public abstract class ToolThreadClass extends Thread {
     }
 
 
-    public boolean writeRecivedDataPacket(DataPacket receivePacket){
+    public boolean writeRecivedDataPacket(DataPacket receivePacket) throws IOException {
         //TODO: Fix to be more integrated with packet classes
         FileWriter filewriter = null;
         File temp = new File("receivedFile.txt");
         byte[] receivedData = new byte[512];
 
         ByteArrayOutputStream data = new ByteArrayOutputStream();
-        try {
-            data.write(Arrays.copyOfRange(receivePacket.getData(), 4, receivePacket.getData().length));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        data.write(Arrays.copyOfRange(receivePacket.getData(), 4, receivePacket.getData().length));
         receivedData = data.toByteArray();
 
         //Try and write to file from the new data string
         String dataString = new String(receivedData, 0, receivedData.length);
-        try {
-            filewriter = new FileWriter(temp, true);
-            filewriter.write(dataString);
-            filewriter.close();
-        } catch (IOException e2) {
-            e2.printStackTrace();
-        }
+        
+        filewriter = new FileWriter(temp, true);
+        filewriter.write(dataString);
+        filewriter.close();
 
         if (receivedData.length < 511) {
            return true;
@@ -126,21 +111,21 @@ public abstract class ToolThreadClass extends Thread {
      */
     public abstract void receivePackets();
 
-    public int ErrorCodeHandler(Exception e){
+    public ErrorPacket ErrorCodeHandler(InetAddress address, int port, Exception e){
     	if (e instanceof FileNotFoundException){
     		//Error Code 1 - File not found.
-    		return 1;
+    		return new ErrorPacket(address, port, 1);
     	} else if (e instanceof AccessViolationException){
     		//Error Code 2 - Access Violation
-    		return 2;
+    		return new ErrorPacket(address, port, 2);
     	} else if (e instanceof DiskFullException){
     		//Error Code 3 - Disk full or allocation exceeded.
-    		return 3;
+    		return new ErrorPacket(address, port, 3);
     	} else if (e instanceof FileAlreadyExistsException){
     		//Error Code 6 - File Already Exists
-    		return 6;
+    		return new ErrorPacket(address, port, 6);
     	}
-    	return 0;
+    	return null;
     }
     
     public class AccessViolationException extends IOException{}

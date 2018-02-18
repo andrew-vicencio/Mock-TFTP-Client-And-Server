@@ -15,10 +15,12 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 import Packet.AcknowledgementPacket;
+import Packet.ErrorPacket;
 import Packet.Packet;
 import tools.PacketConstructor;
+import tools.ToolThreadClass;
 
-public class ClientThread implements Runnable {
+public class ClientThread extends ToolThreadClass {
     private DatagramSocket sendReceiveSocket;
     private DatagramPacket sendPacket;
     private DatagramPacket receivePacket;
@@ -79,8 +81,8 @@ public class ClientThread implements Runnable {
             e.printStackTrace();
             System.exit(1);
         }
-        sendPacket();
-        receivePacket();
+        sendPackets();
+        receivePackets();
     }
 
 
@@ -88,7 +90,7 @@ public class ClientThread implements Runnable {
      * receivePacket is used to wait for confirmation packets from the host. This method will block until it
      * receives a packet.
      */
-    public void receivePacket() { //TODO: Breakdown into receive file and receive acknowledgments
+    public void receivePackets() { //TODO: Breakdown into receive file and receive acknowledgments
         int blockNumber = 0;
         fileComplete = false;
         receivedData = new byte[516];
@@ -145,7 +147,7 @@ public class ClientThread implements Runnable {
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-            sendPacket();
+            sendPackets();
 
             if (receivedData.length < 511) {
                 fileComplete = true;
@@ -158,7 +160,7 @@ public class ClientThread implements Runnable {
     /**
      * sendPacket is used to send DatagramPacket sendPacket to the specified address and port
      */
-    public void sendPacket() { //TODO: Breakdown to handle acknowledgments and sendFilePackets
+    public void sendPackets() { //TODO: Breakdown to handle acknowledgments and sendFilePackets
         if (sendPacket == null) {
             System.out.println("Error: No packet to be sent.");
             System.exit(1);
@@ -235,7 +237,13 @@ public class ClientThread implements Runnable {
     }
     
     public void sendFilePackets() {
-    	ArrayList<DatagramPacket> file = new ArrayList<DatagramPacket>();
+    	ArrayList<DatagramPacket> file = null;
+		try {
+			file = buildDataPackets(fileName, address, port);
+		} catch (IOException e1) {
+			ErrorPacket errPkt = ErrorCodeHandler(address, port, e1);
+			e1.printStackTrace();
+		}
         byte[] temp = new byte[100];
         DatagramPacket recivePkt = new DatagramPacket(temp, temp.length);
     	for (int i = 0; i < file.size(); i++) {
@@ -256,7 +264,6 @@ public class ClientThread implements Runnable {
 
             try{
                 AcknowledgementPacket test = (AcknowledgementPacket)Packet.parse(recivePkt);
-
             } catch (Exception e) {
                 e.printStackTrace();
             }
