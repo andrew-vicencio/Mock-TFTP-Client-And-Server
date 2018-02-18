@@ -150,6 +150,16 @@ public class Connection extends ToolThreadClass {
         //TODO: build first response packet
         DatagramPacket recivedDataPacket = new DatagramPacket(new byte[522], 522);
 
+
+
+        DatagramPacket sendPacket = null;
+        AcknowledgementPacket reviedResponse = new AcknowledgementPacket(address, port, 0);
+        sendPacket = reviedResponse.toDataGramPacket();
+        try {
+            sendReceiveSocket.send(sendPacket);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         boolean fileComplete = false;
         AcknowledgementPacket reviedResponse = new AcknowledgementPacket(address, port, 0);
 
@@ -181,7 +191,7 @@ public class Connection extends ToolThreadClass {
             }
 
             //Write out where the packet came from
-            System.out.println("Client - Packet received from " + recivedDataPacket.getAddress() + " Port " + recivedDataPacket.getPort());
+            System.out.println("Server - Packet received from " + recivedDataPacket.getAddress() + " Port " + recivedDataPacket.getPort());
 
             //Write to file
             DataPacket recivedData = null;

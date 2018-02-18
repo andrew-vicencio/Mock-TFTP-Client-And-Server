@@ -1,7 +1,5 @@
 package Packet;
 
-import javafx.util.Pair;
-
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.DatagramPacket;
