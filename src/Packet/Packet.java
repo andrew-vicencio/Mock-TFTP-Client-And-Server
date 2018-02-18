@@ -62,7 +62,7 @@ public abstract class Packet {
             case 4:
                 return new AcknowledgementPacket(address, port, remaining);
             case 5:
-                return new ErrorPacket(address, port, 01);
+                return new ErrorPacket(address, port, remaining);
         }
 
         throw new Exception("Invalid opCode");
