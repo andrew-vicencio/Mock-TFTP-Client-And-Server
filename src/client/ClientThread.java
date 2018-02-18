@@ -80,7 +80,7 @@ public class ClientThread extends ToolThreadClass {
             e.printStackTrace();
             System.exit(1);
         }
-        sendPackets();
+        sendPackets(sendPacket);
         receivePackets();
     }
     
@@ -193,7 +193,11 @@ public class ClientThread extends ToolThreadClass {
     /**
      * sendPacket is used to send DatagramPacket sendPacket to the specified address and port
      */
-    public void sendPackets() { //TODO: Breakdown to handle acknowledgments and sendFilePackets
+    public void sendPackets() {
+    	sendPackets(sendPacket);
+    }
+    
+    public void sendPackets(DatagramPacket sndPacket) { //TODO: Breakdown to handle acknowledgments and sendFilePackets
         if (sendPacket == null) {
             System.out.println("Error: No packet to be sent.");
             System.exit(1);
@@ -202,8 +206,8 @@ public class ClientThread extends ToolThreadClass {
         System.out.println("Client - Sending packet to " + sendPacket.getAddress() + " Port " + sendPacket.getPort());
 
         try {
-        	sendReceiveSocket.send(sendPacket);
-        } catch (Exception e) {
+            sendReceiveSocket.send(sndPacket);
+        } catch (IOException e) {
             e.printStackTrace();
             System.exit(1);
         }
@@ -230,6 +234,7 @@ public class ClientThread extends ToolThreadClass {
 			file = buildDataPackets(fileName, address, port);
 		} catch (IOException e1) {
 			ErrorPacket errPkt = ErrorCodeHandler(address, port, e1);
+			sendPackets(errPkt.toDataGramPacket());
 			e1.printStackTrace();
 		}
         byte[] temp = new byte[100];

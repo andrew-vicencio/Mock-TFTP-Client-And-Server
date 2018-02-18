@@ -22,7 +22,7 @@ public class ErrorPacket extends Packet {
         this.errorCode = (char) (data[0] * 256 + data[1]);
         this.errorMessage = new String(message);
     }
-
+    
     public ErrorPacket(InetAddress address, int port, int errorCode) {
         super(address, port);
         this.errorCode = (char) errorCode;
