@@ -16,6 +16,7 @@ public class Connection extends ToolThreadClass {
     private ArrayList<DatagramPacket> file;
     private int port;
     private InetAddress address;
+    private ErrorPacket errorPkt;
 
     /**
      * Construct a connection class, used to handle a packet being received by the server.
@@ -74,6 +75,21 @@ public class Connection extends ToolThreadClass {
             String fileName = m1.group(2);
 
            file = buildDataPackets(fileName, address, port);
+
+            try {
+                file = buildDataPackets(fileName, address, port);
+            }  catch (IOException e) {
+                errorPkt = ErrorCodeHandler(address,port,e);
+                if(errorPkt != null){
+                    DatagramPacket x = errorPkt.toDataGramPacket();
+                    try {
+                        sendReceiveSocket.send(x);
+                    } catch (IOException e1) {
+                        e1.printStackTrace();
+                    }
+                    System.exit(1);
+                }
+            }
             sendPackets();
         } else if (m2.matches()) {
             //Write acknolagement packets
@@ -120,16 +136,25 @@ public class Connection extends ToolThreadClass {
     }
 }
 
+
+
+    /**
+     * When the connection gets a write request get all datagram values from client
+     */
     @Override
     public void receivePackets() {
         //TODO: build first response packet
         DatagramPacket recivedDataPacket = new DatagramPacket(new byte[522], 522);
+
+        boolean fileComplete = false;
+        AcknowledgementPacket reviedResponse = new AcknowledgementPacket(address, port, 0);
 
 
 
         DatagramPacket sendPacket = null;
         AcknowledgementPacket reviedResponse = new AcknowledgementPacket(address, port, 0);
         sendPacket = reviedResponse.toDataGramPacket();
+
         try {
             sendReceiveSocket.send(sendPacket);
         } catch (IOException e) {
@@ -140,12 +165,26 @@ public class Connection extends ToolThreadClass {
         while (!fileComplete) {
 
 
+
+        while (!fileComplete) {
+
             //Try and receive from server
             try {
                 sendReceiveSocket.receive(recivedDataPacket);
             } catch (IOException e) {
                 e.printStackTrace();
                 System.exit(1);
+
+            }
+            try {
+                Packet pkt = Packet.parse(recivedDataPacket);
+                if(pkt instanceof ErrorPacket){
+                    System.out.println("Error Recived from client");
+                    System.exit(1);
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+
             }
 
             //Write out where the packet came from
@@ -160,12 +199,41 @@ public class Connection extends ToolThreadClass {
             }
             fileComplete = writeRecivedDataPacket(recivedData);
 
+
             //Send Response Packet to server
 
             //build response packet constrontur
             reviedResponse = new AcknowledgementPacket(recivedData.getAddress(), recivedData.getPort(), recivedData.getBlockNumber());
 
 
+            //Try and write data packets
+            try {
+                fileComplete = writeRecivedDataPacket(recivedData);
+            } catch (IOException e) {
+                //Caught error, try and create error data packet
+                errorPkt = ErrorCodeHandler(address,port,e);
+
+                if(errorPkt != null){
+                    //Send error Datagrampacket
+                    DatagramPacket x = errorPkt.toDataGramPacket();
+                    try {
+                        sendReceiveSocket.send(x);
+                    } catch (IOException e1) {
+                        e1.printStackTrace();
+                    }
+                    //Exit
+                    System.exit(1);
+                }
+            }
+
+
+
+
+
+            //build response packet constrontur
+            reviedResponse = new AcknowledgementPacket(recivedData.getAddress(), recivedData.getPort(), recivedData.getBlockNumber());
+
+            //Send Response Packet to server
             try {
                 sendPacket = reviedResponse.toDataGramPacket();
             } catch (Exception e) {

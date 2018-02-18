@@ -1,5 +1,6 @@
 package Packet;
 
+
 import java.net.DatagramPacket;
 import java.net.InetAddress;
 import java.util.regex.Matcher;
@@ -10,6 +11,11 @@ public class ReadPacket extends Packet {
     private String fileName;
     private String mode;
 
+    /**
+     * @param address
+     * @param port
+     * @param remaining
+     */
     public ReadPacket(InetAddress address, int port, byte[] remaining) {
         super(address, port);
         Pair<String, String> pair = decomposeReadWriteData(remaining);
@@ -17,10 +23,16 @@ public class ReadPacket extends Packet {
         this.mode = pair.getValue();
     }
 
+    /**
+     * @return
+     */
     public String getFileName() {
         return fileName;
     }
 
+    /**
+     * @return
+     */
     public String getFileMode() {
         return mode;
     }
@@ -32,6 +44,6 @@ public class ReadPacket extends Packet {
 
     @Override
     byte[] toByteArray() {
-        return new byte[0];
+        return composeReadWriteData(1, fileName, mode);
     }
 }

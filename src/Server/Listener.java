@@ -17,6 +17,9 @@ public class Listener {
 
     Logger logger;
 
+    /**
+     * 
+     */
     public Listener() {
         // initialise a logger with maximum verbosity
         logger = new Logger(LogLevels.ALL);
@@ -25,6 +28,9 @@ public class Listener {
     /**
      * Start a socket on provided port and handles connections.
      *
+     * @param port
+     */
+    /**
      * @param port
      */
     public void listen(int port) {
@@ -42,6 +48,9 @@ public class Listener {
 
     /**
      * Wait for a packet from the client, and pass of handling it to a connection thread..
+     */
+    /**
+     * 
      */
     public void waitForPacketAndHandle() {
         byte data[] = new byte[100];

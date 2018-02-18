@@ -18,6 +18,13 @@ public class PacketConstructor {
      * write = true if write
      * write = false if read
      */
+
+    /**
+     * @param write
+     * @param filename
+     * @return
+     * @throws IOException
+     */
     private static byte[] getHeader(boolean write, String filename) throws IOException {
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         if (write) {
@@ -34,18 +41,48 @@ public class PacketConstructor {
         return outputStream.toByteArray();
     }
 
+    /**
+     * @param write
+     * @param filename
+     * @return
+     * @throws UnknownHostException
+     * @throws IOException
+     */
     public static DatagramPacket createPacket(boolean write, String filename) throws UnknownHostException, IOException {
         return createPacket(write, filename, InetAddress.getLocalHost(), 69);
     }
 
+    /**
+     * @param write
+     * @param filename
+     * @param port
+     * @return
+     * @throws UnknownHostException
+     * @throws IOException
+     */
     public static DatagramPacket createPacket(boolean write, String filename, int port) throws UnknownHostException, IOException {
         return createPacket(write, filename, InetAddress.getLocalHost(), port);
     }
 
+    /**
+     * @param ack
+     * @param blockNumber
+     * @return
+     * @throws UnknownHostException
+     * @throws IOException
+     */
     public static DatagramPacket createPacket(byte[] ack, int blockNumber) throws UnknownHostException, IOException {
         return new DatagramPacket(ack, ack.length, InetAddress.getLocalHost(), 23);
     }
 
+    /**
+     * @param write
+     * @param filename
+     * @param address
+     * @param port
+     * @return
+     * @throws IOException
+     */
     public static DatagramPacket createPacket(boolean write, String filename, InetAddress address, int port) throws IOException {
         DatagramPacket pkt = null;
         byte[] header = getHeader(write, filename);
@@ -54,6 +91,14 @@ public class PacketConstructor {
         return pkt;
     }
 
+    /**
+     * @param opCode
+     * @param blockNumber
+     * @param data
+     * @param address
+     * @param port
+     * @return
+     */
     public static DatagramPacket createDatapackets(byte[] opCode, byte[] blockNumber, byte[] data, InetAddress address, int port) {
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         DatagramPacket newPkt = null;
