@@ -18,6 +18,7 @@ public class PacketConstructor {
      * write = true if write
      * write = false if read
      */
+
     /**
      * @param write
      * @param filename

@@ -14,6 +14,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 import Packet.AcknowledgementPacket;
+import Packet.*;
+import tools.PacketConstructor;
+import tools.*;
 import Packet.DataPacket;
 import Packet.ErrorPacket;
 import Packet.Packet;
@@ -90,6 +93,10 @@ public class ClientThread extends ToolThreadClass {
             e.printStackTrace();
             System.exit(1);
         }
+        sendPackets();
+        receivePackets();
+    }
+
         sendPackets(sendPacket);
         receivePackets();
     }
@@ -138,6 +145,9 @@ public class ClientThread extends ToolThreadClass {
         int blockNumber = 0;
         boolean fileComplete = false;
         receivedData = new byte[516];
+        FileWriter filewriter = null;
+        File temp = new File("receivedFile.txt");
+
         DatagramPacket receivePacket = new DatagramPacket(new byte[522], 522);
 
         while (!fileComplete) {
@@ -181,6 +191,7 @@ public class ClientThread extends ToolThreadClass {
             		writeRecivedDataPacket((DataPacket)pkt);
             	}
             } catch (IOException e2) {
+                e2.printStackTrace();
     			ErrorPacket errPkt = ErrorCodeHandler(address, port, e2);
     			sendPackets(errPkt.toDataGramPacket());
     			e2.printStackTrace();
@@ -223,6 +234,8 @@ public class ClientThread extends ToolThreadClass {
      * (non-Javadoc)
      * @see tools.ToolThreadClass#sendPackets()
      */
+    public void sendPackets() { //TODO: Breakdown to handle acknowledgments and sendFilePackets
+
     public void sendPackets() {
     	sendPackets(sendPacket);
     }
@@ -234,6 +247,7 @@ public class ClientThread extends ToolThreadClass {
      * @param sndPkt Send Packet
      */
     public void sendPackets(DatagramPacket sndPkt) { //TODO: Breakdown to handle acknowledgments and sendFilePackets
+
         if (sendPacket == null) {
             System.out.println("Error: No packet to be sent.");
             System.exit(1);
@@ -242,14 +256,36 @@ public class ClientThread extends ToolThreadClass {
         System.out.println("Client - Sending packet to " + sendPacket.getAddress() + " Port " + sendPacket.getPort());
 
         try {
+
+        	sendReceiveSocket.send(sendPacket);
+        } catch (Exception e) {
+
             sendReceiveSocket.send(sndPkt);
         } catch (IOException e) {
+
             e.printStackTrace();
             System.exit(1);
         }
 
         System.out.println("Client - Packet sent.");
     }
+    
+    /**
+     * Allocate a byte array of a specific size
+     *
+     * @param x length of the byte array to return to the client
+     * @return An empty byte array of the given length
+     */
+    public byte[] longToBytes(long x) {
+        ByteBuffer buffer = ByteBuffer.allocate(Long.BYTES);
+        buffer.putLong(x);
+        return buffer.array();
+    }
+
+    
+    public void sendFilePackets() {
+    	ArrayList<DatagramPacket> file = buildDataPackets(fileName, address, port);
+
 
     
     /**

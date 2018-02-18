@@ -83,6 +83,10 @@ public abstract class CommandLine extends Thread { //TODO: Does not need to exte
 		return verbose;
 	}
 	
+	public synchronized void print(String str) {
+		System.out.println(str);
+	}
+	
 	/**
 	 * @param str
 	 */

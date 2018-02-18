@@ -13,11 +13,12 @@ public class DataPacket extends Packet {
     private byte[] data;
 
 
+
     /**
      * @param address
      * @param port
      * @param remaining
-     */
+*/
     public DataPacket(InetAddress address, int port, byte[] remaining) {
         super(address, port);
 
@@ -46,6 +47,17 @@ public class DataPacket extends Packet {
     }
 
     @Override
+    DatagramPacket toDataGramPacket() {
+        try {
+            return new DatagramPacket(toByteArray(), toByteArray().length , address, port);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+
+    @Override
     public byte[] toByteArray() throws IOException {
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 
@@ -60,16 +72,20 @@ public class DataPacket extends Packet {
         return outputStream.toByteArray();
     }
 
+
     /**
      * @return
      */
+
     public byte[] getData() {
         return data;
     }
 
+
     /**
      * @param data
      */
+
     public void setData(byte[] data) {
         this.data = data;
     }

@@ -12,6 +12,7 @@ public class Server {
         ServerCommandLine listen= new ServerCommandLine();
         l.listen(69);
         listen.start();
+
     }
 }
 

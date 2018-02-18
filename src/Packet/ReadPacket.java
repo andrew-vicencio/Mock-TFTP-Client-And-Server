@@ -38,6 +38,11 @@ public class ReadPacket extends Packet {
     }
 
     @Override
+    DatagramPacket toDataGramPacket() {
+        return null;
+    }
+
+    @Override
     byte[] toByteArray() {
         return composeReadWriteData(1, fileName, mode);
     }

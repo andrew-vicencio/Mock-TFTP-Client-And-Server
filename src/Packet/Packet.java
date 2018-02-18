@@ -15,6 +15,7 @@ public abstract class Packet {
     protected static final byte writeHeader[] = {0, 2};
     protected static final byte readHeader[] = {0, 1};
     protected static final byte dataResponse[] = {0, 3};
+    protected static final byte acKnolageResopnse[] = {0, 4};
     protected static final byte acknowledgeResponse[] = {0, 4};
 
     /**
@@ -30,6 +31,7 @@ public abstract class Packet {
         String fileName = matcher.group(1);
         String mode = matcher.group(2);
         return new Pair(fileName, mode);
+
     }
 
     public static byte[] composeReadWriteData(int opCode, String filename, String mode) {
@@ -42,6 +44,7 @@ public abstract class Packet {
         out.write(0);
 
         return out.toByteArray();
+
     }
 
     /**
@@ -60,10 +63,13 @@ public abstract class Packet {
         return address;
     }
 
+
+
     /**
      * @return
      */
     public int getPort() {
+
         return port;
     }
 
@@ -113,11 +119,17 @@ public abstract class Packet {
      * @param port
      * @return
      */
+
     public static DatagramPacket createEmptyPacket(InetAddress address, int port) {
         byte[] newArray = new byte[1];
         DatagramPacket newPtk = new DatagramPacket(newArray, 1, address, port);
         return newPtk;
     }
+
+
+
+    abstract DatagramPacket toDataGramPacket();
+
 
     static byte[] to2Bytes(int i) {
         byte[] result = new byte[4];
@@ -152,5 +164,6 @@ public abstract class Packet {
      * @return
      * @throws IOException
      */
+
     abstract byte[] toByteArray() throws IOException;
 }

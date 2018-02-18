@@ -43,10 +43,20 @@ public class AcknowledgementPacket extends Packet {
     }
 
     @Override
+    public DatagramPacket toDataGramPacket()  {
+        try {
+            return new DatagramPacket(toByteArray(), toByteArray().length , address, port);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    @Override
     byte[] toByteArray() throws IOException {
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 
-        outputStream.write(acknowledgeResponse);
+        outputStream.write(acKnolageResopnse);
 
         ByteBuffer buffer = ByteBuffer.allocate(Long.BYTES);
         buffer.putLong(blockNumber);

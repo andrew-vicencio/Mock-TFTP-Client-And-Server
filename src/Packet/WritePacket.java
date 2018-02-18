@@ -35,6 +35,11 @@ public class WritePacket extends Packet {
     }
 
     @Override
+    DatagramPacket toDataGramPacket() {
+        return null;
+    }
+
+    @Override
     byte[] toByteArray() {
         return composeReadWriteData(2, fileName, mode);
     }
