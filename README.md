@@ -47,3 +47,37 @@ Command Line
     1. Enter send
     2. Enter read or write
     3. Enter file name
+
+
+## Responsibilities
+
+Server:
+  * Jacob MacDonald
+  * Benjamin Bichel
+  
+Logger:
+  * Jacob MacDonald
+  
+Packet:
+  * Jacob MacDonald
+  * Andrew Vicencio
+  
+Tools:
+  * Jacob MacDonald
+  * Paul Hewson
+  * Andrew Vicencio
+  * Geoffrey Scornaienchi
+  * Benjamin Bichel
+  
+Error Simulator:
+  * Geoffrey Scornaienchi
+  
+Client:
+  * Paul Hewson
+  * Andrew Vicencio
+  
+ReadMe:
+  * Jacob MacDonald
+  
+UML Class Diagram: 
+  * Geoffrey Scornaienchi
