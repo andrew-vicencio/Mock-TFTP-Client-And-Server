@@ -1,4 +1,5 @@
 package Packet;
+
 import javafx.util.Pair;
 import java.io.IOException;
 import java.net.DatagramPacket;
@@ -24,7 +25,7 @@ public abstract class Packet {
         }
         String fileName = matcher.group(1);
         String mode = matcher.group(2);
-        return new Pair<>(fileName, mode);
+        return new Pair(fileName, mode);
     }
 
     public Packet(InetAddress address, int port){

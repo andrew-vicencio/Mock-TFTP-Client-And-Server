@@ -11,10 +11,10 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-public abstract class ToolThreadClass extends Thread {
+public abstract class ToolThreadClass implements Runnable {
     // pre created read and write response headers
     final byte dataResponse[] = {0, 3};
-    final byte acKnolageResopnse[] = {0, 4};
+    final byte acknowledgeResponse[] = {0, 4};
 
     /**
      * Read a file from disk, into an array of datagram packets to be send to the client.
@@ -83,7 +83,11 @@ public abstract class ToolThreadClass extends Thread {
         byte[] receivedData = new byte[512];
 
         ByteArrayOutputStream data = new ByteArrayOutputStream();
-        data.write(Arrays.copyOfRange(receivePacket.getData(), 4, receivePacket.getData().length));
+        try {
+            data.write(Arrays.copyOfRange(receivePacket.getData(), 4, receivePacket.getData().length));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         receivedData = data.toByteArray();
 
         //Try and write to file from the new data string

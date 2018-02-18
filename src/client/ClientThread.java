@@ -2,7 +2,6 @@ package client;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.net.DatagramPacket;
@@ -23,13 +22,12 @@ import tools.ToolThreadClass;
 public class ClientThread extends ToolThreadClass {
     private DatagramSocket sendReceiveSocket;
     private DatagramPacket sendPacket;
-    private DatagramPacket receivePacket;
     private boolean write;
-    private boolean fileComplete;
     private String fileName;
     private int port;
     private byte[] receivedData;
     private InetAddress address;
+    private ClientCommandLine cl;
 
     final byte[] readResponse = {0, 3};
     final byte[] writeResponse = {0, 4};
@@ -40,7 +38,7 @@ public class ClientThread extends ToolThreadClass {
      * Chose to store write request, filename, and port. This is for future functionality
      * where it retries a few requests before stopping.
      */
-    public ClientThread(boolean write, String filename, InetAddress address, int port) {
+    public ClientThread(boolean write, String filename, InetAddress address, int port, ClientCommandLine cl) {
         try {
             sendReceiveSocket = new DatagramSocket();
             this.write = write;
@@ -48,6 +46,7 @@ public class ClientThread extends ToolThreadClass {
             this.port = port;
             sendPacket = null;
             this.address = address;
+            this.cl = cl;
         } catch (SocketException e) {
             e.printStackTrace();
             System.exit(1);
@@ -65,7 +64,7 @@ public class ClientThread extends ToolThreadClass {
      * @param port     port to listen on.
      */
     public ClientThread(boolean write, String filename, int port) throws UnknownHostException {
-        this(write, filename, InetAddress.getLocalHost(), port);
+        this(write, filename, InetAddress.getLocalHost(), port, null);
     }
 
 
@@ -77,12 +76,44 @@ public class ClientThread extends ToolThreadClass {
         try {
             sendPacket = PacketConstructor.createPacket(write, fileName, port);
         } catch (IOException e) {
-            System.out.println("Error: Packet creation has failed.");
+            cl.print("Error: Packet creation has failed.");
             e.printStackTrace();
             System.exit(1);
         }
         sendPackets();
         receivePackets();
+    }
+    
+    public void receivePackets() {
+    	if(!write) {
+    		receiveFilePackets();
+    		System.out.println("File received.");
+    		return;
+    	}
+    	
+    	DatagramPacket receivePacket = new DatagramPacket(new byte[100], 100);
+    	try {
+    		sendReceiveSocket.receive(receivePacket);
+    	} catch (IOException e) {
+    		System.out.println("Error in receiving first packet.");
+    		e.printStackTrace();
+    		System.exit(1);
+    	}
+    	
+    	Packet ack = null;
+    	try {
+    		ack = Packet.parse(receivePacket);
+    	} catch (Exception e) {
+    		System.out.println("Packet could not be parsed");
+    	}
+    	
+    	if(ack instanceof ErrorPacket) {
+    		System.out.println("Error in write request.");
+    		System.exit(1);
+    	}
+    	
+    	System.out.println("Starting file transfer.");
+    	sendFilePackets();
     }
 
 
@@ -90,12 +121,14 @@ public class ClientThread extends ToolThreadClass {
      * receivePacket is used to wait for confirmation packets from the host. This method will block until it
      * receives a packet.
      */
-    public void receivePackets() { //TODO: Breakdown into receive file and receive acknowledgments
+
+    public void receiveFilePackets() {
         int blockNumber = 0;
-        fileComplete = false;
+        boolean fileComplete = false;
         receivedData = new byte[516];
         FileWriter filewriter = null;
         File temp = new File("receivedFile.txt");
+        DatagramPacket receivePacket = new DatagramPacket(new byte[522], 522);
 
         while (!fileComplete) {
             blockNumber++;
@@ -149,7 +182,7 @@ public class ClientThread extends ToolThreadClass {
             }
             sendPackets();
 
-            if (receivedData.length < 511) {
+            if (receivedData.length < 512) {
                 fileComplete = true;
             }
 
@@ -169,14 +202,13 @@ public class ClientThread extends ToolThreadClass {
         System.out.println("Client - Sending packet to " + sendPacket.getAddress() + " Port " + sendPacket.getPort());
 
         try {
-            sendReceiveSocket.send(sendPacket);
-        } catch (IOException e) {
+        	sendReceiveSocket.send(sendPacket);
+        } catch (Exception e) {
             e.printStackTrace();
             System.exit(1);
         }
 
         System.out.println("Client - Packet sent.");
-        receivePacket = new DatagramPacket(new byte[522], 522);
     }
     
     /**
@@ -190,51 +222,7 @@ public class ClientThread extends ToolThreadClass {
         buffer.putLong(x);
         return buffer.array();
     }
-    
-    /**
-     * Breaks down a File into 512-byte blocks and puts it into array to iterate
-     * and send for later
-     * 
-     * @return an arraylist of datagram packets to iterate and send
-     */
-    public ArrayList<DatagramPacket> createFilePackets() {
-    	byte[] fileBytes = null;
-    	ByteArrayOutputStream output = null;
-    	ArrayList<DatagramPacket> fileArr = new ArrayList<DatagramPacket>();
-    	long blockNum = 0;
-    	try {
-            File file = new File(fileName);
-            FileInputStream reader = new FileInputStream(file);
-            output = new ByteArrayOutputStream();
-            
-            fileBytes = new byte[(int) file.length()];
-            reader.read(fileBytes);
-            reader.close();
-    	} catch (IOException e) {
-    		System.out.println("Error: File unable to be read. Might not exist.");
-    		e.printStackTrace();
-    	}
-    	
-    	for (int i = 0; i < fileBytes.length; i++) {
-    		if (i % 512 == 0 && i != 0) {
-    			blockNum++;
-    			fileArr.add(PacketConstructor.createDatapackets(readResponse, longToBytes(blockNum), output.toByteArray(), address, port));
-                output.reset();
-    		}
-            output.write(fileBytes[i]);
-    	}
-    	
-    	//For either an incomplete packet with <512 bytes or an empty byte to signal end of file (EoF)
-    	blockNum++;
-        fileArr.add(PacketConstructor.createDatapackets(readResponse, longToBytes(blockNum), output.toByteArray(), address, port));
-    	
-        try {
-        	output.close();
-        } catch (IOException e) {
-        	e.printStackTrace();
-        }
-    	return fileArr;
-    }
+
     
     public void sendFilePackets() {
     	ArrayList<DatagramPacket> file = null;
@@ -265,7 +253,9 @@ public class ClientThread extends ToolThreadClass {
             try{
                 AcknowledgementPacket test = (AcknowledgementPacket)Packet.parse(recivePkt);
             } catch (Exception e) {
+            	System.out.println("Error in Acknowledgement Packet.");
                 e.printStackTrace();
+                System.exit(1);
             }
     	}
     }
