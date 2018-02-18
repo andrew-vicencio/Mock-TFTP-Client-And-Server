@@ -17,6 +17,10 @@ public abstract class Packet {
     protected static final byte readHeader[] = {0, 1};
     protected static final byte dataResponse[] = {0, 3};
     protected static final byte acknowledgeResponse[] = {0, 4};
+    /**
+     * @param data
+     * @return
+     */
     public static Pair<String, String> decomposeReadWriteData(byte[] data) {
         String str = new String(data);
         Matcher matcher = Pattern.compile("^(.+?)\\x00(.+?)\\x00$").matcher(str);
@@ -28,19 +32,34 @@ public abstract class Packet {
         return new Pair(fileName, mode);
     }
 
+    /**
+     * @param address
+     * @param port
+     */
     public Packet(InetAddress address, int port){
         this.address = address;
         this.port = port;
     }
 
+    /**
+     * @return
+     */
     public InetAddress getAddress() {
         return address;
     }
 
-   public int getPort() {
+   /**
+ * @return
+ */
+public int getPort() {
         return port;
     }
 
+    /**
+     * @param datagramPacket
+     * @return
+     * @throws Exception
+     */
     public static Packet parse(DatagramPacket datagramPacket) throws Exception {
         if (datagramPacket.getLength() < 2) {
             throw new Exception("Error must have at least 2 bytes for op-code");
@@ -69,10 +88,19 @@ public abstract class Packet {
         throw new Exception("Invalid opCode");
     }
 
+    /**
+     * @return
+     * @throws IOException
+     */
     public DataPacket toDataPacket() throws IOException {
         return new DataPacket(getAddress(), getPort(), toByteArray());
     }
 
+    /**
+     * @param address
+     * @param port
+     * @return
+     */
     public static DatagramPacket createEmptyPacket(InetAddress address, int port) {
         byte[] newArray = new byte[1];
         DatagramPacket newPtk = new DatagramPacket(newArray, 1, address, port);
@@ -80,7 +108,14 @@ public abstract class Packet {
     }
 
 
+    /**
+     * @return
+     */
     abstract DatagramPacket toDataGramPacket();
 
+    /**
+     * @return
+     * @throws IOException
+     */
     abstract byte[] toByteArray() throws IOException;
 }

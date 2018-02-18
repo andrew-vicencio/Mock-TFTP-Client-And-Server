@@ -13,6 +13,11 @@ public class DataPacket extends Packet {
     private byte[] data;
 
 
+    /**
+     * @param address
+     * @param port
+     * @param remaining
+     */
     public DataPacket(InetAddress address, int port, byte[] remaining) {
         super(address, port);
 
@@ -20,6 +25,12 @@ public class DataPacket extends Packet {
         this.data = Arrays.copyOfRange(remaining, 2, remaining.length);
     }
 
+    /**
+     * @param address
+     * @param port
+     * @param blockNumber
+     * @param data
+     */
     public DataPacket(InetAddress address, int port, int blockNumber, byte[] data) {
         super(address, port);
 
@@ -27,10 +38,16 @@ public class DataPacket extends Packet {
         this.data = data;
     }
 
+    /**
+     * @return
+     */
     public long getBlockNumber() {
         return blockNumber;
     }
 
+    /* (non-Javadoc)
+     * @see Packet.Packet#toDataGramPacket()
+     */
     @Override
     DatagramPacket toDataGramPacket() {
         try {
@@ -42,6 +59,9 @@ public class DataPacket extends Packet {
     }
 
 
+    /* (non-Javadoc)
+     * @see Packet.Packet#toByteArray()
+     */
     @Override
     public byte[] toByteArray() throws IOException {
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
@@ -59,10 +79,16 @@ public class DataPacket extends Packet {
 
 
 
+    /**
+     * @return
+     */
     public byte[] getData() {
         return data;
     }
 
+    /**
+     * @param data
+     */
     public void setData(byte[] data) {
         this.data = data;
     }

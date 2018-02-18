@@ -10,6 +10,11 @@ public class ErrorPacket extends Packet {
     private char errorCode;
     private String errorMessage;
 
+    /**
+     * @param address
+     * @param port
+     * @param data
+     */
     public ErrorPacket(InetAddress address, int port, byte[] data) {
         super(address, port);
 
@@ -23,18 +28,33 @@ public class ErrorPacket extends Packet {
         this.errorMessage = new String(message);
     }
     
+    /**
+     * @param address
+     * @param port
+     * @param errorCode
+     */
     public ErrorPacket(InetAddress address, int port, int errorCode) {
         super(address, port);
         this.errorCode = (char) errorCode;
         this.errorMessage = getDefaultErrorMessage(this.errorCode);
     }
 
+    /**
+     * @param address
+     * @param port
+     * @param errorCode
+     * @param errorMessage
+     */
     public ErrorPacket(InetAddress address, int port, int errorCode, String errorMessage) {
         super(address, port);
         this.errorCode = (char) errorCode;
         this.errorMessage = errorMessage;
     }
 
+    /**
+     * @param errorCode
+     * @return
+     */
     private String getDefaultErrorMessage(char errorCode) {
         switch(errorCode) {
             case 0:
@@ -58,6 +78,9 @@ public class ErrorPacket extends Packet {
         }
     }
 
+    /* (non-Javadoc)
+     * @see Packet.Packet#toDataGramPacket()
+     */
     @Override
     public DatagramPacket toDataGramPacket() {
         byte[] byteArray = toByteArray();
@@ -65,6 +88,9 @@ public class ErrorPacket extends Packet {
         return new DatagramPacket(byteArray, byteArray.length, address, port);
     }
 
+    /* (non-Javadoc)
+     * @see Packet.Packet#toByteArray()
+     */
     @Override
     byte[] toByteArray() {
         ByteArrayOutputStream out = new ByteArrayOutputStream();

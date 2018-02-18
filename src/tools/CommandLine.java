@@ -9,6 +9,9 @@ public abstract class CommandLine extends Thread { //TODO: Does not need to exte
 	private boolean test;
 	protected Scanner in;
 	
+	/**
+	 * 
+	 */
 	public CommandLine() {
 		exit = false;
 		verbose = true;
@@ -20,14 +23,23 @@ public abstract class CommandLine extends Thread { //TODO: Does not need to exte
 	/** The next four abstract methods are for each component -
 	 *  client, error simulator, or server - to create their own implementations.
 	 */
+	/**
+	 * 
+	 */
 	public abstract void send();
 	
+	/**
+	 * 
+	 */
 	public abstract void receive();
 
 	/**
 	 * isTest checks if the test has been toggled on
 	 * 
 	 * @return boolean
+	 */
+	/**
+	 * @return
 	 */
 	public boolean isTest() {
 		return test;
@@ -37,6 +49,9 @@ public abstract class CommandLine extends Thread { //TODO: Does not need to exte
 	 * toggleTest will toggle test on or off
 	 * 
 	 * @return boolean
+	 */
+	/**
+	 * @return
 	 */
 	public boolean toggleTest() {
 		test = !test;
@@ -48,6 +63,9 @@ public abstract class CommandLine extends Thread { //TODO: Does not need to exte
 	 * 
 	 * @return
 	 */
+	/**
+	 * @return
+	 */
 	public boolean isVerbose() {
 		return verbose;
 	}
@@ -57,17 +75,26 @@ public abstract class CommandLine extends Thread { //TODO: Does not need to exte
 	 * 
 	 * @return
 	 */
+	/**
+	 * @return
+	 */
 	public boolean toggleVerbose() {
 		verbose = !verbose;
 		return verbose;
 	}
 	
+	/**
+	 * @param str
+	 */
 	public synchronized void print(String str) {
 		System.out.println(str);
 	}
 	
 	/**
 	 * run is the main logic
+	 */
+	/* (non-Javadoc)
+	 * @see java.lang.Thread#run()
 	 */
 	public void run() { //TODO: Make quit handel exiting server and
         //TODO: Make this class for all mains for exiting

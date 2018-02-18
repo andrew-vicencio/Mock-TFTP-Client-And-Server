@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 import Packet.AcknowledgementPacket;
+import Packet.DataPacket;
 import Packet.ErrorPacket;
 import Packet.Packet;
 import tools.PacketConstructor;
@@ -137,8 +138,6 @@ public class ClientThread extends ToolThreadClass {
         int blockNumber = 0;
         boolean fileComplete = false;
         receivedData = new byte[516];
-        FileWriter filewriter = null;
-        File temp = new File("receivedFile.txt");
         DatagramPacket receivePacket = new DatagramPacket(new byte[522], 522);
 
         while (!fileComplete) {
@@ -151,6 +150,19 @@ public class ClientThread extends ToolThreadClass {
                 e.printStackTrace();
                 System.exit(1);
             }
+            
+            //Check for ErrorPacket
+            Packet pkt = null;
+            try {
+            	pkt = Packet.parse(receivePacket);
+                if(pkt instanceof ErrorPacket) {
+                	System.out.println("Error: Serverside.");
+                	System.exit(1);
+                }
+            } catch (Exception e) {
+            	e.printStackTrace();
+            }
+
 
             //Write out where the packet came from
             System.out.println("Client - Packet received from " + receivePacket.getAddress() + " Port " + receivePacket.getPort());
@@ -164,13 +176,17 @@ public class ClientThread extends ToolThreadClass {
             receivedData = data.toByteArray();
 
             //Try and write to file from the new data string
-            String dataString = new String(receivedData, 0, receivedData.length);
             try {
-                filewriter = new FileWriter(temp, true);
-                filewriter.write(dataString);
-                filewriter.close();
+            	if(pkt instanceof DataPacket) {
+            		writeRecivedDataPacket((DataPacket)pkt);
+            	}
             } catch (IOException e2) {
-                e2.printStackTrace();
+    			ErrorPacket errPkt = ErrorCodeHandler(address, port, e2);
+    			sendPackets(errPkt.toDataGramPacket());
+    			e2.printStackTrace();
+    			System.exit(1);
+            } catch (Exception e) {
+            	
             }
 
             //Send Response Packet to server
@@ -182,10 +198,10 @@ public class ClientThread extends ToolThreadClass {
                 String test = new String(ackPacket, 0, ackPacket.length);
                 System.out.println(test);
                 sendPacket = PacketConstructor.createPacket(ackPacket, blockNumber);
-
             } catch (IOException e) {
                 e.printStackTrace();
             }
+            
             try {
                 Thread.sleep(5);
             } catch (InterruptedException e) {
@@ -202,9 +218,9 @@ public class ClientThread extends ToolThreadClass {
     }
 
     /**
-     * sendPacket is used to send DatagramPacket sendPacket to the specified address and port
-     * (non-Javadoc)
+     * sendPackets passes the first request packet to sendPackets.
      * 
+     * (non-Javadoc)
      * @see tools.ToolThreadClass#sendPackets()
      */
     public void sendPackets() {
@@ -212,7 +228,10 @@ public class ClientThread extends ToolThreadClass {
     }
     
     /**
-     * @param sndPkt
+     * sendPackets is used to send any DatagramPacket to the address and port that is saved by
+     * the current ClientThread.
+     * 
+     * @param sndPkt Send Packet
      */
     public void sendPackets(DatagramPacket sndPkt) { //TODO: Breakdown to handle acknowledgments and sendFilePackets
         if (sendPacket == null) {
@@ -244,6 +263,7 @@ public class ClientThread extends ToolThreadClass {
 			ErrorPacket errPkt = ErrorCodeHandler(address, port, e1);
 			sendPackets(errPkt.toDataGramPacket());
 			e1.printStackTrace();
+			System.exit(1);
 		}
         byte[] temp = new byte[100];
         DatagramPacket recivePkt = new DatagramPacket(temp, temp.length);

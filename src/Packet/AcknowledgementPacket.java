@@ -11,11 +11,22 @@ public class AcknowledgementPacket extends Packet {
     //TODO: Finish making all datapacket classes
     private long blockNumber;
 
+    /**
+     * @param address
+     * @param port
+     * @param blockNumber
+     */
     public AcknowledgementPacket(InetAddress address, int port, long blockNumber) {
         super(address, port);
         this.blockNumber = blockNumber;
     }
 
+    /**
+     * @param address
+     * @param port
+     * @param blockString
+     * @throws Exception
+     */
     public AcknowledgementPacket(InetAddress address, int port, byte[] blockString) throws Exception {
         super(address, port);
         if (blockString.length != 2) {
@@ -24,10 +35,16 @@ public class AcknowledgementPacket extends Packet {
         this.blockNumber = blockString[0] * 256 + blockString[1];
     }
 
+    /**
+     * @return
+     */
     public long getBlockNumber() {
         return blockNumber;
     }
 
+    /* (non-Javadoc)
+     * @see Packet.Packet#toDataGramPacket()
+     */
     @Override
     public DatagramPacket toDataGramPacket()  {
         try {
@@ -38,6 +55,9 @@ public class AcknowledgementPacket extends Packet {
         return null;
     }
 
+    /* (non-Javadoc)
+     * @see Packet.Packet#toByteArray()
+     */
     @Override
     byte[] toByteArray() throws IOException {
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();

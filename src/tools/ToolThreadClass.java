@@ -20,8 +20,11 @@ public abstract class ToolThreadClass implements Runnable {
      * Read a file from disk, into an array of datagram packets to be send to the client.
      *
      * @param fileName The name of the file to read from
+     * @param address
+     * @param port
+     * @return
+     * @throws IOException
      */
-
     public  ArrayList<DatagramPacket> buildDataPackets(String fileName, InetAddress address, int port) throws IOException {
         ArrayList<DatagramPacket> file = new ArrayList<DatagramPacket>();
 
@@ -118,7 +121,7 @@ public abstract class ToolThreadClass implements Runnable {
     public abstract void sendPackets();
 
     /*
-    this method is for waiting to receive packets from either client or server they are specialized for each
+     * This method is for waiting to receive packets from either client or server they are specialized for each
      */
     public abstract void receivePackets();
 
