@@ -14,7 +14,7 @@ public class ErrorPacket extends Packet {
     }
 
     @Override
-    DatagramPacket toDataGramPacket() {
+    public DatagramPacket toDataGramPacket() {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         
 		out.write(opCode, 0, opCode.length);

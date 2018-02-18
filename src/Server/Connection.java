@@ -16,6 +16,7 @@ public class Connection extends ToolThreadClass {
     private ArrayList<DatagramPacket> file;
     private int port;
     private InetAddress address;
+    private ErrorPacket errorPkt;
 
     /**
      * Construct a connection class, used to handle a packet being received by the server.
@@ -73,7 +74,20 @@ public class Connection extends ToolThreadClass {
         //Send data gram packets
             String fileName = m1.group(2);
 
-           file = buildDataPackets(fileName, address, port);
+            try {
+                file = buildDataPackets(fileName, address, port);
+            }  catch (IOException e) {
+                errorPkt = ErrorCodeHandler(address,port,e);
+                if(errorPkt != null){
+                    DatagramPacket x = errorPkt.toDataGramPacket();
+                    try {
+                        sendReceiveSocket.send(x);
+                    } catch (IOException e1) {
+                        e1.printStackTrace();
+                    }
+                    System.exit(1);
+                }
+            }
             sendPackets();
         } else if (m2.matches()) {
             //Write acknolagement packets
@@ -153,7 +167,22 @@ public class Connection extends ToolThreadClass {
             }catch (Exception e ){
                 e.printStackTrace();
             }
-            fileComplete = writeRecivedDataPacket(recivedData);
+            try {
+                fileComplete = writeRecivedDataPacket(recivedData);
+            } catch (IOException e) {
+                errorPkt = ErrorCodeHandler(address,port,e);
+                if(errorPkt != null){
+                    DatagramPacket x = errorPkt.toDataGramPacket();
+                    try {
+                        sendReceiveSocket.send(x);
+                    } catch (IOException e1) {
+                        e1.printStackTrace();
+                    }
+                    System.exit(1);
+                }
+            }
+
+
 
             //Send Response Packet to server
 
