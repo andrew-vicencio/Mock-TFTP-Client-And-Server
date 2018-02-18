@@ -150,19 +150,7 @@ public class Connection extends ToolThreadClass {
         //TODO: build first response packet
         DatagramPacket recivedDataPacket = new DatagramPacket(new byte[522], 522);
 
-
-
-        DatagramPacket sendPacket = null;
         AcknowledgementPacket reviedResponse = new AcknowledgementPacket(address, port, 0);
-        sendPacket = reviedResponse.toDataGramPacket();
-        try {
-            sendReceiveSocket.send(sendPacket);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        boolean fileComplete = false;
-        AcknowledgementPacket reviedResponse = new AcknowledgementPacket(address, port, 0);
-
         DatagramPacket sendPacket = reviedResponse.toDataGramPacket();
 
         try {
@@ -170,6 +158,7 @@ public class Connection extends ToolThreadClass {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        boolean fileComplete = false;
 
         while (!fileComplete) {
 
