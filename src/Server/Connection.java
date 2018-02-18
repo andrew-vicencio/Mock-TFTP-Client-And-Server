@@ -117,13 +117,21 @@ public class Connection extends ToolThreadClass {
                 e.printStackTrace();
             }
 
-
             try {
                 sendReceiveSocket.receive(recivePkt);
             } catch (IOException e) {
                 e.printStackTrace();
             }
 
+            try {
+                Packet pkt = Packet.parse(recivePkt);
+                if(pkt instanceof ErrorPacket){
+                    System.out.println("Error Recived from client");
+                    System.exit(1);
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
 
             try{
                 AcknowledgementPacket test = (AcknowledgementPacket)Packet.parse(recivePkt);
@@ -142,15 +150,18 @@ public class Connection extends ToolThreadClass {
         //TODO: build first response packet
         DatagramPacket recivedDataPacket = new DatagramPacket(new byte[522], 522);
 
-
-        DatagramPacket sendPacket = null;
-        AcknowledgementPacket reviedResponse = null;
-
-
         boolean fileComplete = false;
+        AcknowledgementPacket reviedResponse = new AcknowledgementPacket(address, port, 0);
+
+        DatagramPacket sendPacket = reviedResponse.toDataGramPacket();
+
+        try {
+            sendReceiveSocket.send(sendPacket);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
         while (!fileComplete) {
-
 
             //Try and receive from server
             try {
@@ -158,6 +169,15 @@ public class Connection extends ToolThreadClass {
             } catch (IOException e) {
                 e.printStackTrace();
                 System.exit(1);
+            }
+            try {
+                Packet pkt = Packet.parse(recivedDataPacket);
+                if(pkt instanceof ErrorPacket){
+                    System.out.println("Error Recived from client");
+                    System.exit(1);
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
             }
 
             //Write out where the packet came from

@@ -258,8 +258,10 @@ public class ClientThread extends ToolThreadClass {
     public void sendFilePackets() {
     	ArrayList<DatagramPacket> file = null;
 		try {
+
 			file = buildDataPackets(fileName, address, port);
 		} catch (IOException e1) {
+		    System.out.println("made it");
 			ErrorPacket errPkt = ErrorCodeHandler(address, port, e1);
 			sendPackets(errPkt.toDataGramPacket());
 			e1.printStackTrace();

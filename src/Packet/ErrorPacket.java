@@ -6,7 +6,7 @@ import java.net.InetAddress;
 import java.util.Arrays;
 
 public class ErrorPacket extends Packet {
-    private final byte[] opCode = {0, 3};
+    private final byte[] opCode = {0, 5};
     private char errorCode;
     private String errorMessage;
 
