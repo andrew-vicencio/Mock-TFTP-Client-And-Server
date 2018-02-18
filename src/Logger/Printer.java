@@ -5,6 +5,9 @@ import java.util.Arrays;
 
 public class Printer {
 
+    /**
+     * @param datagramPacket
+     */
     public void printPacket(DatagramPacket datagramPacket) {
         System.out.println("Server: Packet received:");
         System.out.println("From host: " + datagramPacket.getAddress());
@@ -18,10 +21,16 @@ public class Printer {
         System.out.println(received + "\n");
     }
 
+    /**
+     * @param string
+     */
     public void printString(String string) {
         System.out.print(string);
     }
 
+    /**
+     * @param e
+     */
     public void printException(Exception e) {
         e.printStackTrace();
     }

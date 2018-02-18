@@ -35,7 +35,10 @@ public class ClientCommandLine extends CommandLine {
         }
 
         //Check for port
-        int port = 23;
+        int port = 69;
+        if (isTest()) {
+        	port = 23;
+        }
 
 
         //Dynamically create client thread
@@ -49,19 +52,9 @@ public class ClientCommandLine extends CommandLine {
         }
     }
 
-    //Not needed for client CommandLine
+    //TODO: Make to read 
     @Override
     public void receive() {
         // TODO Auto-generated method stub
-    }
-
-    @Override
-    public void print() {
-        // TODO Auto-generated method stub
-    }
-
-    @Override
-    public void exit() {
-        //TODO Auto-generated method stub
     }
 }

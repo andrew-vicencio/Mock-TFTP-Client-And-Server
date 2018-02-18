@@ -19,6 +19,9 @@ public class ErrorSimulator {
     private DatagramPacket receiveClientPacket, receiveServerPacket, sendPacket;
     private int clientPort, connectionPort;
 
+    /**
+     * 
+     */
     public ErrorSimulator() {
         try {
             //Error simulator will use port 23
@@ -29,6 +32,9 @@ public class ErrorSimulator {
         }
     }
 
+    /**
+     * @param args
+     */
     public static void main(String args[]) {
         ErrorSimulator host = new ErrorSimulator();
         host.start();
@@ -37,6 +43,7 @@ public class ErrorSimulator {
     /**
      * start is used begins to receive and send
      * packets between the client and server
+     *
      */
     public void start() {
         this.receiveClientPacket();
@@ -56,6 +63,9 @@ public class ErrorSimulator {
     /**
      * receiveClientPacket is used to receive packet sent to
      * port 23 from client
+     */
+    /**
+     * 
      */
     public void receiveClientPacket() {
         byte data[] = new byte[512];
@@ -77,6 +87,9 @@ public class ErrorSimulator {
     /**
      * receiveServerPacket is used to receive packet from server
      */
+    /**
+     * 
+     */
     public void receiveServerPacket() {
         byte data[] = new byte[522];
         receiveServerPacket = new DatagramPacket(data, data.length);
@@ -95,6 +108,9 @@ public class ErrorSimulator {
 
     /**
      * sendClientPacket is used to send packet from server to client
+     */
+    /**
+     * 
      */
     public void sendClientPacket() {
         sendPacket = new DatagramPacket(receiveServerPacket.getData(), receiveServerPacket.getLength(),
