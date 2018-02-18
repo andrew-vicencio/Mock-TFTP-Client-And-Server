@@ -36,28 +36,12 @@ public class AcknowledgementPacket extends Packet {
     }
 
     /**
-     * @return
+     * @return blocknumber
      */
     public long getBlockNumber() {
         return blockNumber;
     }
 
-    /* (non-Javadoc)
-     * @see Packet.Packet#toDataGramPacket()
-     */
-    @Override
-    public DatagramPacket toDataGramPacket()  {
-        try {
-            return new DatagramPacket(toByteArray(), toByteArray().length , address, port);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
-
-    /* (non-Javadoc)
-     * @see Packet.Packet#toByteArray()
-     */
     @Override
     byte[] toByteArray() throws IOException {
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();

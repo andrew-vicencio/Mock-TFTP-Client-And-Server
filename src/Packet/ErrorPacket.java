@@ -27,12 +27,13 @@ public class ErrorPacket extends Packet {
         this.errorCode = (char) (data[0] * 256 + data[1]);
         this.errorMessage = new String(message);
     }
-    
+
     /**
      * @param address
      * @param port
      * @param errorCode
      */
+
     public ErrorPacket(InetAddress address, int port, int errorCode) {
         super(address, port);
         this.errorCode = (char) errorCode;
@@ -56,7 +57,7 @@ public class ErrorPacket extends Packet {
      * @return
      */
     private String getDefaultErrorMessage(char errorCode) {
-        switch(errorCode) {
+        switch (errorCode) {
             case 0:
                 return "Error not defined";
             case 1:
@@ -78,25 +79,12 @@ public class ErrorPacket extends Packet {
         }
     }
 
-    /* (non-Javadoc)
-     * @see Packet.Packet#toDataGramPacket()
-     */
-    @Override
-    public DatagramPacket toDataGramPacket() {
-        byte[] byteArray = toByteArray();
-
-        return new DatagramPacket(byteArray, byteArray.length, address, port);
-    }
-
-    /* (non-Javadoc)
-     * @see Packet.Packet#toByteArray()
-     */
     @Override
     byte[] toByteArray() {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
 
         out.write(opCode, 0, 2);
-        out.write(errorCode);
+        out.write(to2Bytes(errorCode), 0, 2);
         out.write(errorMessage.getBytes(), 0, errorMessage.getBytes().length);
         out.write(0);
 

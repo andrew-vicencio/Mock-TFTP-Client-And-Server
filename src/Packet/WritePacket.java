@@ -36,19 +36,8 @@ public class WritePacket extends Packet {
         return mode;
     }
 
-    /* (non-Javadoc)
-     * @see Packet.Packet#toDataGramPacket()
-     */
-    @Override
-    DatagramPacket toDataGramPacket() {
-        return null;
-    }
-
-    /* (non-Javadoc)
-     * @see Packet.Packet#toByteArray()
-     */
     @Override
     byte[] toByteArray() {
-        return new byte[0];
+        return composeReadWriteData(2, fileName, mode);
     }
 }

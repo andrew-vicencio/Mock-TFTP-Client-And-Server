@@ -21,7 +21,7 @@ public class DataPacket extends Packet {
     public DataPacket(InetAddress address, int port, byte[] remaining) {
         super(address, port);
 
-        this.blockNumber = remaining[0] * 255 + remaining[1];
+        this.blockNumber = remaining[0] * 256 + remaining[1];
         this.data = Arrays.copyOfRange(remaining, 2, remaining.length);
     }
 
@@ -45,23 +45,6 @@ public class DataPacket extends Packet {
         return blockNumber;
     }
 
-    /* (non-Javadoc)
-     * @see Packet.Packet#toDataGramPacket()
-     */
-    @Override
-    DatagramPacket toDataGramPacket() {
-        try {
-            return new DatagramPacket(toByteArray(), toByteArray().length , address, port);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
-
-
-    /* (non-Javadoc)
-     * @see Packet.Packet#toByteArray()
-     */
     @Override
     public byte[] toByteArray() throws IOException {
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
@@ -76,8 +59,6 @@ public class DataPacket extends Packet {
         outputStream.write(data);
         return outputStream.toByteArray();
     }
-
-
 
     /**
      * @return
