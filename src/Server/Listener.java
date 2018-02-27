@@ -1,6 +1,7 @@
 package Server;
 
 import Logger.*;
+import client.ClientThread;
 
 import java.io.IOException;
 import java.net.DatagramPacket;
@@ -16,6 +17,9 @@ public class Listener {
 
     Logger logger;
 
+    /**
+     * 
+     */
     public Listener() {
         // initialise a logger with maximum verbosity
         logger = new Logger(LogLevels.ALL);
@@ -24,6 +28,9 @@ public class Listener {
     /**
      * Start a socket on provided port and handles connections.
      *
+     * @param port
+     */
+    /**
      * @param port
      */
     public void listen(int port) {
@@ -42,6 +49,9 @@ public class Listener {
     /**
      * Wait for a packet from the client, and pass of handling it to a connection thread..
      */
+    /**
+     * 
+     */
     public void waitForPacketAndHandle() {
         byte data[] = new byte[100];
         receivePacket = new DatagramPacket(data, data.length);
@@ -57,8 +67,14 @@ public class Listener {
             System.exit(1);
         }
 
-        Connection connection = new Connection(logger, receivePacket);
-        connection.start();
+        try {
+            Thread thread = new Thread(new Connection(logger, receivePacket), "Server Connection");
+            thread.start();
+        } catch (Exception e) {
+            System.out.println("Error: Client thread not created successfully.");
+            e.printStackTrace();
+            System.exit(1);
+        }
 
     }
 }
