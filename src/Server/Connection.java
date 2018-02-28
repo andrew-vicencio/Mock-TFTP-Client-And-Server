@@ -1,14 +1,16 @@
 package Server;
 
-import Logger.*;
-
-import java.io.*;
-import java.net.*;
-import java.util.*;
-import java.util.regex.*;
-
+import Logger.LogLevels;
+import Logger.Logger;
 import Packet.*;
-import tools.*;
+import tools.ToolThreadClass;
+
+import java.io.IOException;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
+import java.net.InetAddress;
+import java.net.SocketException;
+import java.util.ArrayList;
 
 public class Connection extends ToolThreadClass {
     private Logger logger;
@@ -34,12 +36,6 @@ public class Connection extends ToolThreadClass {
     // socket to be used to send / receive data.
     private DatagramSocket sendReceiveSocket;
 
-
-
-    // Regexes to match read and write requests from the client.
-    private Pattern readRequest = Pattern.compile("^\\x00([\\x01])(.+?)([\\x00]+)(.+?)([^\\x00]+)\\x00+$");
-    private Pattern writeRequest = Pattern.compile("^\\x00([\\x02])(.+?)([\\x00]+)(.+?)([^\\x00]+)\\x00+$");
-
     /**
      * Method called when thread is initialised to handle the packet it was created to handle.
      */
@@ -63,38 +59,35 @@ public class Connection extends ToolThreadClass {
             System.exit(1);
         }
 
-
         System.out.println("Server: Sending packet:");
         logger.printPacket(LogLevels.INFO, receivePacket);
-        String str = new String(receivePacket.getData(), 0, receivePacket.getLength());
 
-        Matcher m1 = readRequest.matcher(str);
-        Matcher m2 = writeRequest.matcher(str);
-        if (m1.matches()) {
-        //Send data gram packets
-            String fileName = m1.group(2);
+        Packet packet;
+        try {
+            packet = Packet.parse(receivePacket);
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.exit(133);
+            return;
+        }
+
+        if (packet instanceof ReadPacket) {
+            //Send data gram packets
+            ReadPacket readPacket = (ReadPacket) packet;
 
             try {
-                file = buildDataPackets(fileName, address, port);
-            }  catch (IOException e) {
-                errorPkt = ErrorCodeHandler(address,port,e);
-                if(errorPkt != null){
-                    DatagramPacket x = errorPkt.toDataGramPacket();
-                    try {
-                        sendReceiveSocket.send(x);
-                    } catch (IOException e1) {
-                        e1.printStackTrace();
-                    }
-                    System.exit(1);
-                }
+                file = buildDataPackets(readPacket.getFileName(), address, port);
+            } catch (IOException e) {
+                errorPkt = ErrorCodeHandler(address, port, e);
+                ifErrorPrintAndExit(errorPkt);
             }
             sendPackets();
-        } else if (m2.matches()) {
-            //Write acknolagement packets
+        } else if (packet instanceof WritePacket) {
+            //Write acknowledgement packets
             receivePackets();
 
         } else {
-            System.out.println("Recived Invalid Data");
+            System.out.println("Received Invalid Data");
             System.exit(1);
         }
 
@@ -123,24 +116,16 @@ public class Connection extends ToolThreadClass {
                 e.printStackTrace();
             }
 
+            ifDataPacketErrorPrintAndExit(recivePkt);
+
             try {
-                Packet pkt = Packet.parse(recivePkt);
-                if(pkt instanceof ErrorPacket){
-                    System.out.println("Error Recived from client");
-                    System.exit(1);
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-
-            try{
-                AcknowledgementPacket test = (AcknowledgementPacket)Packet.parse(recivePkt);
+                AcknowledgementPacket test = (AcknowledgementPacket) Packet.parse(recivePkt);
 
             } catch (Exception e) {
                 e.printStackTrace();
             }
+        }
     }
-}
 
     /**
      * When the connection gets a write request get all datagram values from client
@@ -148,7 +133,7 @@ public class Connection extends ToolThreadClass {
     @Override
     public void receivePackets() {
         //TODO: build first response packet
-        DatagramPacket recivedDataPacket = new DatagramPacket(new byte[522], 522);
+        DatagramPacket recivedDataPacket = new DatagramPacket(new byte[1024], 1024);
 
         AcknowledgementPacket reviedResponse = new AcknowledgementPacket(address, port, 0);
         DatagramPacket sendPacket = reviedResponse.toDataGramPacket();
@@ -169,15 +154,8 @@ public class Connection extends ToolThreadClass {
                 e.printStackTrace();
                 System.exit(1);
             }
-            try {
-                Packet pkt = Packet.parse(recivedDataPacket);
-                if(pkt instanceof ErrorPacket){
-                    System.out.println("Error Recived from client");
-                    System.exit(1);
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+
+            ifDataPacketErrorPrintAndExit(recivedDataPacket);
 
             //Write out where the packet came from
             System.out.println("Server - Packet received from " + recivedDataPacket.getAddress() + " Port " + recivedDataPacket.getPort());
@@ -186,7 +164,7 @@ public class Connection extends ToolThreadClass {
             DataPacket recivedData = null;
             try {
                 recivedData = (DataPacket) (Packet.parse(recivedDataPacket));
-            }catch (Exception e ){
+            } catch (Exception e) {
                 e.printStackTrace();
             }
 
@@ -195,26 +173,12 @@ public class Connection extends ToolThreadClass {
                 fileComplete = writeRecivedDataPacket(recivedData);
             } catch (IOException e) {
                 //Caught error, try and create error data packet
-                errorPkt = ErrorCodeHandler(address,port,e);
+                errorPkt = ErrorCodeHandler(address, port, e);
 
-                if(errorPkt != null){
-                    //Send error Datagrampacket
-                    DatagramPacket x = errorPkt.toDataGramPacket();
-                    try {
-                        sendReceiveSocket.send(x);
-                    } catch (IOException e1) {
-                        e1.printStackTrace();
-                    }
-                    //Exit
-                    System.exit(1);
-                }
+                ifErrorPrintAndExit(errorPkt);
             }
 
-
-
-
-
-            //build response packet constrontur
+            //build response packet constructor
             reviedResponse = new AcknowledgementPacket(recivedData.getAddress(), recivedData.getPort(), recivedData.getBlockNumber());
 
             //Send Response Packet to server
@@ -233,5 +197,28 @@ public class Connection extends ToolThreadClass {
 
         }
 
+    }
+
+    private void ifDataPacketErrorPrintAndExit(DatagramPacket receivedDataPacket) {
+        try {
+            Packet pkt = Packet.parse(receivedDataPacket);
+            if (pkt instanceof ErrorPacket) {
+                System.out.println("Error Received from client");
+                System.exit(1);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    void ifErrorPrintAndExit(ErrorPacket errorPacket) {
+        if (errorPacket != null) {
+            try {
+                sendReceiveSocket.send(errorPacket.toDataGramPacket());
+            } catch (IOException e1) {
+                e1.printStackTrace();
+            }
+            System.exit(1);
+        }
     }
 }
