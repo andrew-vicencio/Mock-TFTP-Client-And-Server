@@ -22,7 +22,7 @@ public class PacketTest {
 
         AcknowledgementPacket ack = (AcknowledgementPacket) packet;
 
-        assertEquals(8200, ack.getBlockNumber(), "Conversion of bytes to number incorrect");
+        assertEquals((long) 8200, ack.getBlockNumber(), "Conversion of bytes to number incorrect");
 
         assertEquals(Arrays.toString(ack.toByteArray()), Arrays.toString(bytes), "Packet data is not preserved");
     }
@@ -43,7 +43,7 @@ public class PacketTest {
                 Arrays.toString(new Byte[]{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20}),
                 "Data is not preserved");
 
-        assertEquals(8200, dataPacket.getBlockNumber(), "Conversion of bytes to number incorrect");
+        assertEquals((long) 8200, dataPacket.getBlockNumber(), "Conversion of bytes to number incorrect");
 
         assertEquals(Arrays.toString(dataPacket.toByteArray()), Arrays.toString(bytes), "Packet data is not preserved");
     }
@@ -94,5 +94,23 @@ public class PacketTest {
         assertEquals(writePacket.getFileMode(), "Mode", "File mode");
 
         assertEquals(Arrays.toString(writePacket.toByteArray()), Arrays.toString(bytes), "Packet data is not preserved");
+    }
+
+    @Test
+    public void testTrimming() throws Exception {
+
+        byte[] bytes = {0, 4, 0, 8, 0, 0, 0, 0, 0};
+
+        byte[] actual = {0, 4, 0, 8};
+
+        DatagramPacket datagramPacket = new DatagramPacket(bytes, 4, InetAddress.getLocalHost(), 25556);
+
+        Packet packet = Packet.parse(datagramPacket);
+
+        AcknowledgementPacket ack = (AcknowledgementPacket) packet;
+
+        assertEquals((long) 8, ack.getBlockNumber(), "Conversion of bytes to number incorrect");
+
+        assertEquals(Arrays.toString(ack.toByteArray()), Arrays.toString(actual), "Packet data is not preserved");
     }
 }
