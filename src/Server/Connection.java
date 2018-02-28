@@ -74,8 +74,6 @@ public class Connection extends ToolThreadClass {
         //Send data gram packets
             String fileName = m1.group(2);
 
-           file = buildDataPackets(fileName, address, port);
-
             try {
                 file = buildDataPackets(fileName, address, port);
             }  catch (IOException e) {
@@ -119,13 +117,21 @@ public class Connection extends ToolThreadClass {
                 e.printStackTrace();
             }
 
-
             try {
                 sendReceiveSocket.receive(recivePkt);
             } catch (IOException e) {
                 e.printStackTrace();
             }
 
+            try {
+                Packet pkt = Packet.parse(recivePkt);
+                if(pkt instanceof ErrorPacket){
+                    System.out.println("Error Recived from client");
+                    System.exit(1);
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
 
             try{
                 AcknowledgementPacket test = (AcknowledgementPacket)Packet.parse(recivePkt);
@@ -136,8 +142,6 @@ public class Connection extends ToolThreadClass {
     }
 }
 
-
-
     /**
      * When the connection gets a write request get all datagram values from client
      */
@@ -146,14 +150,8 @@ public class Connection extends ToolThreadClass {
         //TODO: build first response packet
         DatagramPacket recivedDataPacket = new DatagramPacket(new byte[522], 522);
 
-        boolean fileComplete = false;
         AcknowledgementPacket reviedResponse = new AcknowledgementPacket(address, port, 0);
-
-
-
-        DatagramPacket sendPacket = null;
-        AcknowledgementPacket reviedResponse = new AcknowledgementPacket(address, port, 0);
-        sendPacket = reviedResponse.toDataGramPacket();
+        DatagramPacket sendPacket = reviedResponse.toDataGramPacket();
 
         try {
             sendReceiveSocket.send(sendPacket);
@@ -164,17 +162,12 @@ public class Connection extends ToolThreadClass {
 
         while (!fileComplete) {
 
-
-
-        while (!fileComplete) {
-
             //Try and receive from server
             try {
                 sendReceiveSocket.receive(recivedDataPacket);
             } catch (IOException e) {
                 e.printStackTrace();
                 System.exit(1);
-
             }
             try {
                 Packet pkt = Packet.parse(recivedDataPacket);
@@ -184,7 +177,6 @@ public class Connection extends ToolThreadClass {
                 }
             } catch (Exception e) {
                 e.printStackTrace();
-
             }
 
             //Write out where the packet came from
@@ -197,14 +189,6 @@ public class Connection extends ToolThreadClass {
             }catch (Exception e ){
                 e.printStackTrace();
             }
-            fileComplete = writeRecivedDataPacket(recivedData);
-
-
-            //Send Response Packet to server
-
-            //build response packet constrontur
-            reviedResponse = new AcknowledgementPacket(recivedData.getAddress(), recivedData.getPort(), recivedData.getBlockNumber());
-
 
             //Try and write data packets
             try {
