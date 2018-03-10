@@ -20,12 +20,6 @@ public class WritePacket extends Packet {
         this.mode = pair.getValue();
     }
 
-    public WritePacket(InetAddress address, int port, String fileName, String mode){
-        super(address, port);
-        this.fileName = fileName;
-
-    }
-
     /**
      * @return
      */
@@ -39,9 +33,6 @@ public class WritePacket extends Packet {
     public String getFileMode() {
         return mode;
     }
-
-
-
 
     @Override
     byte[] toByteArray() {
