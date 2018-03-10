@@ -21,7 +21,7 @@ public class ErrorSimulator {
     
     private int testModeID = 0; // 0 : normal operation; 1 : lose a packet; 2 : delay a packet, 3 : duplicate a packet -- SELECT WHICH ERROR TO SIMULATE
     private int errorPacketID = 0; // 0 : None; 1: 1st WRQ/RRQ, 2: 2nd WRQ/RRQ, 3: 1st Data, 4: 2nd Data, 5: 1st ACK, 6: 2nd Ack -- SELECT WHICH PACKET TO LOSE/DELAY/DUPLICATE
-    private int timeDelay = 0; //How much time between delays or sending duplicates (in MILLISECONDS)
+    private int timeDelay = 100; //How much time between delays or sending duplicates (in MILLISECONDS)
     
     /**
      * 
@@ -29,7 +29,7 @@ public class ErrorSimulator {
     public ErrorSimulator() {
         try {
             //Error simulator will use port 23
-            sendReceiveSocket = new DatagramSocket(23);
+            sendReceiveSocket = new DatagramSocket(10023);
         } catch (SocketException se) {
             se.printStackTrace();
             System.exit(1);
@@ -72,7 +72,7 @@ public class ErrorSimulator {
      * 
      */
     public void receiveClientPacket() {
-        byte data[] = new byte[512];
+        byte data[] = new byte[522];
         receiveClientPacket = new DatagramPacket(data, data.length);
 
         try {
@@ -138,7 +138,7 @@ public class ErrorSimulator {
     public void sendServerPacket() {
         //send to port 69 (server)
         sendPacket = new DatagramPacket(receiveClientPacket.getData(), receiveClientPacket.getLength(),
-                receiveClientPacket.getAddress(), 69);
+                receiveClientPacket.getAddress(), 10069);
         try {
             sendReceiveSocket.send(sendPacket);
         } catch (IOException e) {
@@ -158,11 +158,17 @@ public class ErrorSimulator {
     public void sendResponsePacket(){
         sendPacket = new DatagramPacket(receiveClientPacket.getData(), receiveClientPacket.getLength(),
                 receiveClientPacket.getAddress(), connectionPort);
+        if (testModeID == 2) {
+        	delay();
+        }
         try {
             sendReceiveSocket.send(sendPacket);
         } catch (IOException e) {
             e.printStackTrace();
             System.exit(1);
+        }
+        if (testModeID == 3){
+        	delayAndSendDuplicate(sendPacket);
         }
 
         System.out.println("ErrorSimulator: Sending packet to server:");
@@ -170,5 +176,29 @@ public class ErrorSimulator {
         System.out.println("Destination host port: " + sendPacket.getPort() + "\n");
         receiveClientPacket = null;
     }
-
+    
+    public void delay(){
+    	try {
+			Thread.sleep(timeDelay);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+    }
+    
+    public void delayAndSendDuplicate(DatagramPacket packet){
+    	this.delay();
+        try {
+        	sendReceiveSocket.send(packet);
+        } catch (IOException e) {
+        e.printStackTrace();
+        System.exit(1);
+        }
+    }
+    
+    
+    
+    
+    
 }
+
+
