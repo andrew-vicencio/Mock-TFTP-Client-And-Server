@@ -20,6 +20,12 @@ public class Connection extends ToolThreadClass {
     private InetAddress address;
     private ErrorPacket errorPkt;
 
+
+    // socket to be used to send / receive data.
+    private DatagramSocket sendReceiveSocket;
+
+
+
     /**
      * Construct a connection class, used to handle a packet being received by the server.
      *
@@ -33,8 +39,7 @@ public class Connection extends ToolThreadClass {
         this.logger = logger;
     }
 
-    // socket to be used to send / receive data.
-    private DatagramSocket sendReceiveSocket;
+
 
     /**
      * Method called when thread is initialised to handle the packet it was created to handle.
@@ -171,7 +176,7 @@ public class Connection extends ToolThreadClass {
             //Try and write data packets
             try {
                 fileComplete = writeRecivedDataPacket(recivedData);
-            } catch (IOException e) {
+            } catch (Exception e) {
                 //Caught error, try and create error data packet
                 errorPkt = ErrorCodeHandler(address, port, e);
 
@@ -199,6 +204,7 @@ public class Connection extends ToolThreadClass {
 
     }
 
+
     private void ifDataPacketErrorPrintAndExit(DatagramPacket receivedDataPacket) {
         try {
             Packet pkt = Packet.parse(receivedDataPacket);
@@ -211,7 +217,8 @@ public class Connection extends ToolThreadClass {
         }
     }
 
-    void ifErrorPrintAndExit(ErrorPacket errorPacket) {
+
+   public void ifErrorPrintAndExit(ErrorPacket errorPacket) {
         if (errorPacket != null) {
             try {
                 sendReceiveSocket.send(errorPacket.toDataGramPacket());

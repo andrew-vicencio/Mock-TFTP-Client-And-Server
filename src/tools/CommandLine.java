@@ -83,6 +83,8 @@ public abstract class CommandLine extends Thread { //TODO: Does not need to exte
 		return verbose;
 	}
 	
+
+	
 	/**
 	 * @param str
 	 */

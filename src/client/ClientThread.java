@@ -14,10 +14,13 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 import Packet.AcknowledgementPacket;
+import Packet.*;
+
+import tools.*;
 import Packet.DataPacket;
 import Packet.ErrorPacket;
 import Packet.Packet;
-import tools.PacketConstructor;
+
 import tools.ToolThreadClass;
 
 public class ClientThread extends ToolThreadClass {
@@ -84,16 +87,23 @@ public class ClientThread extends ToolThreadClass {
      */
     public void run() {
         try {
-            sendPacket = PacketConstructor.createPacket(write, fileName, port);
+            if(write){
+                sendPacket = (new WritePacket(InetAddress.getLocalHost(), port, fileName, "")).toDataGramPacket();
+            }else{
+                sendPacket = (new ReadPacket(InetAddress.getLocalHost(), port, fileName, "")).toDataGramPacket();
+            }
+
         } catch (IOException e) {
-            cl.print("Error: Packet creation has failed.");
+            System.out.print("Error: Packet creation has failed.");
             e.printStackTrace();
             System.exit(1);
         }
-        sendPackets(sendPacket);
+        sendPackets();
         receivePackets();
     }
-    
+
+
+    //TODO; figure out why the utilization of two recivePackets
     /* (non-Javadoc)
      * @see tools.ToolThreadClass#receivePackets()
      */
@@ -129,6 +139,11 @@ public class ClientThread extends ToolThreadClass {
     	sendFilePackets();
     }
 
+    @Override
+    public void ifErrorPrintAndExit(ErrorPacket errorPacket) {
+
+    }
+
 
     /**
      * receivePacket is used to wait for confirmation packets from the host. This method will block until it
@@ -138,6 +153,9 @@ public class ClientThread extends ToolThreadClass {
         int blockNumber = 0;
         boolean fileComplete = false;
         receivedData = new byte[516];
+        FileWriter filewriter = null;
+        File temp = new File("receivedFile.txt");
+
         DatagramPacket receivePacket = new DatagramPacket(new byte[522], 522);
 
         while (!fileComplete) {
@@ -180,13 +198,12 @@ public class ClientThread extends ToolThreadClass {
             	if(pkt instanceof DataPacket) {
             		writeRecivedDataPacket((DataPacket)pkt);
             	}
-            } catch (IOException e2) {
+            } catch (Exception e2) {
+                e2.printStackTrace();
     			ErrorPacket errPkt = ErrorCodeHandler(address, port, e2);
     			sendPackets(errPkt.toDataGramPacket());
     			e2.printStackTrace();
     			System.exit(1);
-            } catch (Exception e) {
-            	
             }
 
             //Send Response Packet to server
@@ -197,7 +214,8 @@ public class ClientThread extends ToolThreadClass {
                 byte[] ackPacket = ack.toByteArray();
                 String test = new String(ackPacket, 0, ackPacket.length);
                 System.out.println(test);
-                sendPacket = PacketConstructor.createPacket(ackPacket, blockNumber);
+
+                sendPacket = (new AcknowledgementPacket(InetAddress.getLocalHost(), port, blockNumber)).toDataGramPacket();
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -217,6 +235,10 @@ public class ClientThread extends ToolThreadClass {
         sendReceiveSocket.close();
     }
 
+
+
+    //TODO; Make these sendPackets into one method
+
     /**
      * sendPackets passes the first request packet to sendPackets.
      * 
@@ -224,6 +246,8 @@ public class ClientThread extends ToolThreadClass {
      * @see tools.ToolThreadClass#sendPackets()
      */
     public void sendPackets() {
+
+
     	sendPackets(sendPacket);
     }
     
@@ -233,7 +257,8 @@ public class ClientThread extends ToolThreadClass {
      * 
      * @param sndPkt Send Packet
      */
-    public void sendPackets(DatagramPacket sndPkt) { //TODO: Breakdown to handle acknowledgments and sendFilePackets
+    public void sendPackets(DatagramPacket sndPkt) {
+
         if (sendPacket == null) {
             System.out.println("Error: No packet to be sent.");
             System.exit(1);
@@ -242,20 +267,23 @@ public class ClientThread extends ToolThreadClass {
         System.out.println("Client - Sending packet to " + sendPacket.getAddress() + " Port " + sendPacket.getPort());
 
         try {
-            sendReceiveSocket.send(sndPkt);
-        } catch (IOException e) {
+
+        	sendReceiveSocket.send(sendPacket);
+        } catch (Exception e) {
             e.printStackTrace();
             System.exit(1);
+
         }
 
         System.out.println("Client - Packet sent.");
     }
 
-    
+
     /**
      * 
      */
     public void sendFilePackets() {
+
     	ArrayList<DatagramPacket> file = null;
 		try {
 
