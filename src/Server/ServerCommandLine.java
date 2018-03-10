@@ -1,23 +1,28 @@
 package Server;
 
+import java.util.Arrays;
+
 import tools.CommandLine;
 
 public class ServerCommandLine extends CommandLine {
-    /* (non-Javadoc)
-     * @see tools.CommandLine#send()
-     */
-    @Override
-    public void send() {
+	public ServerCommandLine() {
+		super("Server");
+	}
 
-    }
+	@Override
+	public void interpret(String[] cmds) {
+		if (Arrays.asList(cmds).contains("read")) {
+			helpCommand();
+		}
+		
+		if (Arrays.asList(cmds).contains("write")) {
+			helpCommand();
+		}
+	}
 
-    /* (non-Javadoc)
-     * @see tools.CommandLine#receive()
-     */
-    @Override
-    public void receive() {
-
-    }
-
-
+	@Override
+	public void helpCommand() {
+		print("Exit is the only command");
+	}
+	
 }
