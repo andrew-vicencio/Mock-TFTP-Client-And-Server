@@ -67,18 +67,6 @@ public abstract class ToolThreadClass implements Runnable {
     }
 
     /**
-     * Allocate a byte array of a specific size
-     *
-     * @param x length of the byte array to return to the client
-     * @return An empty byte array of the given length
-     */
-    public byte[] longToBytes(long x) {
-        ByteBuffer buffer = ByteBuffer.allocate(Long.BYTES);
-        buffer.putLong(x);
-        return buffer.array();
-    }
-
-    /**
      * Write the packet to a file
      *
      * @param receivePacket
@@ -90,6 +78,8 @@ public abstract class ToolThreadClass implements Runnable {
         //TODO: Paul ur code here check to see if able to write to file for size
         FileWriter filewriter = null;
         File temp = new File("receivedFile.txt");
+
+
         byte[] receivedData = new byte[512];
 
         ByteArrayOutputStream data = new ByteArrayOutputStream();
