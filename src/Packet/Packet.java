@@ -5,7 +5,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.InetAddress;
-import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -32,7 +31,7 @@ public abstract class Packet {
         }
         String fileName = matcher.group(1);
         String mode = matcher.group(2);
-        return new Pair(fileName, mode);
+        return new Pair<>(fileName, mode);
     }
 
     public static byte[] composeReadWriteData(int opCode, String filename, String mode) {
@@ -123,7 +122,7 @@ public abstract class Packet {
     }
 
     static byte[] to2Bytes(int i) {
-        byte[] result = new byte[4];
+        byte[] result = new byte[2];
 
         result[0] = (byte) (i >> 8);
         result[1] = (byte) (i);
@@ -132,9 +131,17 @@ public abstract class Packet {
     }
 
     static byte[] to2Bytes(char c) {
-        byte[] result = new byte[4];
+        byte[] result = new byte[2];
         result[0] = (byte) (c >> 8);
         result[1] = (byte) (c);
+
+        return result;
+    }
+
+    static byte[] to2Bytes(long l) {
+        byte[] result = new byte[2];
+        result[0] = (byte) (l >> 8);
+        result[1] = (byte) (l);
 
         return result;
     }
@@ -156,10 +163,4 @@ public abstract class Packet {
      * @throws IOException
      */
     abstract byte[] toByteArray() throws IOException;
-
-    public byte[] longToBytes(long x) {
-                ByteBuffer buffer = ByteBuffer.allocate(Long.BYTES);
-                buffer.putLong(x);
-                return buffer.array();
-           }
 }

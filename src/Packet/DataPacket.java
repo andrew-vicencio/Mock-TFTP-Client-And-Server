@@ -50,13 +50,9 @@ public class DataPacket extends Packet {
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 
         outputStream.write(dataResponse);
-
-        ByteBuffer buffer = ByteBuffer.allocate(Long.BYTES);
-        buffer.putLong(blockNumber);
-        byte[] byteArray = buffer.array();
-
-        outputStream.write(Arrays.copyOfRange(byteArray, byteArray.length - 2, byteArray.length));
+        outputStream.write(to2Bytes(blockNumber));
         outputStream.write(data);
+
         return outputStream.toByteArray();
     }
 
