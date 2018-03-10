@@ -22,7 +22,7 @@ public class ReadPacket extends Packet {
     public ReadPacket(InetAddress address, int port, String fileName, String mode){
                 super(address, port);
                 this.fileName = fileName;
-                this.mode = mode;
+                this.mode = "netascii";
             }
     /**
      * @return

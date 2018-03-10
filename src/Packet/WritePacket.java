@@ -24,7 +24,7 @@ public class WritePacket extends Packet {
 
                 super(address, port);
                 this.fileName = fileName;
-                this.mode = mode;
+                this.mode = "netascii";
          }
 
     /**
