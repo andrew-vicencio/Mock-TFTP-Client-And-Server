@@ -81,7 +81,7 @@ public class ErrorPacket extends Packet {
     }
 
     @Override
-    DatagramPacket toDataGramPacket() {
+   public DatagramPacket toDataGramPacket() {
         return null;
     }
 

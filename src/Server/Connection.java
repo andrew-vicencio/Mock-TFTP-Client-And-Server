@@ -171,7 +171,7 @@ public class Connection extends ToolThreadClass {
             //Try and write data packets
             try {
                 fileComplete = writeRecivedDataPacket(recivedData);
-            } catch (IOException e) {
+            } catch (Exception e) {
                 //Caught error, try and create error data packet
                 errorPkt = ErrorCodeHandler(address, port, e);
 

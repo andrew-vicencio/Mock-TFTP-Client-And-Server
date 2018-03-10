@@ -47,7 +47,7 @@ public class DataPacket extends Packet {
     }
 
     @Override
-    DatagramPacket toDataGramPacket() {
+   public DatagramPacket toDataGramPacket() {
         try {
             return new DatagramPacket(toByteArray(), toByteArray().length , address, port);
         } catch (IOException e) {

@@ -22,7 +22,7 @@ public abstract class ToolThreadClass implements Runnable {
      * @param fileName The name of the file to read from
 */
 
-    public  ArrayList<DatagramPacket> buildDataPackets(String fileName, InetAddress address, int port) {
+    public  ArrayList<DatagramPacket> buildDataPackets(String fileName, InetAddress address, int port) throws IOException {
 
         ArrayList<DatagramPacket> file = new ArrayList<DatagramPacket>();
 

@@ -89,7 +89,7 @@ public class ClientThread extends ToolThreadClass {
         try {
             sendPacket = PacketConstructor.createPacket(write, fileName, port);
         } catch (IOException e) {
-            cl.print("Error: Packet creation has failed.");
+            System.out.print("Error: Packet creation has failed.");
             e.printStackTrace();
             System.exit(1);
         }
@@ -97,9 +97,7 @@ public class ClientThread extends ToolThreadClass {
         receivePackets();
     }
 
-        sendPackets(sendPacket);
-        receivePackets();
-    }
+
     
     /* (non-Javadoc)
      * @see tools.ToolThreadClass#receivePackets()
@@ -236,7 +234,7 @@ public class ClientThread extends ToolThreadClass {
      */
     public void sendPackets() { //TODO: Breakdown to handle acknowledgments and sendFilePackets
 
-    public void sendPackets() {
+
     	sendPackets(sendPacket);
     }
     
@@ -259,13 +257,13 @@ public class ClientThread extends ToolThreadClass {
 
         	sendReceiveSocket.send(sendPacket);
         } catch (Exception e) {
-
-            sendReceiveSocket.send(sndPkt);
-        } catch (IOException e) {
-
             e.printStackTrace();
             System.exit(1);
+
         }
+
+
+
 
         System.out.println("Client - Packet sent.");
     }
@@ -282,12 +280,7 @@ public class ClientThread extends ToolThreadClass {
         return buffer.array();
     }
 
-    
-    public void sendFilePackets() {
-    	ArrayList<DatagramPacket> file = buildDataPackets(fileName, address, port);
 
-
-    
     /**
      * 
      */
