@@ -94,7 +94,7 @@ public abstract class ToolThreadClass implements Runnable {
 
         ByteArrayOutputStream data = new ByteArrayOutputStream();
         try {
-            data.write(Arrays.copyOfRange(receivePacket.getData(), 4, receivePacket.getData().length));
+            data.write(Arrays.copyOfRange(receivePacket.getData(), 0, receivePacket.getData().length));
         } catch (IOException e) {
             e.printStackTrace();
         }

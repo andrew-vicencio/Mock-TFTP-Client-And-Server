@@ -96,19 +96,21 @@ public class ClientThread extends ToolThreadClass {
             System.exit(1);
         }
         send(sendPacket);
-        receivePackets();
+
+        if(!write) {
+            receiveFilePackets();
+            System.out.println("File received.");
+            return;
+        }else{
+            receivePackets();
+        }
+
     }
     
     /* (non-Javadoc)
      * @see tools.ToolThreadClass#receivePackets()
      */
     public void receivePackets() {
-    	if(!write) {
-    		receiveFilePackets();
-    		System.out.println("File received.");
-    		return;
-    	}
-    	
     	DatagramPacket receivePacket = new DatagramPacket(new byte[100], 100);
     	try {
     		sendReceiveSocket.receive(receivePacket);
