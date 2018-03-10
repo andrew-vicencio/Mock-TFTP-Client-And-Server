@@ -1,6 +1,5 @@
 package Packet;
 
-
 import java.net.InetAddress;
 
 public class WritePacket extends Packet {
@@ -20,12 +19,15 @@ public class WritePacket extends Packet {
         this.mode = pair.getValue();
     }
 
-    public WritePacket(InetAddress address, int port, String fileName, String mode){
-
-                super(address, port);
-                this.fileName = fileName;
-                this.mode = "netascii";
-         }
+    public WritePacket(InetAddress address, int port, String fileName, String mode) {
+        super(address, port);
+        this.fileName = fileName;
+        if (mode.equals("")) {
+            this.mode = "netascii";
+        } else {
+            this.mode = mode;
+        }
+    }
 
     /**
      * @return

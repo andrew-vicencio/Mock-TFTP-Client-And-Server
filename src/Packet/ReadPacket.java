@@ -19,11 +19,16 @@ public class ReadPacket extends Packet {
         this.mode = pair.getValue();
     }
 
-    public ReadPacket(InetAddress address, int port, String fileName, String mode){
-                super(address, port);
-                this.fileName = fileName;
-                this.mode = "netascii";
-            }
+    public ReadPacket(InetAddress address, int port, String fileName, String mode) {
+        super(address, port);
+        this.fileName = fileName;
+        if (mode.equals("")) {
+            this.mode = "netascii";
+        } else {
+            this.mode = mode;
+        }
+    }
+
     /**
      * @return
      */
