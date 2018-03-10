@@ -158,23 +158,30 @@ public class ErrorSimulator {
     public void sendResponsePacket(){
         sendPacket = new DatagramPacket(receiveClientPacket.getData(), receiveClientPacket.getLength(),
                 receiveClientPacket.getAddress(), connectionPort);
-        if (testModeID == 2) {
-        	delay();
-        }
-        try {
-            sendReceiveSocket.send(sendPacket);
-        } catch (IOException e) {
-            e.printStackTrace();
-            System.exit(1);
-        }
-        if (testModeID == 3){
-        	delayAndSendDuplicate(sendPacket);
-        }
+        switch (testModeID){
+        case 0: //No network error	
+        	 try {
+                 sendReceiveSocket.send(sendPacket);
+             } catch (IOException e) {
+                 e.printStackTrace();
+                 System.exit(1);
+             }
 
-        System.out.println("ErrorSimulator: Sending packet to server:");
-        System.out.println("To host: " + sendPacket.getAddress());
-        System.out.println("Destination host port: " + sendPacket.getPort() + "\n");
-        receiveClientPacket = null;
+             System.out.println("ErrorSimulator: Sending packet to server:");
+             System.out.println("To host: " + sendPacket.getAddress());
+             System.out.println("Destination host port: " + sendPacket.getPort() + "\n");
+             receiveClientPacket = null;
+        	break;
+        	
+        case 1: //Lose a packet
+        	break;
+        case 2: //Delay a packet
+        	break;
+        case 3: //Duplicate a packet
+        	break;
+        }
+       
+       
     }
     
     public void delay(){
