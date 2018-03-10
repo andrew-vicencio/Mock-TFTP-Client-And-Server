@@ -18,7 +18,11 @@ public class ErrorSimulator {
     private DatagramSocket sendReceiveSocket;
     private DatagramPacket receiveClientPacket, receiveServerPacket, sendPacket;
     private int clientPort, connectionPort;
-
+    
+    private int testModeID = 0; // 0 : normal operation; 1 : lose a packet; 2 : delay a packet, 3 : duplicate a packet -- SELECT WHICH ERROR TO SIMULATE
+    private int errorPacketID = 0; // 0 : None; 1: 1st WRQ/RRQ, 2: 2nd WRQ/RRQ, 3: 1st Data, 4: 2nd Data, 5: 1st ACK, 6: 2nd Ack -- SELECT WHICH PACKET TO LOSE/DELAY/DUPLICATE
+    private int timeDelay = 0; //How much time between delays or sending duplicates (in MILLISECONDS)
+    
     /**
      * 
      */
