@@ -21,31 +21,35 @@ public class ErrorSimCommandLine extends CommandLine {
 
 	@Override
 	public void interpret(String[] cmds) {
-		if (Arrays.asList(cmds).contains("rrq")) {
-			RRQ = 1;
-		}
-		
-		if (Arrays.asList(cmds).contains("wrq")) {
-			RRQ = -1;
-		}
-		
-		packetType = cmds[1];
-		
-		if (Arrays.asList(cmds).contains("lose")) { //Check for lose
-			errorCode = 1;
-		} else if (Arrays.asList(cmds).contains("delay")) { //Check for delay
-			errorCode = 2;
-			if (cmds.length >= 5) { //Check for delay amount
-				try {
-					delayAmt = Integer.parseInt(cmds[4]);
-				} catch (Exception e) {
-					print("Invalid delay amount. Default amount (2s) will be used");
-				}
+		if(cmds.length >= 4) {
+			if (Arrays.asList(cmds).contains("rrq")) {
+				RRQ = 1;
+			} else if (Arrays.asList(cmds).contains("wrq")) {
+				RRQ = -1;
 			} else {
-				delayAmt = 2;
+				print("Invalid Command");
 			}
-		} else if (Arrays.asList(cmds).contains("duplicate")) { //Check for duplicate
-			errorCode = 3;
+			
+			packetType = cmds[1];
+			
+			if (Arrays.asList(cmds).contains("lose")) { //Check for lose
+				errorCode = 1;
+			} else if (Arrays.asList(cmds).contains("delay")) { //Check for delay
+				errorCode = 2;
+				if (cmds.length >= 5) { //Check for delay amount
+					try {
+						delayAmt = Integer.parseInt(cmds[4]);
+					} catch (Exception e) {
+						print("Invalid delay amount. Default amount (2s) will be used");
+					}
+				} else {
+					delayAmt = 2;
+				}
+			} else if (Arrays.asList(cmds).contains("duplicate")) { //Check for duplicate
+				errorCode = 3;
+			} else {
+				print("Invalid Command");
+			}
 		}
 	}
 

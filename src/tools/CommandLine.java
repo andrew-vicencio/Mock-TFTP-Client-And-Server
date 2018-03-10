@@ -97,18 +97,14 @@ public abstract class CommandLine extends Thread { //TODO: Does not need to exte
 			print("Verbose: " + verbose);
 			print("Test: " + test);
 			print("What would you like to do?");
-			String input = in.next();				//User input
+			String input = in.nextLine();				//User input
 			input = input.toLowerCase();			//User input to lower case
+			print(input);
 			String[] token = input.split("\\s");	//Input split into tokens
+//			print(token.toString());
 			int argSize = token.length;				//Amount of arguments in command
 			
-			if (argSize > 3) { 						//For now, max 3 arguments (send/receive, verbose toggle, test toggle)
-				print("Error: Too many arguments in command.");
-				System.exit(1);
-			} else if (argSize <= 0) { 				//Must have at least one argument
-				print("Error: too few arguments in command.");
-				System.exit(1);
-			}
+			print(Integer.toString(argSize));
 			
 			//Checks for verbose flag change
 			if (Arrays.asList(token).contains("--verbose") || Arrays.asList(token).contains("-v")) {

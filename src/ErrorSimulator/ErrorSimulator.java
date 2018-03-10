@@ -18,6 +18,7 @@ public class ErrorSimulator {
     private DatagramSocket sendReceiveSocket;
     private DatagramPacket receiveClientPacket, receiveServerPacket, sendPacket;
     private int clientPort, connectionPort;
+    private ErrorSimCommandLine cl;
     
     private int testModeID = 0; // 0 : normal operation; 1 : lose a packet; 2 : delay a packet, 3 : duplicate a packet -- SELECT WHICH ERROR TO SIMULATE
     private int errorPacketID = 0; // 0 : None; 1: 1st WRQ/RRQ, 2: 2nd WRQ/RRQ, 3: 1st Data, 4: 2nd Data, 5: 1st ACK, 6: 2nd Ack -- SELECT WHICH PACKET TO LOSE/DELAY/DUPLICATE
@@ -26,7 +27,7 @@ public class ErrorSimulator {
     /**
      * 
      */
-    public ErrorSimulator() {
+    public ErrorSimulator(ErrorSimCommandLine cl) {
         try {
             //Error simulator will use port 23
             sendReceiveSocket = new DatagramSocket(23);
@@ -34,16 +35,9 @@ public class ErrorSimulator {
             se.printStackTrace();
             System.exit(1);
         }
+        this.cl = cl;
     }
-
-    /**
-     * @param args
-     */
-    public static void main(String args[]) {
-        ErrorSimulator host = new ErrorSimulator();
-        host.start();
-    }
-
+    
     /**
      * start is used begins to receive and send
      * packets between the client and server

@@ -5,19 +5,14 @@ import java.util.Arrays;
 import tools.CommandLine;
 
 public class ServerCommandLine extends CommandLine {
-	public ServerCommandLine() {
+	private Listener listen;
+	public ServerCommandLine(Listener listen) {
 		super("Server");
+		this.listen = listen;
 	}
 
 	@Override
 	public void interpret(String[] cmds) {
-		if (Arrays.asList(cmds).contains("read")) {
-			helpCommand();
-		}
-		
-		if (Arrays.asList(cmds).contains("write")) {
-			helpCommand();
-		}
 	}
 
 	@Override

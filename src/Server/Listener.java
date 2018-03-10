@@ -10,7 +10,7 @@ import java.net.SocketException;
 import java.util.ArrayList;
 
 
-public class Listener {
+public class Listener extends Thread{
 
     DatagramPacket receivePacket;
     DatagramSocket receiveSocket;
@@ -44,6 +44,10 @@ public class Listener {
         while (true) {
             waitForPacketAndHandle();
         }
+    }
+    
+    public void run() {
+    	listen(69);
     }
 
     /**
