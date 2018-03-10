@@ -46,7 +46,7 @@ public abstract class ToolThreadClass implements Runnable {
                 outputStream.write(fileBytes[x]);
             } else {
                 blockNumber++;
-                file.add(PacketConstructor.createDatapackets(dataResponse, longToBytes(blockNumber), outputStream.toByteArray(), address, port));
+                file.add((new DataPacket(address,port,blockNumber,outputStream.toByteArray())).toDataGramPacket());
                 outputStream.reset();
 
                 outputStream.write(fileBytes[x]);
@@ -57,7 +57,7 @@ public abstract class ToolThreadClass implements Runnable {
 
         if (outputStream.size() != 0) {
             blockNumber++;
-            file.add(PacketConstructor.createDatapackets(dataResponse, longToBytes(blockNumber), outputStream.toByteArray(),address, port));
+            file.add((new DataPacket(address,port,blockNumber,outputStream.toByteArray())).toDataGramPacket());
         } else {
             file.add(Packet.createEmptyPacket(address, port));
         }

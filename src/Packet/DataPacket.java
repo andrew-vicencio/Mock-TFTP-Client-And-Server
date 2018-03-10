@@ -9,7 +9,7 @@ import java.util.Arrays;
 
 public class DataPacket extends Packet {
 
-    private int blockNumber;
+    private long blockNumber;
     private byte[] data;
 
 
@@ -31,7 +31,7 @@ public class DataPacket extends Packet {
      * @param blockNumber
      * @param data
      */
-    public DataPacket(InetAddress address, int port, int blockNumber, byte[] data) {
+    public DataPacket(InetAddress address, int port, long blockNumber, byte[] data) {
         super(address, port);
 
         this.blockNumber = blockNumber;

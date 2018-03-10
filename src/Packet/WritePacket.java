@@ -20,6 +20,13 @@ public class WritePacket extends Packet {
         this.mode = pair.getValue();
     }
 
+    public WritePacket(InetAddress address, int port, String fileName, String mode){
+
+                super(address, port);
+                this.fileName = fileName;
+                this.mode = mode;
+         }
+
     /**
      * @return
      */

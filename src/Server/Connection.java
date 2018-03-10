@@ -19,6 +19,9 @@ public class Connection extends ToolThreadClass {
     private int port;
     private InetAddress address;
     private ErrorPacket errorPkt;
+    // socket to be used to send / receive data.
+    private DatagramSocket sendReceiveSocket;
+
 
     /**
      * Construct a connection class, used to handle a packet being received by the server.
@@ -32,9 +35,6 @@ public class Connection extends ToolThreadClass {
         this.receivePacket = receivePacket;
         this.logger = logger;
     }
-
-    // socket to be used to send / receive data.
-    private DatagramSocket sendReceiveSocket;
 
     /**
      * Method called when thread is initialised to handle the packet it was created to handle.

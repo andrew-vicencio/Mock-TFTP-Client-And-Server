@@ -17,7 +17,7 @@ import Packet.AcknowledgementPacket;
 import Packet.DataPacket;
 import Packet.ErrorPacket;
 import Packet.Packet;
-import tools.PacketConstructor;
+import Packet.*;
 import tools.ToolThreadClass;
 
 public class ClientThread extends ToolThreadClass {
@@ -84,7 +84,12 @@ public class ClientThread extends ToolThreadClass {
      */
     public void run() {
         try {
-            sendPacket = PacketConstructor.createPacket(write, fileName, port);
+            if(write){
+                sendPacket = (new WritePacket(InetAddress.getLocalHost(), port, fileName, "")).toDataGramPacket();
+            }else{
+                sendPacket = (new ReadPacket(InetAddress.getLocalHost(), port, fileName, "")).toDataGramPacket();
+            }
+
         } catch (IOException e) {
             cl.print("Error: Packet creation has failed.");
             e.printStackTrace();
@@ -190,18 +195,12 @@ public class ClientThread extends ToolThreadClass {
             }
 
             //Send Response Packet to server
-            ByteArrayOutputStream ack = new ByteArrayOutputStream();
             try {
-                ack.write(writeResponse);
-                ack.write(blockNumber);
-                byte[] ackPacket = ack.toByteArray();
-                String test = new String(ackPacket, 0, ackPacket.length);
-                System.out.println(test);
-                sendPacket = PacketConstructor.createPacket(ackPacket, blockNumber);
-            } catch (IOException e) {
+                sendPacket = (new AcknowledgementPacket(InetAddress.getLocalHost(),port, blockNumber)).toDataGramPacket();
+            } catch (UnknownHostException e) {
                 e.printStackTrace();
             }
-            
+
             try {
                 Thread.sleep(5);
             } catch (InterruptedException e) {
