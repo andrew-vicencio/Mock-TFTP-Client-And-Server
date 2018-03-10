@@ -47,12 +47,8 @@ public class AcknowledgementPacket extends Packet {
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 
         outputStream.write(acknowledgeResponse);
+        outputStream.write(to2Bytes(blockNumber));
 
-        ByteBuffer buffer = ByteBuffer.allocate(Long.BYTES);
-        buffer.putLong(blockNumber);
-        byte[] byteArray = buffer.array();
-
-        outputStream.write(Arrays.copyOfRange(byteArray, byteArray.length - 2, byteArray.length));
         return outputStream.toByteArray();
     }
 }
