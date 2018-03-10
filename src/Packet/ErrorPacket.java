@@ -1,6 +1,5 @@
 package Packet;
 
-
 import java.io.ByteArrayOutputStream;
 import java.net.DatagramPacket;
 import java.net.InetAddress;
@@ -78,11 +77,6 @@ public class ErrorPacket extends Packet {
             default:
                 return "Invalid error message code";
         }
-    }
-
-    @Override
-   public DatagramPacket toDataGramPacket() {
-        return null;
     }
 
     @Override

@@ -5,7 +5,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.InetAddress;
-import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -46,8 +45,6 @@ public abstract class Packet {
 
         return out.toByteArray();
     }
-
-
 
     /**
      * @param address
@@ -133,6 +130,13 @@ public abstract class Packet {
         return result;
     }
 
+    static byte[] to2Bytes(char c) {
+        byte[] result = new byte[4];
+        result[0] = (byte) (c >> 8);
+        result[1] = (byte) (c);
+
+        return result;
+    }
 
     public DatagramPacket toDataGramPacket() {
         byte[] byteArray = new byte[0];
@@ -151,10 +155,4 @@ public abstract class Packet {
      * @throws IOException
      */
     abstract byte[] toByteArray() throws IOException;
-
-    public byte[] longToBytes(long x) {
-        ByteBuffer buffer = ByteBuffer.allocate(Long.BYTES);
-        buffer.putLong(x);
-        return buffer.array();
-    }
 }

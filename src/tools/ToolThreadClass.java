@@ -20,11 +20,12 @@ public abstract class ToolThreadClass implements Runnable {
      * Read a file from disk, into an array of datagram packets to be send to the client.
      *
      * @param fileName The name of the file to read from
-*/
-
-    public  ArrayList<DatagramPacket> buildDataPackets(String fileName, InetAddress address, int port) throws IOException {
-
-
+     * @param address
+     * @param port
+     * @return
+     * @throws IOException
+     */
+    public  ArrayList<DatagramPacket> buildDataPackets(String fileName, InetAddress address, int port) throws IOException  {
         ArrayList<DatagramPacket> file = new ArrayList<DatagramPacket>();
 
         byte[] fileBytes = null;
@@ -44,9 +45,8 @@ public abstract class ToolThreadClass implements Runnable {
             if (x == 0 || x % 512 != 0) {
                 outputStream.write(fileBytes[x]);
             } else {
-
                 blockNumber++;
-                file.add((new DataPacket(address, port, blockNumber, outputStream.toByteArray())).toDataGramPacket());
+                file.add(PacketConstructor.createDatapackets(dataResponse, longToBytes(blockNumber), outputStream.toByteArray(), address, port));
                 outputStream.reset();
 
                 outputStream.write(fileBytes[x]);
@@ -57,17 +57,37 @@ public abstract class ToolThreadClass implements Runnable {
 
         if (outputStream.size() != 0) {
             blockNumber++;
-            file.add((new DataPacket(address, port, blockNumber, outputStream.toByteArray())).toDataGramPacket());
+            file.add(PacketConstructor.createDatapackets(dataResponse, longToBytes(blockNumber), outputStream.toByteArray(),address, port));
         } else {
-            file.add((new DataPacket(address, port, blockNumber, new byte[1])).toDataGramPacket());
+            file.add(Packet.createEmptyPacket(address, port));
         }
 
         outputStream.close();
         return file;
     }
 
-    public boolean writeRecivedDataPacket(DataPacket receivePacket){
+    /**
+     * Allocate a byte array of a specific size
+     *
+     * @param x length of the byte array to return to the client
+     * @return An empty byte array of the given length
+     */
+    public byte[] longToBytes(long x) {
+        ByteBuffer buffer = ByteBuffer.allocate(Long.BYTES);
+        buffer.putLong(x);
+        return buffer.array();
+    }
 
+    /**
+     * Write the packet to a file
+     *
+     * @param receivePacket
+     * @return boolean checks if data packet is final data packet
+     * @throws IOException
+     */
+    public boolean writeRecivedDataPacket(DataPacket receivePacket) throws IOException {
+        //TODO: Fix to be more integrated with packet classes
+        //TODO: Paul ur code here check to see if able to write to file for size
         FileWriter filewriter = null;
         File temp = new File("receivedFile.txt");
         byte[] receivedData = new byte[512];
@@ -78,19 +98,14 @@ public abstract class ToolThreadClass implements Runnable {
         } catch (IOException e) {
             e.printStackTrace();
         }
-
         receivedData = data.toByteArray();
 
         //Try and write to file from the new data string
         String dataString = new String(receivedData, 0, receivedData.length);
-        try {
-            filewriter = new FileWriter(temp, true);
-            filewriter.write(dataString);
-            filewriter.close();
-        } catch (IOException e2) {
-            e2.printStackTrace();
-        }
-
+        
+        filewriter = new FileWriter(temp, true);
+        filewriter.write(dataString);
+        filewriter.close();
 
         if (receivedData.length < 511) {
            return true;
@@ -99,14 +114,16 @@ public abstract class ToolThreadClass implements Runnable {
         }
     }
 
+
     /**
-     * Every class that inherits should be sending packets no matter what that is this method for sending packets, reciving packets, and handleing errors
+     * Every class that inherits should be sending packets no matter what that is this method for sending packets
      */
     public abstract void sendPackets();
 
+    /*
+     * This method is for waiting to receive packets from either client or server they are specialized for each
+     */
     public abstract void receivePackets();
-
-    public abstract void ifErrorPrintAndExit(ErrorPacket errorPacket);
 
     /**
      * Determines what error packet to create
@@ -131,7 +148,7 @@ public abstract class ToolThreadClass implements Runnable {
     	}
     	return null;
     }
-
+    
     public class AccessViolationException extends IOException{}
     public class FileAlreadyExistsException extends IOException{}
     public class DiskFullException extends IOException{}

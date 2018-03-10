@@ -9,16 +9,15 @@ import java.util.Arrays;
 
 public class DataPacket extends Packet {
 
-    private long blockNumber;
+    private int blockNumber;
     private byte[] data;
-
 
 
     /**
      * @param address
      * @param port
      * @param remaining
-*/
+     */
     public DataPacket(InetAddress address, int port, byte[] remaining) {
         super(address, port);
 
@@ -32,7 +31,7 @@ public class DataPacket extends Packet {
      * @param blockNumber
      * @param data
      */
-    public DataPacket(InetAddress address, int port, long blockNumber, byte[] data) {
+    public DataPacket(InetAddress address, int port, int blockNumber, byte[] data) {
         super(address, port);
 
         this.blockNumber = blockNumber;
@@ -45,17 +44,6 @@ public class DataPacket extends Packet {
     public long getBlockNumber() {
         return blockNumber;
     }
-
-    @Override
-   public DatagramPacket toDataGramPacket() {
-        try {
-            return new DatagramPacket(toByteArray(), toByteArray().length , address, port);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
-
 
     @Override
     public byte[] toByteArray() throws IOException {
@@ -72,23 +60,17 @@ public class DataPacket extends Packet {
         return outputStream.toByteArray();
     }
 
-
     /**
      * @return
      */
-
     public byte[] getData() {
         return data;
     }
 
-
     /**
      * @param data
      */
-
     public void setData(byte[] data) {
         this.data = data;
     }
-
-
 }
