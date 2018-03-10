@@ -72,7 +72,7 @@ public class ErrorSimulator {
      * 
      */
     public void receiveClientPacket() {
-        byte data[] = new byte[512];
+        byte data[] = new byte[522];
         receiveClientPacket = new DatagramPacket(data, data.length);
 
         try {

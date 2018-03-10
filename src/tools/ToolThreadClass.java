@@ -15,7 +15,7 @@ public abstract class ToolThreadClass implements Runnable {
     // pre created read and write response headers
     final byte dataResponse[] = {0, 3};
     final byte acknowledgeResponse[] = {0, 4};
-
+    protected int indexBlockNumer;
     /**
      * Read a file from disk, into an array of datagram packets to be send to the client.
      *

@@ -147,7 +147,7 @@ public class Connection extends ToolThreadClass {
 
         while (!fileComplete) {
 
-            //Try and receive from server
+            //Try and receive from Client
             try {
                 sendReceiveSocket.receive(recivedDataPacket);
             } catch (IOException e) {
