@@ -99,12 +99,9 @@ public abstract class CommandLine extends Thread { //TODO: Does not need to exte
 			print("What would you like to do?");
 			String input = in.nextLine();				//User input
 			input = input.toLowerCase();			//User input to lower case
-			print(input);
 			String[] token = input.split("\\s");	//Input split into tokens
 //			print(token.toString());
 			int argSize = token.length;				//Amount of arguments in command
-			
-			print(Integer.toString(argSize));
 			
 			//Checks for verbose flag change
 			if (Arrays.asList(token).contains("--verbose") || Arrays.asList(token).contains("-v")) {
