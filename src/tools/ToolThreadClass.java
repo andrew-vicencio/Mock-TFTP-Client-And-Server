@@ -24,52 +24,11 @@ public abstract class ToolThreadClass implements Runnable {
 
     public  ArrayList<DatagramPacket> buildDataPackets(String fileName, InetAddress address, int port) throws IOException {
 
+
         ArrayList<DatagramPacket> file = new ArrayList<DatagramPacket>();
 
         byte[] fileBytes = null;
         long blockNumber = 0;
-
-        try {
-            File fileItem = new File(fileName);
-            FileInputStream reader = new FileInputStream(fileItem);
-
-            fileBytes = new byte[(int) fileItem.length()];
-            reader.read(fileBytes);
-            reader.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-            System.exit(1);
-        }
-
-        try {
-            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-            for (int x = 0; x < fileBytes.length; x++) {
-
-
-                if (x == 0 || x % 512 != 0) {
-                    outputStream.write(fileBytes[x]);
-                } else {
-                    blockNumber++;
-                    file.add(PacketConstructor.createDatapackets(dataResponse, longToBytes(blockNumber), outputStream.toByteArray(), address, port));
-                    outputStream.reset();
-
-                    outputStream.write(fileBytes[x]);
-                }
-            }
-
-            //If the file is exactly length of around 512 or factor of 512 create a packet that closes connection
-
-            if (outputStream.size() != 0) {
-                blockNumber++;
-                file.add(PacketConstructor.createDatapackets(dataResponse, longToBytes(blockNumber), outputStream.toByteArray(),address, port));
-            } else {
-                file.add(Packet.createEmptyPacket(address, port));
-            }
-
-            outputStream.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
         
         File fileItem = new File(fileName);
         FileInputStream reader = new FileInputStream(fileItem);
@@ -85,8 +44,9 @@ public abstract class ToolThreadClass implements Runnable {
             if (x == 0 || x % 512 != 0) {
                 outputStream.write(fileBytes[x]);
             } else {
+
                 blockNumber++;
-                file.add(PacketConstructor.createDatapackets(dataResponse, longToBytes(blockNumber), outputStream.toByteArray(), address, port));
+                file.add((new DataPacket(address, port, blockNumber, outputStream.toByteArray())).toDataGramPacket());
                 outputStream.reset();
 
                 outputStream.write(fileBytes[x]);
@@ -97,27 +57,14 @@ public abstract class ToolThreadClass implements Runnable {
 
         if (outputStream.size() != 0) {
             blockNumber++;
-            file.add(PacketConstructor.createDatapackets(dataResponse, longToBytes(blockNumber), outputStream.toByteArray(),address, port));
+            file.add((new DataPacket(address, port, blockNumber, outputStream.toByteArray())).toDataGramPacket());
         } else {
-            file.add(Packet.createEmptyPacket(address, port));
+            file.add((new DataPacket(address, port, blockNumber, new byte[1])).toDataGramPacket());
         }
 
         outputStream.close();
         return file;
     }
-
-    /**
-     * Allocate a byte array of a specific size
-     *
-     * @param x length of the byte array to return to the client
-     * @return An empty byte array of the given length
-     */
-    public byte[] longToBytes(long x) {
-        ByteBuffer buffer = ByteBuffer.allocate(Long.BYTES);
-        buffer.putLong(x);
-        return buffer.array();
-    }
-
 
     public boolean writeRecivedDataPacket(DataPacket receivePacket){
 
@@ -152,15 +99,14 @@ public abstract class ToolThreadClass implements Runnable {
         }
     }
 
-
     /**
-     * Every class that inherits should be sending packets no matter what that is this method for sending packets
+     * Every class that inherits should be sending packets no matter what that is this method for sending packets, reciving packets, and handleing errors
      */
     public abstract void sendPackets();
 
-     
     public abstract void receivePackets();
 
+    public abstract void ifErrorPrintAndExit(ErrorPacket errorPacket);
 
     /**
      * Determines what error packet to create
@@ -185,7 +131,7 @@ public abstract class ToolThreadClass implements Runnable {
     	}
     	return null;
     }
-    
+
     public class AccessViolationException extends IOException{}
     public class FileAlreadyExistsException extends IOException{}
     public class DiskFullException extends IOException{}

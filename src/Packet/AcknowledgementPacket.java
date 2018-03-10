@@ -56,8 +56,6 @@ public class AcknowledgementPacket extends Packet {
     byte[] toByteArray() throws IOException {
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 
-
-
         ByteBuffer buffer = ByteBuffer.allocate(Long.BYTES);
         buffer.putLong(blockNumber);
         byte[] byteArray = buffer.array();
