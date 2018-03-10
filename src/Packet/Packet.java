@@ -123,7 +123,7 @@ public abstract class Packet {
     }
 
     static byte[] to2Bytes(int i) {
-        byte[] result = new byte[4];
+        byte[] result = new byte[2];
 
         result[0] = (byte) (i >> 8);
         result[1] = (byte) (i);
@@ -132,7 +132,7 @@ public abstract class Packet {
     }
 
     static byte[] to2Bytes(char c) {
-        byte[] result = new byte[4];
+        byte[] result = new byte[2];
         result[0] = (byte) (c >> 8);
         result[1] = (byte) (c);
 
