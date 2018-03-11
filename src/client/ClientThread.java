@@ -134,6 +134,12 @@ public class ClientThread extends ToolThreadClass {
     @Override
     public DatagramPacket timeout(DatagramPacket previousPkt, int x) {
         DatagramPacket recivedDataPacket = new DatagramPacket(new byte[1024], 1024);
+
+        if(previousPkt == null){
+            System.out.println("failed Request");
+            System.exit(1);
+
+        }
         if (x != 3) {
             try {
                 sendReceiveSocket.send(previousPkt);
