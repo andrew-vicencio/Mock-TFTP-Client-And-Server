@@ -6,11 +6,13 @@ import java.net.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 
+import Logger.LogLevels;
 import Packet.AcknowledgementPacket;
 import Packet.DataPacket;
 import Packet.ErrorPacket;
 import Packet.Packet;
 import Packet.*;
+import Logger.Logger;
 import tools.ToolThreadClass;
 
 public class ClientThread extends ToolThreadClass {
@@ -20,6 +22,7 @@ public class ClientThread extends ToolThreadClass {
     private String fileName;
     private int port;
     private byte[] receivedData;
+    private Logger logger;
     private InetAddress address;
     private ClientCommandLine cl;
     private DatagramPacket prvsPkt;
@@ -40,6 +43,7 @@ public class ClientThread extends ToolThreadClass {
      * @param cl
      */
     public ClientThread(boolean write, String filename, InetAddress address, int port, ClientCommandLine cl) {
+        logger = new Logger(LogLevels.ALL);
         try {
             sendReceiveSocket = new DatagramSocket();
             this.write = write;
@@ -212,7 +216,13 @@ public class ClientThread extends ToolThreadClass {
             //Try and write to file from the new data string
             try {
             	if(pkt instanceof DataPacket) {
-            		writeRecivedDataPacket((DataPacket)pkt);
+            	    DataPacket dataPacket = (DataPacket) pkt;
+            	    if (shouldDiscardPacket(dataPacket)) {
+            	        System.out.println("[debug]: Dropping packet index " + dataPacket.getBlockNumber());
+            	        continue;
+                    }
+            	    setLastBlockNumber(dataPacket.getBlockNumber());
+            		writeRecivedDataPacket(dataPacket);
             	}
             } catch (IOException e2) {
     			ErrorPacket errPkt = ErrorCodeHandler(address, port, e2);

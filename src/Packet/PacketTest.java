@@ -45,6 +45,8 @@ public class PacketTest {
         assertEquals((long) 8200, dataPacket.getBlockNumber(), "Conversion of bytes to number incorrect");
 
         assertEquals(Arrays.toString(dataPacket.toByteArray()), Arrays.toString(bytes), "Packet data is not preserved");
+
+        assertEquals(Arrays.toString(Packet.parse(packet.toDataGramPacket()).toByteArray()), Arrays.toString(bytes), "A full cycle in the other direction is not consistent");
     }
 
     @Test

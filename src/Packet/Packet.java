@@ -85,7 +85,7 @@ public abstract class Packet {
 
         byte[] remaining = Arrays.copyOfRange(bytes, 2, datagramPacket.getLength());
 
-        switch (bytes[0] * 256 + bytes[1]) {
+        switch ((int) twoBytesToLong(bytes)) {
             case 1:
                 return new ReadPacket(address, port, remaining);
             case 2:
@@ -118,6 +118,10 @@ public abstract class Packet {
         byte[] newArray = new byte[1];
         DatagramPacket newPtk = new DatagramPacket(newArray, 1, address, port);
         return newPtk;
+    }
+
+    static long twoBytesToLong(byte[] bytes) {
+        return (bytes[0]) << 8 | (bytes[1] & 0xFF);
     }
 
     static byte[] to2Bytes(int i) {

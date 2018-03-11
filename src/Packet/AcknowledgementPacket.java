@@ -29,7 +29,7 @@ public class AcknowledgementPacket extends Packet {
         if (blockString.length != 2) {
             throw new Exception("Invalid Acknowledgement packet length: +");
         }
-        this.blockNumber = blockString[0] * 256 + blockString[1];
+        this.blockNumber = twoBytesToLong(blockString);
     }
 
     /**

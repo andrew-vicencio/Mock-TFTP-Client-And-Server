@@ -166,6 +166,11 @@ public class Connection extends ToolThreadClass {
             DataPacket recivedData = null;
             try {
                 recivedData = (DataPacket) (Packet.parse(recivedDataPacket));
+                if (shouldDiscardPacket(recivedData)) {
+                    System.out.println("[debug]: Dropping packet index " + recivedData.getBlockNumber());
+                    continue;
+                }
+                setLastBlockNumber(recivedData.getBlockNumber());
             } catch (Exception e) {
                 e.printStackTrace();
             }
