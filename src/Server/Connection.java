@@ -111,7 +111,7 @@ public class Connection extends ToolThreadClass {
             try {
                 sendReceiveSocket.receive(recivePkt);
             } catch (SocketTimeoutException e){
-                timeout(prvsPkt,0);
+                recivePkt = timeout(prvsPkt,0);
             } catch (IOException e) {
                 e.printStackTrace();
             }
