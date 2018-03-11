@@ -202,7 +202,13 @@ public class ClientThread extends ToolThreadClass {
             //Try and write to file from the new data string
             try {
             	if(pkt instanceof DataPacket) {
-            		writeRecivedDataPacket((DataPacket)pkt);
+            	    DataPacket dataPacket = (DataPacket) pkt;
+            	    if (shouldDiscardPacket(dataPacket)) {
+            	        System.out.println("[debug]: Dropping packet index " + dataPacket.getBlockNumber());
+            	        continue;
+                    }
+            	    setLastBlockNumber(dataPacket.getBlockNumber());
+            		writeRecivedDataPacket(dataPacket);
             	}
             } catch (IOException e2) {
     			ErrorPacket errPkt = ErrorCodeHandler(address, port, e2);
