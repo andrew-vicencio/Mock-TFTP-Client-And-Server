@@ -329,12 +329,13 @@ public class ClientThread extends ToolThreadClass {
 
 
             try{
-                //AcknowledgementPacket test = (AcknowledgementPacket)Packet.parse(recivePkt);
+                AcknowledgementPacket test = (AcknowledgementPacket)Packet.parse(recivePkt);
             } catch (Exception e) {
             	System.out.println("Error in Acknowledgement Packet.");
                 e.printStackTrace();
                 System.exit(1);
             }
     	}
+    	System.out.println("Send finished.");
     }
 }

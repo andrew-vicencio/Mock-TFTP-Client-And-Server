@@ -48,8 +48,12 @@ public class ErrorSimCommandLine extends CommandLine {
 			} else if (Arrays.asList(cmds).contains("duplicate")) { //Check for duplicate
 				errorCode = 3;
 			} else {
-				print("Invalid Command");
+				print("Invalid Error Command");
 			}
+			print(Integer.toString(RRQ));
+			print(packetType);
+			print(Integer.toString(errorCode));
+			print(Integer.toString(delayAmt));
 		}
 	}
 

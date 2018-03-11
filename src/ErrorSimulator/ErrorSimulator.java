@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.SocketException;
+import Packet.*;
 
 /**
  * @author Geoffrey Scornaienchi
@@ -14,7 +15,7 @@ import java.net.SocketException;
  * Processes one client request at a time
  */
 public class ErrorSimulator {
-
+	private boolean newConnection;
     private DatagramSocket sendReceiveSocket;
     private DatagramPacket receiveClientPacket, receiveServerPacket, sendPacket;
     private int clientPort, connectionPort;
@@ -36,6 +37,7 @@ public class ErrorSimulator {
             System.exit(1);
         }
         this.cl = cl;
+        newConnection = true;
     }
     
     /**
@@ -44,15 +46,13 @@ public class ErrorSimulator {
      *
      */
     public void start() {
-        this.receiveClientPacket();
-        this.sendServerPacket();
-        this.receiveServerPacket();
-        this.sendClientPacket();
-
         while (true) {
-
             this.receiveClientPacket();
-            this.sendResponsePacket();
+            if (newConnection) {
+            	this.sendServerPacket();
+            } else {
+            	this.sendResponsePacket();
+            }
             this.receiveServerPacket();
             this.sendClientPacket();
         }
@@ -75,6 +75,18 @@ public class ErrorSimulator {
             e.printStackTrace();
             System.exit(1);
         }
+        
+        Packet pkt = null;
+        try {
+        	pkt = Packet.parse(receiveClientPacket);
+        } catch (Exception e) {
+        	System.out.println("Invalid packet");
+        } finally {
+        	if (pkt instanceof ReadPacket || pkt instanceof WritePacket) {
+        		newConnection = true;
+        	}
+        }
+        
         System.out.println("ErrorSimulator: Received packet from client:");
         System.out.println("From host: " + receiveClientPacket.getAddress());
         System.out.println("Host port: " + receiveClientPacket.getPort() + "\n");
@@ -84,9 +96,6 @@ public class ErrorSimulator {
 
     /**
      * receiveServerPacket is used to receive packet from server
-     */
-    /**
-     * 
      */
     public void receiveServerPacket() {
         byte data[] = new byte[522];
@@ -124,7 +133,7 @@ public class ErrorSimulator {
         sendPacket = new DatagramPacket(receiveClientPacket.getData(), receiveClientPacket.getLength(),
         receiveClientPacket.getAddress(), 69);
         checkNetworkErrorsAndSend(testModeID, sendPacket);
-        
+        newConnection = false;
     }
 
     /**
@@ -160,7 +169,8 @@ public class ErrorSimulator {
     
     public void checkNetworkErrorsAndSend(int testModeID, DatagramPacket packet){
     	switch (testModeID){
-        case 0: //No network error	
+        case 0: //No network error
+        	 System.out.println("Case 0");
         	 try {
                  sendReceiveSocket.send(packet);
              } catch (IOException e) {
@@ -175,9 +185,11 @@ public class ErrorSimulator {
         	break;
         	
         case 1: //Lose a packet
+        	System.out.println("Case 1");
         	break;
         	
         case 2: //Delay a packet
+        	System.out.println("Case 2");
         	delay();
         	try {
                 sendReceiveSocket.send(sendPacket);
@@ -193,6 +205,7 @@ public class ErrorSimulator {
         	break;
         	
         case 3: //Duplicate a packet
+        	System.out.println("Case 3");
         	try {
                 sendReceiveSocket.send(sendPacket);
             } catch (IOException e) {
