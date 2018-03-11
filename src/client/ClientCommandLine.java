@@ -35,9 +35,9 @@ public class ClientCommandLine extends CommandLine {
         }
 
         //Check for port
-        int port = 10069;
+        int port = 69;
         if (isTest()) {
-        	port = 10023;
+        	port = 23;
         }
 
 
