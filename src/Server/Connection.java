@@ -198,6 +198,8 @@ public class Connection extends ToolThreadClass {
 
 
         }
+        
+        System.out.println("Received file.");
 
     }
 
