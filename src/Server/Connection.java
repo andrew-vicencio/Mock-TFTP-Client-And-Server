@@ -8,7 +8,6 @@ import tools.ToolThreadClass;
 import java.io.IOException;
 import java.net.*;
 import java.util.ArrayList;
-import java.util.concurrent.TimeoutException;
 
 public class Connection extends ToolThreadClass {
     private Logger logger;
@@ -152,7 +151,7 @@ public class Connection extends ToolThreadClass {
             try {
                 sendReceiveSocket.receive(recivedDataPacket);
             } catch (SocketTimeoutException e){
-                timeout(prvsPkt,0);
+                recivedDataPacket =  timeout(prvsPkt,0);
             } catch (IOException e) {
                 e.printStackTrace();
                 System.exit(1);
@@ -203,8 +202,28 @@ public class Connection extends ToolThreadClass {
     }
 
     @Override
-    public void timeout(DatagramPacket previousPkt, int x) {
+    public DatagramPacket timeout(DatagramPacket previousPkt, int x) {
+        DatagramPacket recivedDataPacket = new DatagramPacket(new byte[1024], 1024);
+        if(x != 3){
+            try{
+                sendReceiveSocket.send(previousPkt);
 
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+            try {
+                sendReceiveSocket.receive(recivedDataPacket);
+            }catch (SocketTimeoutException e){
+                return timeout(previousPkt, x + 1);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }else{
+            System.out.println("Timeout Limit hit");
+            System.exit(1);
+        }
+      return recivedDataPacket;
     }
 
     private void ifDataPacketErrorPrintAndExit(DatagramPacket receivedDataPacket) {

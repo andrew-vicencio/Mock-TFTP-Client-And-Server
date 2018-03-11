@@ -1,15 +1,8 @@
 package client;
 
 import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.net.DatagramPacket;
-import java.net.DatagramSocket;
-import java.net.InetAddress;
-import java.net.SocketException;
-import java.net.UnknownHostException;
-import java.nio.ByteBuffer;
+import java.net.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -137,10 +130,29 @@ public class ClientThread extends ToolThreadClass {
     }
 
     @Override
-    public void timeout(DatagramPacket previousPkt, int x) {
+    public DatagramPacket timeout(DatagramPacket previousPkt, int x) {
+        DatagramPacket recivedDataPacket = new DatagramPacket(new byte[1024], 1024);
+        if (x != 3) {
+            try {
+                sendReceiveSocket.send(previousPkt);
 
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+            try {
+                sendReceiveSocket.receive(recivedDataPacket);
+            } catch (SocketTimeoutException e) {
+                return timeout(previousPkt, x + 1);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        } else {
+            System.out.println("Timeout Limit hit");
+            System.exit(1);
+        }
+        return recivedDataPacket;
     }
-
 
     /**
      * receivePacket is used to wait for confirmation packets from the host. This method will block until it

@@ -7,7 +7,6 @@ import Packet.Packet;
 import java.io.*;
 import java.net.DatagramPacket;
 import java.net.InetAddress;
-import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -116,7 +115,7 @@ public abstract class ToolThreadClass implements Runnable {
     public abstract void receivePackets();
 
 
-    public abstract void timeout(DatagramPacket previousPkt, int x);
+    public abstract DatagramPacket timeout(DatagramPacket previousPkt, int x);
     /**
      * Determines what error packet to create
      * @param address
