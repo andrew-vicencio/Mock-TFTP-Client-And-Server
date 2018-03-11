@@ -19,7 +19,11 @@ public class DataPacket extends Packet {
     public DataPacket(InetAddress address, int port, byte[] remaining) {
         super(address, port);
 
-        this.blockNumber = remaining[0] * 256 + remaining[1];
+        System.out.println("Creating a block from bytes" + remaining[0] + "and " + remaining[1]);
+
+        this.blockNumber = twoBytesToLong(remaining);
+
+        System.out.println("Into number" + this.blockNumber);
         this.data = Arrays.copyOfRange(remaining, 2, remaining.length);
     }
 

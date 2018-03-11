@@ -23,7 +23,7 @@ public class ErrorPacket extends Packet {
             throw new Error("Invalid packet content");
         }
 
-        this.errorCode = (char) (data[0] * 256 + data[1]);
+        this.errorCode = (char) twoBytesToLong(data);
         this.errorMessage = new String(message);
     }
 
