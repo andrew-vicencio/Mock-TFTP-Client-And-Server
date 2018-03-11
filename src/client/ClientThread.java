@@ -22,6 +22,7 @@ public class ClientThread extends ToolThreadClass {
     private byte[] receivedData;
     private InetAddress address;
     private ClientCommandLine cl;
+    private DatagramPacket prvsPkt;
 
     final byte[] readResponse = {0, 3};
     final byte[] writeResponse = {0, 4};
@@ -107,7 +108,8 @@ public class ClientThread extends ToolThreadClass {
     	DatagramPacket receivePacket = new DatagramPacket(new byte[100], 100);
     	try {
     		sendReceiveSocket.receive(receivePacket);
-    	} catch (IOException e) {
+
+    	}catch(IOException e) {
     		System.out.println("Error in receiving first packet.");
     		e.printStackTrace();
     		System.exit(1);
@@ -170,6 +172,8 @@ public class ClientThread extends ToolThreadClass {
             //Try and receive from server
             try {
                 sendReceiveSocket.receive(receivePacket);
+            }catch (SocketTimeoutException e){
+                receivePacket = timeout(prvsPkt, 0);
             } catch (IOException e) {
                 e.printStackTrace();
                 System.exit(1);
@@ -215,7 +219,9 @@ public class ClientThread extends ToolThreadClass {
 
             //Send Response Packet to server
             try {
+
                 sendPacket = (new AcknowledgementPacket(InetAddress.getLocalHost(),port, blockNumber)).toDataGramPacket();
+                prvsPkt = sendPacket;
             } catch (UnknownHostException e) {
                 e.printStackTrace();
             }
@@ -289,6 +295,7 @@ public class ClientThread extends ToolThreadClass {
         DatagramPacket recivePkt = new DatagramPacket(temp, temp.length);
     	for (int i = 0; i < file.size(); i++) {
             try {
+                prvsPkt = file.get(i);
                 sendReceiveSocket.send(file.get(i));
             } catch (IOException e) {
                 e.printStackTrace();
@@ -298,6 +305,8 @@ public class ClientThread extends ToolThreadClass {
             try {
                 System.out.println("Waiting2.0");
                 sendReceiveSocket.receive(recivePkt); //TODO: Call receivePacket()
+            }catch (SocketTimeoutException e) {
+                recivePkt = timeout( prvsPkt,0);
             } catch (IOException e) {
                 e.printStackTrace();
             }
