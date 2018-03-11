@@ -6,11 +6,9 @@ import Packet.*;
 import tools.ToolThreadClass;
 
 import java.io.IOException;
-import java.net.DatagramPacket;
-import java.net.DatagramSocket;
-import java.net.InetAddress;
-import java.net.SocketException;
+import java.net.*;
 import java.util.ArrayList;
+import java.util.concurrent.TimeoutException;
 
 public class Connection extends ToolThreadClass {
     private Logger logger;
@@ -21,7 +19,7 @@ public class Connection extends ToolThreadClass {
     private ErrorPacket errorPkt;
     // socket to be used to send / receive data.
     private DatagramSocket sendReceiveSocket;
-
+    private DatagramPacket prvsPkt;
 
     /**
      * Construct a connection class, used to handle a packet being received by the server.
@@ -105,6 +103,7 @@ public class Connection extends ToolThreadClass {
         DatagramPacket recivePkt = new DatagramPacket(temp, temp.length);
         for (int x = 0; x < file.size(); x++) {
             try {
+                prvsPkt = file.get(x);
                 sendReceiveSocket.send(file.get(x));
             } catch (IOException e) {
                 e.printStackTrace();
@@ -112,6 +111,8 @@ public class Connection extends ToolThreadClass {
 
             try {
                 sendReceiveSocket.receive(recivePkt);
+            } catch (SocketTimeoutException e){
+                timeout(prvsPkt,0);
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -150,6 +151,8 @@ public class Connection extends ToolThreadClass {
             //Try and receive from Client
             try {
                 sendReceiveSocket.receive(recivedDataPacket);
+            } catch (SocketTimeoutException e){
+                timeout(prvsPkt,0);
             } catch (IOException e) {
                 e.printStackTrace();
                 System.exit(1);
@@ -196,6 +199,11 @@ public class Connection extends ToolThreadClass {
 
 
         }
+
+    }
+
+    @Override
+    public void timeout(DatagramPacket previousPkt, int x) {
 
     }
 

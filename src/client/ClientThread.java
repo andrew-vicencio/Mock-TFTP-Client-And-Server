@@ -136,6 +136,11 @@ public class ClientThread extends ToolThreadClass {
     	sendFilePackets();
     }
 
+    @Override
+    public void timeout(DatagramPacket previousPkt, int x) {
+
+    }
+
 
     /**
      * receivePacket is used to wait for confirmation packets from the host. This method will block until it

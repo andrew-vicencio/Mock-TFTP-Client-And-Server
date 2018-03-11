@@ -115,6 +115,8 @@ public abstract class ToolThreadClass implements Runnable {
      */
     public abstract void receivePackets();
 
+
+    public abstract void timeout(DatagramPacket previousPkt, int x);
     /**
      * Determines what error packet to create
      * @param address
