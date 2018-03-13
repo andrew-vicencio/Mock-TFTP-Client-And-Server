@@ -52,6 +52,22 @@ public class ErrorPacket extends Packet {
     }
 
     /**
+     * Get's the error message
+     * @return string representation of error message
+     */
+    public String getErrorMessage() {
+        return errorMessage;
+    }
+
+    /**
+     * Get's the error code
+     * @return a char representation of the error code.
+     */
+    public char getErrorCode() {
+        return errorCode;
+    }
+
+    /**
      * @param errorCode
      * @return
      */

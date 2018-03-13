@@ -319,7 +319,7 @@ public class ClientThread extends ToolThreadClass {
 
 
             try {
-                System.out.println("Waiting2.0");
+                System.out.println("Waiting2.0"); // TODO: output more / better information
                 sendReceiveSocket.receive(recivePkt); //TODO: Call receivePacket()
             }catch (SocketTimeoutException e) {
                 recivePkt = timeout( prvsPkt,0);
