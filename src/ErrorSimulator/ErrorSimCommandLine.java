@@ -11,6 +11,7 @@ public class ErrorSimCommandLine extends CommandLine {
 	private int errorCode;
 	private int delayAmt;
 	private int currentMode;
+
 	private final String[] types = {"data", "ack", "err", "read", "write"};
 	
 	public ErrorSimCommandLine() {
@@ -175,4 +176,21 @@ public class ErrorSimCommandLine extends CommandLine {
 	public void setDelayAmt(int delayAmt) {
 		this.delayAmt = delayAmt;
 	}
+	
+	public int getPacketNum() {
+		return packetNum;
+	}
+
+	public void setPacketNum(int packetNum) {
+		this.packetNum = packetNum;
+	}
+
+	public int getCurrentMode() {
+		return currentMode;
+	}
+
+	public void setCurrentMode(int currentMode) {
+		this.currentMode = currentMode;
+	}
+
 }
