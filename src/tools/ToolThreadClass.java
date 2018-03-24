@@ -7,6 +7,8 @@ import Packet.Packet;
 import java.io.*;
 import java.net.DatagramPacket;
 import java.net.InetAddress;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -34,12 +36,16 @@ public abstract class ToolThreadClass implements Runnable {
      * @throws IOException
      */
     public  ArrayList<DatagramPacket> buildDataPackets(String fileName, InetAddress address, int port) throws IOException  {
+
+        //TODO: Fix to be more integrated with packet classes
         ArrayList<DatagramPacket> file = new ArrayList<DatagramPacket>();
 
         byte[] fileBytes = null;
         long blockNumber = 0;
-        
         File fileItem = new File(fileName);
+
+        //FileAccessChecker(fileItem, false);
+
         FileInputStream reader = new FileInputStream(fileItem);
 
         fileBytes = new byte[(int) fileItem.length()];
@@ -82,10 +88,12 @@ public abstract class ToolThreadClass implements Runnable {
      * @throws IOException
      */
     public boolean writeRecivedDataPacket(DataPacket receivePacket) throws IOException {
-        //TODO: Fix to be more integrated with packet classes
-        //TODO: Paul ur code here check to see if able to write to file for size
+
+
         FileWriter filewriter = null;
         File temp = new File("receivedFile.txt");
+
+        //FileAccessChecker(temp, true);
 
 
         byte[] receivedData = new byte[512];
@@ -112,6 +120,30 @@ public abstract class ToolThreadClass implements Runnable {
         }
     }
 
+
+    protected void FileAccessChecker(File x, boolean y) throws IOException{
+
+        //TODO: Paul ur code here check to see if able to write to file for size
+
+        //TODO: Ben fix the problems with the checker
+        //Cant if it exists
+
+        if(y){
+            if(x.exists()){
+                throw new AccessViolationException();
+            }else if(x.canWrite()){//if you can write too
+                throw new FileAlreadyExistsException();
+            }
+        }else{
+            if(!x.exists()){
+                throw new AccessViolationException();
+            }else if(!x.canRead()){//if you can write too
+                throw new FileAlreadyExistsException();
+            }
+        }
+
+
+    }
 
     /**
      * Every class that inherits should be sending packets no matter what that is this method for sending packets
