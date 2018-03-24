@@ -132,6 +132,11 @@ public class ClientThread extends ToolThreadClass {
             }
 
 
+            if(tid == 0){
+                tid = pkt.getPort();
+            }else{
+                ifInvalidTIDPrintAndExit(receivePacket);
+            }
             //Write out where the packet came from
             System.out.println("Client - Packet received from " + receivePacket.getAddress() + " Port " + receivePacket.getPort());
 
@@ -221,7 +226,7 @@ public class ClientThread extends ToolThreadClass {
             ifErrorPrintAndExit(errorPkt);
         }
 
-
+        tid = ack.getPort();
         System.out.println("Starting file transfer.");
 
 
@@ -256,7 +261,7 @@ public class ClientThread extends ToolThreadClass {
             }
 
             ifDataPacketErrorPrintAndExit(recivePkt);
-
+            ifInvalidTIDPrintAndExit(recivePkt);
 
             try{
                 AcknowledgementPacket test = (AcknowledgementPacket)Packet.parse(recivePkt);

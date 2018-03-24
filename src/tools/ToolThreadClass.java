@@ -5,10 +5,7 @@ import Packet.ErrorPacket;
 import Packet.Packet;
 
 import java.io.*;
-import java.net.DatagramPacket;
-import java.net.DatagramSocket;
-import java.net.InetAddress;
-import java.net.SocketTimeoutException;
+import java.net.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -20,6 +17,7 @@ public abstract class ToolThreadClass implements Runnable {
     final byte acknowledgeResponse[] = {0, 4};
     protected long indexBlockNumber;
     protected DatagramSocket sendReceiveSocket;
+    protected int tid;
 
     public boolean shouldDiscardPacket(DataPacket dataPacket) {
         return dataPacket.getBlockNumber() != (indexBlockNumber + 1);
@@ -224,7 +222,7 @@ public abstract class ToolThreadClass implements Runnable {
         }
     }
 
-  protected   void ifErrorPrintAndExit(ErrorPacket errorPacket) {
+     protected   void ifErrorPrintAndExit(ErrorPacket errorPacket) {
         if (errorPacket != null) {
             try {
                 sendReceiveSocket.send(errorPacket.toDataGramPacket());
@@ -234,6 +232,19 @@ public abstract class ToolThreadClass implements Runnable {
             System.exit(1);
         }
     }
+
+    protected void ifInvalidTIDPrintAndExit(DatagramPacket x){
+        if(x.getPort() != tid){
+            ErrorPacket newPacket = null;
+            try {
+                newPacket = new ErrorPacket(InetAddress.getLocalHost(), x.getPort(), 5);
+            } catch (UnknownHostException e) {
+                e.printStackTrace();
+            }
+
+            ifErrorPrintAndExit(newPacket);
+        }
+}
     
     public class AccessViolationException extends IOException{}
     public class FileAlreadyExistsException extends IOException{}

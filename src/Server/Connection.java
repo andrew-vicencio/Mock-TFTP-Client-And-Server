@@ -68,6 +68,10 @@ public class Connection extends ToolThreadClass {
             return;
         }
 
+        //Set tid for checking against rest of packets
+        tid = packet.getPort();
+
+
         //Check which packet has been given to us
         if (packet instanceof ReadPacket) {
             //Send data gram packets
@@ -120,6 +124,7 @@ public class Connection extends ToolThreadClass {
 
 
             ifDataPacketErrorPrintAndExit(recivePkt);
+            ifInvalidTIDPrintAndExit(recivePkt);
             //TODO: What should we do with ack packet
             try {
                 AcknowledgementPacket test = (AcknowledgementPacket) Packet.parse(recivePkt);
@@ -127,7 +132,7 @@ public class Connection extends ToolThreadClass {
 
                 errorPkt = new ErrorPacket(address, port, 4);
                 ifErrorPrintAndExit(errorPkt);
-                e.printStackTrace();
+
             }
         }
     }
@@ -163,7 +168,7 @@ public class Connection extends ToolThreadClass {
             }
 
             ifDataPacketErrorPrintAndExit(recivedDataPacket);
-
+            ifInvalidTIDPrintAndExit(recivedDataPacket);
             //Write out where the packet came from
             System.out.println("Server - Packet received from " + recivedDataPacket.getAddress() + " Port " + recivedDataPacket.getPort());
 
