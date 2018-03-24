@@ -7,8 +7,11 @@ import tools.*;
 public class ErrorSimCommandLine extends CommandLine {
 	private int RRQ;
 	private String packetType;
+	private int packetNum;
 	private int errorCode;
 	private int delayAmt;
+	private int currentMode;
+	private final String[] types = {"data", "ack", "err", "read", "write"};
 	
 	public ErrorSimCommandLine() {
 		super("Error Simulator");
@@ -17,64 +20,128 @@ public class ErrorSimCommandLine extends CommandLine {
 		packetType = null;
 		errorCode = 0;
 		delayAmt = 0;
+		currentMode = 0;
 	}
 
 	@Override
-	public void interpret(String[] cmds) {
-		if(cmds.length >= 4) {
-			if (Arrays.asList(cmds).contains("rrq")) {
-				RRQ = 1;
-			} else if (Arrays.asList(cmds).contains("wrq")) {
-				RRQ = -1;
-			} else {
-				print("Invalid Command");
-			}
-			
-			packetType = cmds[1];
-			
-			if (Arrays.asList(cmds).contains("lose")) { //Check for lose
-				errorCode = 1;
-			} else if (Arrays.asList(cmds).contains("delay")) { //Check for delay
-				errorCode = 2;
-				if (cmds.length >= 5) { //Check for delay amount
-					try {
-						delayAmt = Integer.parseInt(cmds[4]);
-					} catch (Exception e) {
-						print("Invalid delay amount. Default amount (2s) will be used");
-					}
-				} else {
-					delayAmt = 2;
-				}
-			} else if (Arrays.asList(cmds).contains("duplicate")) { //Check for duplicate
-				errorCode = 3;
-			} else {
-				print("Invalid Error Command");
-			}
-			print(Integer.toString(RRQ));
-			print(packetType);
-			print(Integer.toString(errorCode));
-			print(Integer.toString(delayAmt));
+	public void interpret() {
+		System.out.print("Current mode ");
+		switch(currentMode) {
+			case 0:
+				System.out.print("0: Normal Operations (i.e. Choosing packets to be lost/duplicated/delayed.)\n");
+				break;
+			case 1:
+				System.out.print("1: Error code 4 - Wrong TFTP Operation.\n");
+				break;
+			case 2:
+				System.out.print("2: Wrong mode.\n");
+				break;
 		}
+		
+		print("What mode would you like to operate in? (0, 1, 2)");
+		String mode = in.next();
+		
+		switch(mode) {
+			case "0":
+				interpretZero();
+				break;
+			case "1":
+				interpretOne();
+				break;
+			case "2":
+				interpretTwo();
+				break;
+			default:
+				print("This mode is invalid. Please try again.");
+				return;
+		}
+	}
+	
+	private void interpretZero() {
+		currentMode = 0;
+		print("Q1: Would you like to tamper with a [read] or [write] request?");
+		String write = in.next();
+		
+		if (write.equalsIgnoreCase("read")){
+			RRQ = 1;
+		} else if(write.equalsIgnoreCase("write")) {
+			RRQ = -1;
+		} else if (write.equalsIgnoreCase("exit")) {
+			System.exit(1);
+		}	else {
+			print("Invalid command. PLease try again.");
+			return;
+		}
+		
+		print("Q2: What packet type would you like to tamper with? (i.e. DATA, ACK, etc.");
+		String type = in.next();
+		
+		if (!Arrays.asList(types).contains(type.toLowerCase())) {
+			print("Invalid Packet type. Please try again.");
+			return;
+		} else if (write.equalsIgnoreCase("exit")) {
+			System.exit(1);
+		}
+		
+		print("Q3: Which packet would you like to choose? (i.e. Choosing DATA and 3 chooses the 3rd DATA packet.)");
+		String num = in.next();
+		
+		if (write.equalsIgnoreCase("exit")) {
+				System.exit(1);
+		}
+		
+		try {
+			packetNum = Integer.parseInt(num);
+		} catch (Exception e) {
+			packetNum = 3;
+			print("Invalid delay amount. Default amount (3) will be used.");
+		}
+		
+		print("Q4: Would you like to [lose], [delay], or [duplicate] this packet?");
+		String errCode = in.next();
+		
+		if (errCode.equalsIgnoreCase("lose")) {
+			errorCode = 1;
+		} else if (errCode.equalsIgnoreCase("delay")) {
+			errorCode = 2;
+			print("Q5: How long would you like to delay (in seconds)?");
+			String delay = in.next();
+			try {
+				delayAmt = Integer.parseInt(delay);
+			} catch (Exception e) {
+				delayAmt = 2;
+				print("Invalid delay amount. Default amount (2s) will be used.");
+			}
+			if (delayAmt >= 5) {
+				delayAmt = 2;
+				print("Delay amount may be too long. File transfer may have already completed."
+						+ "\nDefault amount (2s) will be used.");
+			}
+		} else if (errCode.equalsIgnoreCase("duplicate")) {
+			errorCode = 3;
+		} else if (write.equalsIgnoreCase("exit")) {
+			System.exit(1);
+		}
+
+	}
+	
+	private void interpretOne() {
+		currentMode = 1;
+	}
+	
+	private void interpretTwo() {
+		currentMode = 2;
 	}
 
 	@Override
 	public void helpCommand() {
-		print("RRQ <Packet Type> <Packet#> <lose/delay/duplicate> [delay amount]\n"
-				+ "RRQ tells the error simulator to simulate an error from a read request\n\n"
-				+ "\tPacket Type \t The type of packet (i.e. DATA, ACK, etc)\n"
-				+ "\tPacket# \t The nth packet of the specified type (i.e. Packet# is 3. Packet Type is DATA. Select 3rd DATA packet.)\n"
-				+ "\tlose \t Lose the specified packet.\n"
-				+ "\tdelay \t Delay the specified packet.\n"
-				+ "\tduplicate \t Duplicate the specified packet.\n"
-				+ "\tdelay amount \t Amount of seconds the specified packet will be delayed.\n\n");
-		print("WRQ <Packet Type> <Packet#> <lose/delay/duplicate> [delay amount]\n"
-				+ "WRQ tells the error simulator to simulate an error from a read request\n\n"
-				+ "\tPacket Type \t The type of packet (i.e. DATA, ACK)\n"
-				+ "\tPacket# \t The nth packet of the specified type (i.e. Packet# is 3. Packet Type is DATA. Select 3rd DATA packet.)\n"
-				+ "\tlose \t Lose the specified packet.\n"
-				+ "\tdelay \t Delay the specified packet.\n"
-				+ "\tduplicate \t Duplicate the specified packet.\n"
-				+ "\tdelay amount \t Amount of seconds the specified packet will be delayed.\n");
+		print("Follow the prompts.");
+		System.out.print("Supported modes are:\n"
+				+ "0: Normal Operations (i.e. Choosing packets to be lost/duplicated/delayed.)\n"
+				+ "1: Error code 4 - Wrong TFTP Operation.\n"
+				+ "2: Wrong mode.\n");
+		print("Valid commands for Q2 are: data, ack, err, read, write");
+		print("Valid commands for Q3 are integers less than 5.");
 	}
 
 	public int getRRQ() {

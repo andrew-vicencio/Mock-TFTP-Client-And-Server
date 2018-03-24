@@ -12,7 +12,7 @@ public class ServerCommandLine extends CommandLine {
 	}
 
 	@Override
-	public void interpret(String[] cmds) {
+	public void interpret() {
 	}
 
 	@Override

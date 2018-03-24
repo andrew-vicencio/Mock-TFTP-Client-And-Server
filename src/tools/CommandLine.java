@@ -23,7 +23,7 @@ public abstract class CommandLine extends Thread { //TODO: Does not need to exte
 		this.name = name;
 	}
 	
-	public abstract void interpret(String[] cmds);
+	public abstract void interpret();
 	
 	public abstract void helpCommand();
 
@@ -96,12 +96,10 @@ public abstract class CommandLine extends Thread { //TODO: Does not need to exte
 			print(name + " Command line ready.");
 			print("Verbose: " + verbose);
 			print("Test: " + test);
-			print("What would you like to do?");
+			print("[--verbose], [--test], [HELP], [EXIT], or [CONTINUE]");
 			String input = in.nextLine();				//User input
 			input = input.toLowerCase();			//User input to lower case
 			String[] token = input.split("\\s");	//Input split into tokens
-//			print(token.toString());
-			int argSize = token.length;				//Amount of arguments in command
 			
 			//Checks for verbose flag change
 			if (Arrays.asList(token).contains("--verbose") || Arrays.asList(token).contains("-v")) {
@@ -119,10 +117,11 @@ public abstract class CommandLine extends Thread { //TODO: Does not need to exte
 			}
 			
 			if (Arrays.asList(token).contains("exit")) {
+				in.close();
 				System.exit(1);
 			}
 			
-			interpret(token);
+			interpret();
 			test = TEST_DEFAULT;
 			verbose = VERBOSE_DEFAULT;
 		}
