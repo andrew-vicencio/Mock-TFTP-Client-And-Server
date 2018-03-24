@@ -56,9 +56,10 @@ public class Connection extends ToolThreadClass {
             System.exit(1);
         }
 
-        System.out.println("Server: Sending packet:");
+        System.out.println("Server:/n Sending packet:");
         logger.printPacket(LogLevels.INFO, receivePacket);
 
+        //Parse Packet that was received
         Packet packet;
         try {
             packet = Packet.parse(receivePacket);
@@ -68,6 +69,7 @@ public class Connection extends ToolThreadClass {
             return;
         }
 
+        //Check which packet has been given to us
         if (packet instanceof ReadPacket) {
             //Send data gram packets
             ReadPacket readPacket = (ReadPacket) packet;
@@ -92,7 +94,6 @@ public class Connection extends ToolThreadClass {
 
     }
 
-
     /**
      * Send the datagram packets read from a file, to the client.
      */
@@ -101,13 +102,15 @@ public class Connection extends ToolThreadClass {
         byte[] temp = new byte[100];
         DatagramPacket recivePkt = new DatagramPacket(temp, temp.length);
         for (int x = 0; x < file.size(); x++) {
+
+            //Try and send first Packet
             try {
                 prvsPkt = file.get(x);
                 sendReceiveSocket.send(file.get(x));
             } catch (IOException e) {
                 e.printStackTrace();
             }
-
+            //Try and receive first Ack Packet
             try {
                 sendReceiveSocket.receive(recivePkt);
             } catch (SocketTimeoutException e){
@@ -116,8 +119,9 @@ public class Connection extends ToolThreadClass {
                 e.printStackTrace();
             }
 
-            ifDataPacketErrorPrintAndExit(recivePkt);
 
+            ifDataPacketErrorPrintAndExit(recivePkt);
+            //TODO: What should we do with ack packet
             try {
                 AcknowledgementPacket test = (AcknowledgementPacket) Packet.parse(recivePkt);
 
@@ -132,18 +136,18 @@ public class Connection extends ToolThreadClass {
      */
     @Override
     public void receivePackets() {
-        //TODO: build first response packet
         DatagramPacket recivedDataPacket = new DatagramPacket(new byte[1024], 1024);
+        boolean fileComplete = false;
 
+        //Build First Acknowledgement Packet and send off
         AcknowledgementPacket reviedResponse = new AcknowledgementPacket(address, port, 0);
         DatagramPacket sendPacket = reviedResponse.toDataGramPacket();
-
         try {
             sendReceiveSocket.send(sendPacket);
         } catch (IOException e) {
             e.printStackTrace();
         }
-        boolean fileComplete = false;
+
 
         while (!fileComplete) {
 
@@ -162,7 +166,7 @@ public class Connection extends ToolThreadClass {
             //Write out where the packet came from
             System.out.println("Server - Packet received from " + recivedDataPacket.getAddress() + " Port " + recivedDataPacket.getPort());
 
-            //Write to file
+            //Get received Data and parse and check for duplecets
             DataPacket recivedData = null;
             try {
                 recivedData = (DataPacket) (Packet.parse(recivedDataPacket));
@@ -185,16 +189,16 @@ public class Connection extends ToolThreadClass {
                 ifErrorPrintAndExit(errorPkt);
             }
 
-            //build response packet constructor
+            //Set response packet object
             reviedResponse = new AcknowledgementPacket(recivedData.getAddress(), recivedData.getPort(), recivedData.getBlockNumber());
 
-            //Send Response Packet to server
+            //Build Datagram response packet
             try {
                 sendPacket = reviedResponse.toDataGramPacket();
             } catch (Exception e) {
                 e.printStackTrace();
             }
-            //send the packet on the way
+            //Send the packet on the way
             try {
                 sendReceiveSocket.send(sendPacket);
             } catch (IOException e) {
@@ -203,7 +207,7 @@ public class Connection extends ToolThreadClass {
 
 
         }
-        
+        //Finished receiving the file
         System.out.println("Received file.");
 
     }
