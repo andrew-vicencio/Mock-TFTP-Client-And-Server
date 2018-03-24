@@ -114,7 +114,7 @@ public class Connection extends ToolThreadClass {
             try {
                 sendReceiveSocket.receive(recivePkt);
             } catch (SocketTimeoutException e){
-                recivePkt = timeout(prvsPkt,0);
+                recivePkt = timeout(prvsPkt,0,sendReceiveSocket);
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -155,7 +155,7 @@ public class Connection extends ToolThreadClass {
             try {
                 sendReceiveSocket.receive(recivedDataPacket);
             } catch (SocketTimeoutException e){
-                recivedDataPacket =  timeout(prvsPkt,0);
+                recivedDataPacket =  timeout(prvsPkt,0, sendReceiveSocket);
             } catch (IOException e) {
                 e.printStackTrace();
                 System.exit(1);
@@ -210,31 +210,6 @@ public class Connection extends ToolThreadClass {
         //Finished receiving the file
         System.out.println("Received file.");
 
-    }
-
-    @Override
-    public DatagramPacket timeout(DatagramPacket previousPkt, int x) {
-        DatagramPacket recivedDataPacket = new DatagramPacket(new byte[1024], 1024);
-        if(x != 3){
-            try{
-                sendReceiveSocket.send(previousPkt);
-
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-
-            try {
-                sendReceiveSocket.receive(recivedDataPacket);
-            }catch (SocketTimeoutException e){
-                return timeout(previousPkt, x + 1);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }else{
-            System.out.println("Timeout Limit hit");
-            System.exit(1);
-        }
-      return recivedDataPacket;
     }
 
     private void ifDataPacketErrorPrintAndExit(DatagramPacket receivedDataPacket) {

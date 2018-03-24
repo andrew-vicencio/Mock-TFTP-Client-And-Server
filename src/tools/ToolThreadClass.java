@@ -6,7 +6,9 @@ import Packet.Packet;
 
 import java.io.*;
 import java.net.DatagramPacket;
+import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.net.SocketTimeoutException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -156,7 +158,35 @@ public abstract class ToolThreadClass implements Runnable {
     public abstract void receivePackets();
 
 
-    public abstract DatagramPacket timeout(DatagramPacket previousPkt, int x);
+    public  DatagramPacket timeout(DatagramPacket previousPkt, int x, DatagramSocket sendReceiveSocket){
+        DatagramPacket recivedDataPacket = new DatagramPacket(new byte[1024], 1024);
+
+        if(previousPkt == null){
+            System.out.println("failed Request");
+            System.exit(1);
+
+        }
+        if (x != 3) {
+            try {
+                sendReceiveSocket.send(previousPkt);
+
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+            try {
+                sendReceiveSocket.receive(recivedDataPacket);
+            } catch (SocketTimeoutException e) {
+                return timeout(previousPkt, x + 1, sendReceiveSocket);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        } else {
+            System.out.println("Timeout Limit hit");
+            System.exit(1);
+        }
+        return recivedDataPacket;
+    }
     /**
      * Determines what error packet to create
      * @param address
