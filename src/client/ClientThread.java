@@ -113,7 +113,7 @@ public class ClientThread extends ToolThreadClass {
             try {
                 sendReceiveSocket.receive(receivePacket);
             }catch (SocketTimeoutException e){
-                receivePacket = timeout(prvsPkt, 0);
+                receivePacket = timeout(prvsPkt, 0, sendReceiveSocket);
             } catch (IOException e) {
                 e.printStackTrace();
                 System.exit(1);
@@ -235,6 +235,8 @@ public class ClientThread extends ToolThreadClass {
             e1.printStackTrace();
             System.exit(1);
         }
+
+
         byte[] temp = new byte[100];
         DatagramPacket recivePkt = new DatagramPacket(temp, temp.length);
         for (int i = 0; i < file.size(); i++) {
@@ -250,7 +252,7 @@ public class ClientThread extends ToolThreadClass {
                 System.out.println("Waiting2.0"); // TODO: output more / better information
                 sendReceiveSocket.receive(recivePkt);
             }catch (SocketTimeoutException e) {
-                recivePkt = timeout( prvsPkt,0);
+                recivePkt = timeout( prvsPkt,0, sendReceiveSocket);
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -264,40 +266,8 @@ public class ClientThread extends ToolThreadClass {
                 System.exit(1);
             }
         }
+
         System.out.println("Send finished.");
-    }
-
-
-
-    @Override
-    public DatagramPacket timeout(DatagramPacket previousPkt, int x) {
-        DatagramPacket recivedDataPacket = new DatagramPacket(new byte[1024], 1024);
-
-        if(previousPkt == null){
-            System.out.println("failed Request");
-            System.exit(1);
-
-        }
-        if (x != 3) {
-            try {
-                sendReceiveSocket.send(previousPkt);
-
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-
-            try {
-                sendReceiveSocket.receive(recivedDataPacket);
-            } catch (SocketTimeoutException e) {
-                return timeout(previousPkt, x + 1);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        } else {
-            System.out.println("Timeout Limit hit");
-            System.exit(1);
-        }
-        return recivedDataPacket;
     }
 
     /**
