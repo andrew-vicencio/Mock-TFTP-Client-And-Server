@@ -11,7 +11,7 @@ import Logger.Logger;
 import tools.ToolThreadClass;
 
 public class ClientThread extends ToolThreadClass {
-    private DatagramSocket sendReceiveSocket;
+
     private DatagramPacket sendPacket;
     private boolean write;
     private String fileName;
@@ -160,7 +160,8 @@ public class ClientThread extends ToolThreadClass {
                 e2.printStackTrace();
                 System.exit(1);
             } catch (Exception e) {
-
+               ErrorPacket errorPkt = new ErrorPacket(address, port, 4);
+                ifErrorPrintAndExit(errorPkt);
             }
 
             //Send Response Packet to server
@@ -201,35 +202,32 @@ public class ClientThread extends ToolThreadClass {
         DatagramPacket receivePacket = new DatagramPacket(new byte[100], 100);
         ArrayList<DatagramPacket> file = null;
 
+
         try {
             sendReceiveSocket.receive(receivePacket);
-
         }catch(IOException e) {
             System.out.println("Error in receiving first packet.");
             e.printStackTrace();
             System.exit(1);
         }
 
+        ifDataPacketErrorPrintAndExit(receivePacket);
+        //TODO Change
         Packet ack = null;
         try {
             ack = Packet.parse(receivePacket);
         } catch (Exception e) {
-            System.out.println("Packet could not be parsed");
+            ErrorPacket errorPkt = new ErrorPacket(address, port, 4);
+            ifErrorPrintAndExit(errorPkt);
         }
 
-        if(ack instanceof ErrorPacket) {
-            System.out.println("Error in write request.");
-            System.exit(1);
-        }
 
         System.out.println("Starting file transfer.");
 
 
         try {
-
             file = buildDataPackets(fileName, address, port);
         } catch (IOException e1) {
-            System.out.println("made it");
             ErrorPacket errPkt = ErrorCodeHandler(address, port, e1);
             send(errPkt.toDataGramPacket());
             e1.printStackTrace();
@@ -257,13 +255,14 @@ public class ClientThread extends ToolThreadClass {
                 e.printStackTrace();
             }
 
+            ifDataPacketErrorPrintAndExit(recivePkt);
+
 
             try{
                 AcknowledgementPacket test = (AcknowledgementPacket)Packet.parse(recivePkt);
             } catch (Exception e) {
-                System.out.println("Error in Acknowledgement Packet.");
-                e.printStackTrace();
-                System.exit(1);
+                ErrorPacket errorPkt = new ErrorPacket(address, port, 4);
+                ifErrorPrintAndExit(errorPkt);
             }
         }
 

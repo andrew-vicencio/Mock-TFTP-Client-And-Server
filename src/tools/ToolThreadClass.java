@@ -19,6 +19,7 @@ public abstract class ToolThreadClass implements Runnable {
     final byte dataResponse[] = {0, 3};
     final byte acknowledgeResponse[] = {0, 4};
     protected long indexBlockNumber;
+    protected DatagramSocket sendReceiveSocket;
 
     public boolean shouldDiscardPacket(DataPacket dataPacket) {
         return dataPacket.getBlockNumber() != (indexBlockNumber + 1);
@@ -209,6 +210,29 @@ public abstract class ToolThreadClass implements Runnable {
     		return new ErrorPacket(address, port, 6);
     	}
     	return null;
+    }
+
+    protected void ifDataPacketErrorPrintAndExit(DatagramPacket receivedDataPacket) {
+        try {
+            Packet pkt = Packet.parse(receivedDataPacket);
+            if (pkt instanceof ErrorPacket) {
+                System.out.println("Error Received from client");
+                System.exit(1);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+  protected   void ifErrorPrintAndExit(ErrorPacket errorPacket) {
+        if (errorPacket != null) {
+            try {
+                sendReceiveSocket.send(errorPacket.toDataGramPacket());
+            } catch (IOException e1) {
+                e1.printStackTrace();
+            }
+            System.exit(1);
+        }
     }
     
     public class AccessViolationException extends IOException{}

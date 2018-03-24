@@ -17,7 +17,6 @@ public class Connection extends ToolThreadClass {
     private InetAddress address;
     private ErrorPacket errorPkt;
     // socket to be used to send / receive data.
-    private DatagramSocket sendReceiveSocket;
     private DatagramPacket prvsPkt;
 
     /**
@@ -86,8 +85,8 @@ public class Connection extends ToolThreadClass {
             receivePackets();
 
         } else {
-            System.out.println("Received Invalid Data");
-            System.exit(1);
+            errorPkt = new ErrorPacket(address, port, 4);
+            ifErrorPrintAndExit(errorPkt);
         }
 
         sendReceiveSocket.close();
@@ -124,8 +123,10 @@ public class Connection extends ToolThreadClass {
             //TODO: What should we do with ack packet
             try {
                 AcknowledgementPacket test = (AcknowledgementPacket) Packet.parse(recivePkt);
-
             } catch (Exception e) {
+
+                errorPkt = new ErrorPacket(address, port, 4);
+                ifErrorPrintAndExit(errorPkt);
                 e.printStackTrace();
             }
         }
@@ -166,7 +167,7 @@ public class Connection extends ToolThreadClass {
             //Write out where the packet came from
             System.out.println("Server - Packet received from " + recivedDataPacket.getAddress() + " Port " + recivedDataPacket.getPort());
 
-            //Get received Data and parse and check for duplecets
+            //Get received Data and parse and check for duplecets and valid op code
             DataPacket recivedData = null;
             try {
                 recivedData = (DataPacket) (Packet.parse(recivedDataPacket));
@@ -176,7 +177,9 @@ public class Connection extends ToolThreadClass {
                 }
                 setLastBlockNumber(recivedData.getBlockNumber());
             } catch (Exception e) {
-                e.printStackTrace();
+                //Send off invalid opcode error packet
+                errorPkt = new ErrorPacket(address, port, 4);
+                ifErrorPrintAndExit(errorPkt);
             }
 
             //Try and write data packets
@@ -212,26 +215,5 @@ public class Connection extends ToolThreadClass {
 
     }
 
-    private void ifDataPacketErrorPrintAndExit(DatagramPacket receivedDataPacket) {
-        try {
-            Packet pkt = Packet.parse(receivedDataPacket);
-            if (pkt instanceof ErrorPacket) {
-                System.out.println("Error Received from client");
-                System.exit(1);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
 
-    void ifErrorPrintAndExit(ErrorPacket errorPacket) {
-        if (errorPacket != null) {
-            try {
-                sendReceiveSocket.send(errorPacket.toDataGramPacket());
-            } catch (IOException e1) {
-                e1.printStackTrace();
-            }
-            System.exit(1);
-        }
-    }
 }
