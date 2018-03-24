@@ -26,10 +26,15 @@ public abstract class Packet {
         String str = new String(data);
         Matcher matcher = Pattern.compile("^(.+?)\\x00(.+?)\\x00$").matcher(str);
         if (!matcher.matches()) {
-            throw new Error("Invalid packet content");
+            throw new IllegalArgumentException("Invalid packet content");
         }
         String fileName = matcher.group(1);
         String mode = matcher.group(2);
+        if (!(mode.equalsIgnoreCase("netascii")
+                || mode.equalsIgnoreCase("octet")
+                || mode.equalsIgnoreCase("mail"))) {
+            throw new IllegalArgumentException("Invalid mode");
+        }
         return new Pair<>(fileName, mode);
     }
 
@@ -73,9 +78,9 @@ public abstract class Packet {
      * @return
      * @throws Exception
      */
-    public static Packet parse(DatagramPacket datagramPacket) throws Exception {
+    public static Packet parse(DatagramPacket datagramPacket) throws IllegalArgumentException {
         if (datagramPacket.getLength() < 2) {
-            throw new Exception("Error must have at least 2 bytes for op-code");
+            throw new IllegalArgumentException("Error must have at least 2 bytes for op-code");
         }
 
         InetAddress address = datagramPacket.getAddress();
@@ -98,15 +103,7 @@ public abstract class Packet {
                 return new ErrorPacket(address, port, remaining);
         }
 
-        throw new Exception("Invalid opCode");
-    }
-
-    /**
-     * @return
-     * @throws IOException
-     */
-    public DataPacket toDataPacket() throws IOException {
-        return new DataPacket(getAddress(), getPort(), toByteArray());
+        throw new IllegalArgumentException("Invalid opCode");
     }
 
     /**

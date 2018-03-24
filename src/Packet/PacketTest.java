@@ -66,7 +66,7 @@ public class PacketTest {
     @Test
     public void testRead() throws Exception {
 
-        byte[] bytes = {0, 1, 78, 97, 109, 101, 0, 77, 111, 100, 101, 0};
+        byte[] bytes = {0, 1, 78, 97, 109, 101, 0, 78, 69, 84, 65, 83, 67, 73, 73, 0};
 
         DatagramPacket datagramPacket = new DatagramPacket(bytes, bytes.length, InetAddress.getLocalHost(), 25556);
 
@@ -75,7 +75,7 @@ public class PacketTest {
         ReadPacket readPacket = (ReadPacket) packet;
 
         assertEquals(readPacket.getFileName(), "Name", "File name");
-        assertEquals(readPacket.getFileMode(), "Mode", "File mode");
+        assertEquals(readPacket.getFileMode(), "NETASCII", "File mode");
 
         assertEquals(Arrays.toString(readPacket.toByteArray()), Arrays.toString(bytes), "Packet data is not preserved");
     }
@@ -83,7 +83,7 @@ public class PacketTest {
     @Test
     public void testWrite() throws Exception {
 
-        byte[] bytes = {0, 2, 78, 97, 109, 101, 0, 77, 111, 100, 101, 0};
+        byte[] bytes = {0, 2, 78, 97, 109, 101, 0, 78, 69, 84, 65, 83, 67, 73, 73, 0};
 
         DatagramPacket datagramPacket = new DatagramPacket(bytes, bytes.length, InetAddress.getLocalHost(), 25556);
 
@@ -92,7 +92,7 @@ public class PacketTest {
         WritePacket writePacket = (WritePacket) packet;
 
         assertEquals(writePacket.getFileName(), "Name", "File name");
-        assertEquals(writePacket.getFileMode(), "Mode", "File mode");
+        assertEquals(writePacket.getFileMode(), "NETASCII", "File mode");
 
         assertEquals(Arrays.toString(writePacket.toByteArray()), Arrays.toString(bytes), "Packet data is not preserved");
     }

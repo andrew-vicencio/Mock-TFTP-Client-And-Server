@@ -14,13 +14,13 @@ public class ErrorPacket extends Packet {
      * @param port
      * @param data
      */
-    public ErrorPacket(InetAddress address, int port, byte[] data) {
+    public ErrorPacket(InetAddress address, int port, byte[] data) throws IllegalArgumentException {
         super(address, port);
 
         byte[] message = Arrays.copyOfRange(data, 2, data.length - 1);
 
         if (data[data.length - 1] != 0) {
-            throw new Error("Invalid packet content");
+            throw new IllegalArgumentException("Invalid packet content");
         }
 
         this.errorCode = (char) twoBytesToLong(data);
@@ -53,6 +53,7 @@ public class ErrorPacket extends Packet {
 
     /**
      * Get's the error message
+     *
      * @return string representation of error message
      */
     public String getErrorMessage() {
@@ -61,6 +62,7 @@ public class ErrorPacket extends Packet {
 
     /**
      * Get's the error code
+     *
      * @return a char representation of the error code.
      */
     public char getErrorCode() {

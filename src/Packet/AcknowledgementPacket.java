@@ -24,10 +24,10 @@ public class AcknowledgementPacket extends Packet {
      * @param blockString
      * @throws Exception
      */
-    public AcknowledgementPacket(InetAddress address, int port, byte[] blockString) throws Exception {
+    public AcknowledgementPacket(InetAddress address, int port, byte[] blockString) throws IllegalArgumentException {
         super(address, port);
         if (blockString.length != 2) {
-            throw new Exception("Invalid Acknowledgement packet length: +");
+            throw new IllegalArgumentException("Invalid Acknowledgement packet length: " + (blockString.length + 2));
         }
         this.blockNumber = twoBytesToLong(blockString);
     }

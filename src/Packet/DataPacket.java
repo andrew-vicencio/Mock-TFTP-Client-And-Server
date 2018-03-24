@@ -16,15 +16,13 @@ public class DataPacket extends Packet {
      * @param port
      * @param remaining
      */
-    public DataPacket(InetAddress address, int port, byte[] remaining) {
+    public DataPacket(InetAddress address, int port, byte[] remaining) throws IllegalArgumentException {
         super(address, port);
 
-        System.out.println("Creating a block from bytes" + remaining[0] + "and " + remaining[1]);
-
         this.blockNumber = twoBytesToLong(remaining);
-
-        System.out.println("Into number" + this.blockNumber);
         this.data = Arrays.copyOfRange(remaining, 2, remaining.length);
+
+        if (this.data.length > 512) throw new IllegalArgumentException("Invalid data length");
     }
 
     /**
