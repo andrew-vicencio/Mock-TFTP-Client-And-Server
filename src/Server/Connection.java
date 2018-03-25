@@ -33,7 +33,7 @@ public class Connection extends ToolThreadClass {
     }
 
     /**
-     * Method called when thread is initialised to handle the packet it was created to handle.
+     * Method called when thread is initialized to handle the packet it was created to handle.
      */
     public void run() {
         System.out.println("Server: Packet received:");
