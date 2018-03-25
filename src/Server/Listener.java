@@ -21,7 +21,7 @@ public class Listener extends Thread{
      * 
      */
     public Listener() {
-        // initialise a logger with maximum verbosity
+        // initialize a logger with maximum Verboseness
         logger = new Logger(LogLevels.ALL);
     }
 

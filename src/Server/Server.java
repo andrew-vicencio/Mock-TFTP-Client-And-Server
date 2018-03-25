@@ -3,7 +3,7 @@ package Server;
 public class Server {
 
     /**
-     * Initialise the Connection listener of the server
+     * Initialize the Connection listener of the server
      *
      * @param args arguments passed in when starting the java program.
      */
