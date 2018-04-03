@@ -95,6 +95,7 @@ public class ClientThread extends ToolThreadClass {
             sendPackets();
         }
         sendReceiveSocket.close();
+        port = 69;
     }
     
     /* (non-Javadoc)
@@ -118,7 +119,9 @@ public class ClientThread extends ToolThreadClass {
                 e.printStackTrace();
                 System.exit(1);
             }
-
+            if(port == 69){
+                port = receivePacket.getPort();
+            }
             //Check for ErrorPacket
             Packet pkt = null;
             try {
@@ -214,6 +217,9 @@ public class ClientThread extends ToolThreadClass {
             System.out.println("Error in receiving first packet.");
             e.printStackTrace();
             System.exit(1);
+        }
+        if(port == 69){
+            port = receivePacket.getPort();
         }
 
         ifDataPacketErrorPrintAndExit(receivePacket);
