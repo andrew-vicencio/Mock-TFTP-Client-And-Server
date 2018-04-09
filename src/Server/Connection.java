@@ -68,6 +68,8 @@ public class Connection extends ToolThreadClass {
             return;
         }
 
+        //Setting TID from the first packet received from client side
+        ifInvalidTIDPrintAndExit(receivePacket);
 
 
 
