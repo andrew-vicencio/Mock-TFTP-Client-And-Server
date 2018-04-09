@@ -234,7 +234,10 @@ public abstract class ToolThreadClass implements Runnable {
     }
 
     protected void ifInvalidTIDPrintAndExit(DatagramPacket x){
-        if(x.getPort() != tid){
+        if(this.tid == 0){
+            this.tid = x.getPort();
+        }else{
+        if(x.getPort() != this.tid){
             ErrorPacket newPacket = null;
             try {
                 newPacket = new ErrorPacket(InetAddress.getLocalHost(), x.getPort(), 5);
@@ -243,7 +246,7 @@ public abstract class ToolThreadClass implements Runnable {
             }
 
             ifErrorPrintAndExit(newPacket);
-        }
+        }}
 }
     
     public class AccessViolationException extends IOException{}

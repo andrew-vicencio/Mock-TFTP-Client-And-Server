@@ -68,8 +68,7 @@ public class Connection extends ToolThreadClass {
             return;
         }
 
-        //Set tid for checking against rest of packets
-        tid = packet.getPort();
+
 
 
         //Check which packet has been given to us

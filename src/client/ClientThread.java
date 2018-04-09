@@ -135,11 +135,9 @@ public class ClientThread extends ToolThreadClass {
             }
 
 
-            if(tid == 0){
-                tid = pkt.getPort();
-            }else{
+
                 ifInvalidTIDPrintAndExit(receivePacket);
-            }
+
             //Write out where the packet came from
             System.out.println("Client - Packet received from " + receivePacket.getAddress() + " Port " + receivePacket.getPort());
 
