@@ -15,7 +15,7 @@ public class ClientThread extends ToolThreadClass {
     private DatagramPacket sendPacket;
     private boolean write;
     private String fileName;
-    private int port;
+    private int port, ogPort;
     private byte[] receivedData;
     private Logger logger;
     private InetAddress address;
@@ -73,7 +73,7 @@ public class ClientThread extends ToolThreadClass {
      * @see java.lang.Runnable#run()
      */
     public void run() {
-        int origonalPort = port;
+        int ogPort = port;
         try {
             if(write){
                 sendPacket = (new WritePacket(InetAddress.getLocalHost(), port, fileName, "")).toDataGramPacket();
@@ -96,7 +96,7 @@ public class ClientThread extends ToolThreadClass {
             sendPackets();
         }
         sendReceiveSocket.close();
-        port = origonalPort;
+        port = ogPort;
     }
     
     /* (non-Javadoc)
@@ -120,7 +120,7 @@ public class ClientThread extends ToolThreadClass {
                 e.printStackTrace();
                 System.exit(1);
             }
-            if(port == 69){
+            if(port == ogPort){
                 port = receivePacket.getPort();
             }
             //Check for ErrorPacket
@@ -131,7 +131,9 @@ public class ClientThread extends ToolThreadClass {
                     System.out.println("Error: Serverside.");
                     System.exit(1);
                 }
-            } catch (Exception e) {
+            }catch (IllegalArgumentException e1){
+
+            } catch(Exception e) {
                 e.printStackTrace();
             }
 
@@ -159,7 +161,7 @@ public class ClientThread extends ToolThreadClass {
                         continue;
                     }
                     setLastBlockNumber(dataPacket.getBlockNumber());
-                    writeRecivedDataPacket(dataPacket);
+                    writereceivedDataPacket(dataPacket);
                 }
             } catch (IOException e2) {
                 ErrorPacket errPkt = ErrorCodeHandler(address, port, e2);
@@ -217,7 +219,7 @@ public class ClientThread extends ToolThreadClass {
             e.printStackTrace();
             System.exit(1);
         }
-        if(port == 69){
+        if(port == ogPort){
             port = receivePacket.getPort();
         }
 
@@ -246,7 +248,7 @@ public class ClientThread extends ToolThreadClass {
 
 
         byte[] temp = new byte[100];
-        DatagramPacket recivePkt = new DatagramPacket(temp, temp.length);
+        DatagramPacket receivePkt = new DatagramPacket(temp, temp.length);
         for (int i = 0; i < file.size(); i++) {
             try {
                 prvsPkt = file.get(i);
@@ -258,18 +260,18 @@ public class ClientThread extends ToolThreadClass {
 
             try {
                 System.out.println("Waiting2.0"); // TODO: output more / better information
-                sendReceiveSocket.receive(recivePkt);
+                sendReceiveSocket.receive(receivePkt);
             }catch (SocketTimeoutException e) {
-                recivePkt = timeout( prvsPkt,0, sendReceiveSocket);
+                receivePkt = timeout( prvsPkt,0, sendReceiveSocket);
             } catch (IOException e) {
                 e.printStackTrace();
             }
 
-            ifDataPacketErrorPrintAndExit(recivePkt);
-            ifInvalidTIDPrintAndExit(recivePkt);
+            ifDataPacketErrorPrintAndExit(receivePkt);
+            ifInvalidTIDPrintAndExit(receivePkt);
 
             try{
-                AcknowledgementPacket test = (AcknowledgementPacket)Packet.parse(recivePkt);
+                AcknowledgementPacket test = (AcknowledgementPacket)Packet.parse(receivePkt);
             } catch (Exception e) {
                 ErrorPacket errorPkt = new ErrorPacket(address, port, 4);
                 ifErrorPrintAndExit(errorPkt);

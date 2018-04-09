@@ -67,8 +67,7 @@ public class Connection extends ToolThreadClass {
             ifErrorPrintAndExit(errorPkt);
         } catch (Exception e) {
             e.printStackTrace();
-            System.exit(133);
-            return;
+            System.exit(1);
         }
 
         //Setting TID from the first packet received from client side
@@ -103,7 +102,7 @@ public class Connection extends ToolThreadClass {
     @Override
     public void sendPackets() {
         byte[] temp = new byte[100];
-        DatagramPacket recivePkt = new DatagramPacket(temp, temp.length);
+        DatagramPacket receivePkt = new DatagramPacket(temp, temp.length);
         for (int x = 0; x < file.size(); x++) {
 
             //Try and send first Packet
@@ -115,19 +114,19 @@ public class Connection extends ToolThreadClass {
             }
             //Try and receive first Ack Packet
             try {
-                sendReceiveSocket.receive(recivePkt);
+                sendReceiveSocket.receive(receivePkt);
             } catch (SocketTimeoutException e){
-                recivePkt = timeout(prvsPkt,0,sendReceiveSocket);
+                receivePkt = timeout(prvsPkt,0,sendReceiveSocket);
             } catch (IOException e) {
                 e.printStackTrace();
             }
 
 
-            ifDataPacketErrorPrintAndExit(recivePkt);
-            ifInvalidTIDPrintAndExit(recivePkt);
+            ifDataPacketErrorPrintAndExit(receivePkt);
+            ifInvalidTIDPrintAndExit(receivePkt);
             //TODO: What should we do with ack packet
             try {
-                AcknowledgementPacket test = (AcknowledgementPacket) Packet.parse(recivePkt);
+                AcknowledgementPacket test = (AcknowledgementPacket) Packet.parse(receivePkt);
             } catch (Exception e) {
 
                 errorPkt = new ErrorPacket(address, port, 4);
@@ -142,7 +141,7 @@ public class Connection extends ToolThreadClass {
      */
     @Override
     public void receivePackets() {
-        DatagramPacket recivedDataPacket = new DatagramPacket(new byte[1024], 1024);
+        DatagramPacket receivedDataPacket = new DatagramPacket(new byte[1024], 1024);
         boolean fileComplete = false;
 
         //Build First Acknowledgement Packet and send off
@@ -159,37 +158,37 @@ public class Connection extends ToolThreadClass {
 
             //Try and receive from Client
             try {
-                sendReceiveSocket.receive(recivedDataPacket);
+                sendReceiveSocket.receive(receivedDataPacket);
             } catch (SocketTimeoutException e){
-                recivedDataPacket =  timeout(prvsPkt,0, sendReceiveSocket);
+                receivedDataPacket =  timeout(prvsPkt,0, sendReceiveSocket);
             } catch (IOException e) {
                 e.printStackTrace();
                 System.exit(1);
             }
 
-            ifDataPacketErrorPrintAndExit(recivedDataPacket);
-            ifInvalidTIDPrintAndExit(recivedDataPacket);
+            ifDataPacketErrorPrintAndExit(receivedDataPacket);
+            ifInvalidTIDPrintAndExit(receivedDataPacket);
             //Write out where the packet came from
-            System.out.println("Server - Packet received from " + recivedDataPacket.getAddress() + " Port " + recivedDataPacket.getPort());
+            System.out.println("Server - Packet received from " + receivedDataPacket.getAddress() + " Port " + receivedDataPacket.getPort());
 
             //Get received Data and parse and check for duplecets and valid op code
-            DataPacket recivedData = null;
+            DataPacket receivedData = null;
             try {
-                recivedData = (DataPacket) (Packet.parse(recivedDataPacket));
-                if (shouldDiscardPacket(recivedData)) {
-                    System.out.println("[debug]: Dropping packet index " + recivedData.getBlockNumber());
+                receivedData = (DataPacket) (Packet.parse(receivedDataPacket));
+                if (shouldDiscardPacket(receivedData)) {
+                    System.out.println("[debug]: Dropping packet index " + receivedData.getBlockNumber());
                     continue;
                 }
-                setLastBlockNumber(recivedData.getBlockNumber());
+                setLastBlockNumber(receivedData.getBlockNumber());
             } catch (Exception e) {
-                //Send off invalid opcode error packet
+                //Send off invalid opcode/format error packet
                 errorPkt = new ErrorPacket(address, port, 4);
                 ifErrorPrintAndExit(errorPkt);
             }
 
             //Try and write data packets
             try {
-                fileComplete = writeRecivedDataPacket(recivedData);
+                fileComplete = writereceivedDataPacket(receivedData);
             } catch (IOException e) {
                 //Caught error, try and create error data packet
                 errorPkt = ErrorCodeHandler(address, port, e);
@@ -198,7 +197,7 @@ public class Connection extends ToolThreadClass {
             }
 
             //Set response packet object
-            reviedResponse = new AcknowledgementPacket(recivedData.getAddress(), recivedData.getPort(), recivedData.getBlockNumber());
+            reviedResponse = new AcknowledgementPacket(receivedData.getAddress(), receivedData.getPort(), receivedData.getBlockNumber());
 
             //Build Datagram response packet
             try {

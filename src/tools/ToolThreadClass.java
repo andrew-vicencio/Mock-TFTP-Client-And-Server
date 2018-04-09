@@ -88,7 +88,7 @@ public abstract class ToolThreadClass implements Runnable {
      * @return boolean checks if data packet is final data packet
      * @throws IOException
      */
-    public boolean writeRecivedDataPacket(DataPacket receivePacket) throws IOException {
+    public boolean writereceivedDataPacket(DataPacket receivePacket) throws IOException {
 
 
         FileWriter filewriter = null;
@@ -158,7 +158,7 @@ public abstract class ToolThreadClass implements Runnable {
 
 
     public  DatagramPacket timeout(DatagramPacket previousPkt, int x, DatagramSocket sendReceiveSocket){
-        DatagramPacket recivedDataPacket = new DatagramPacket(new byte[1024], 1024);
+        DatagramPacket receivedDataPacket = new DatagramPacket(new byte[1024], 1024);
 
         if(previousPkt == null){
             System.out.println("failed Request");
@@ -174,7 +174,7 @@ public abstract class ToolThreadClass implements Runnable {
             }
 
             try {
-                sendReceiveSocket.receive(recivedDataPacket);
+                sendReceiveSocket.receive(receivedDataPacket);
             } catch (SocketTimeoutException e) {
                 return timeout(previousPkt, x + 1, sendReceiveSocket);
             } catch (IOException e) {
@@ -184,7 +184,7 @@ public abstract class ToolThreadClass implements Runnable {
             System.out.println("Timeout Limit hit");
             System.exit(1);
         }
-        return recivedDataPacket;
+        return receivedDataPacket;
     }
     /**
      * Determines what error packet to create
