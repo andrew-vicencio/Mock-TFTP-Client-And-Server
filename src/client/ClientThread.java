@@ -132,7 +132,8 @@ public class ClientThread extends ToolThreadClass {
                     System.exit(1);
                 }
             }catch (IllegalArgumentException e1){
-
+                ErrorPacket errorPkt = new ErrorPacket(address, port, 4);
+                ifErrorPrintAndExit(errorPkt);
             } catch(Exception e) {
                 e.printStackTrace();
             }
