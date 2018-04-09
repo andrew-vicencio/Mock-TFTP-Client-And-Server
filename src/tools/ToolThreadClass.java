@@ -18,6 +18,8 @@ public abstract class ToolThreadClass implements Runnable {
     protected long indexBlockNumber;
     protected DatagramSocket sendReceiveSocket;
     protected int tid;
+    protected boolean runonce = false;
+    protected String fileName = "receivedFile.txt";
 
     public boolean shouldDiscardPacket(DataPacket dataPacket) {
         return dataPacket.getBlockNumber() != (indexBlockNumber + 1);
@@ -38,14 +40,13 @@ public abstract class ToolThreadClass implements Runnable {
      */
     public  ArrayList<DatagramPacket> buildDataPackets(String fileName, InetAddress address, int port) throws IOException  {
 
-        //TODO: Fix to be more integrated with packet classes
         ArrayList<DatagramPacket> file = new ArrayList<DatagramPacket>();
 
         byte[] fileBytes = null;
         long blockNumber = 0;
         File fileItem = new File(fileName);
 
-        //FileAccessChecker(fileItem, false);
+        FileAccessChecker(fileItem, true, 0);
 
         FileInputStream reader = new FileInputStream(fileItem);
 
@@ -92,11 +93,8 @@ public abstract class ToolThreadClass implements Runnable {
 
 
         FileWriter filewriter = null;
-        File temp = new File("receivedFile.txt");
-
-        //FileAccessChecker(temp, true);
-
-
+        File  temp = FileAccessChecker(  new File(fileName), false, 0);
+        runonce = true;
         byte[] receivedData = new byte[512];
 
         ByteArrayOutputStream data = new ByteArrayOutputStream();
@@ -122,7 +120,8 @@ public abstract class ToolThreadClass implements Runnable {
     }
 
 
-    protected void FileAccessChecker(File x, boolean y) throws IOException{
+    protected File FileAccessChecker(File x, boolean y, int i) throws IOException{
+
 
         //TODO: Paul ur code here check to see if able to write to file for size
 
@@ -130,20 +129,30 @@ public abstract class ToolThreadClass implements Runnable {
         //Cant if it exists
 
         if(y){
+            //Read request checking
             if(x.exists()){
-                throw new AccessViolationException();
-            }else if(x.canWrite()){//if you can write too
-                throw new FileAlreadyExistsException();
+                if(!x.canRead()){
+                    throw new AccessViolationException();
+                }
+            }else{
+                throw new FileNotFoundException();
             }
         }else{
-            if(!x.exists()){
-                throw new AccessViolationException();
-            }else if(!x.canRead()){//if you can write too
-                throw new FileAlreadyExistsException();
+            //write request Checking
+            if(x.exists()){
+                if(runonce){
+                    return x;
+                }else{
+                    fileName = "receivedFile" + i + ".txt";
+                    return FileAccessChecker( new File(fileName), y, i +1);
+
+                }
+
+            }else{
+               return x;
             }
         }
-
-
+        return null;
     }
 
     /**

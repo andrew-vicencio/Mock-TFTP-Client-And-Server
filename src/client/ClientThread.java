@@ -97,6 +97,8 @@ public class ClientThread extends ToolThreadClass {
         }
         sendReceiveSocket.close();
         port = ogPort;
+        this.runonce = false;
+        this.fileName = "receivedFile.txt";
     }
     
     /* (non-Javadoc)

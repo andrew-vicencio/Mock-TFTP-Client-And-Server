@@ -93,7 +93,8 @@ public class Connection extends ToolThreadClass {
         }
 
         sendReceiveSocket.close();
-
+        this.runonce = false;
+        this.fileName = "receivedFile.txt";
     }
 
     /**
