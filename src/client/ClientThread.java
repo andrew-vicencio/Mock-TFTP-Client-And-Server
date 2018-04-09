@@ -73,6 +73,7 @@ public class ClientThread extends ToolThreadClass {
      * @see java.lang.Runnable#run()
      */
     public void run() {
+        int origonalPort = port;
         try {
             if(write){
                 sendPacket = (new WritePacket(InetAddress.getLocalHost(), port, fileName, "")).toDataGramPacket();
@@ -95,7 +96,7 @@ public class ClientThread extends ToolThreadClass {
             sendPackets();
         }
         sendReceiveSocket.close();
-        port = 69;
+        port = origonalPort;
     }
     
     /* (non-Javadoc)
