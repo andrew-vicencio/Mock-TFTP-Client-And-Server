@@ -245,7 +245,11 @@ public abstract class ToolThreadClass implements Runnable {
                 e.printStackTrace();
             }
 
-            ifErrorPrintAndExit(newPacket);
+            try {
+                sendReceiveSocket.send(newPacket.toDataGramPacket());
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }}
 }
     

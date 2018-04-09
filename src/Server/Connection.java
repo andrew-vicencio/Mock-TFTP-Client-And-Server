@@ -59,9 +59,12 @@ public class Connection extends ToolThreadClass {
         logger.printPacket(LogLevels.INFO, receivePacket);
 
         //Parse Packet that was received
-        Packet packet;
+        Packet packet = null;
         try {
             packet = Packet.parse(receivePacket);
+        }catch (IllegalArgumentException e1){
+            errorPkt = new ErrorPacket(address, port, 4);
+            ifErrorPrintAndExit(errorPkt);
         } catch (Exception e) {
             e.printStackTrace();
             System.exit(133);
@@ -88,10 +91,6 @@ public class Connection extends ToolThreadClass {
         } else if (packet instanceof WritePacket) {
             //Write acknowledgement packets
             receivePackets();
-
-        } else {
-            errorPkt = new ErrorPacket(address, port, 4);
-            ifErrorPrintAndExit(errorPkt);
         }
 
         sendReceiveSocket.close();
