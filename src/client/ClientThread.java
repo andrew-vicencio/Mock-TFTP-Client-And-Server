@@ -61,6 +61,7 @@ public class ClientThread extends ToolThreadClass {
      * @param port     port to listen on.
      * @throws UnknownHostException
      */
+    //TODO: add in host from commandline
     public ClientThread(boolean write, String filename, int port) throws UnknownHostException {
         this(write, filename, InetAddress.getLocalHost(), port, null);
     }
@@ -76,12 +77,12 @@ public class ClientThread extends ToolThreadClass {
         int ogPort = port;
         try {
             if (write) {
-                sendPacket = (new WritePacket(InetAddress.getLocalHost(), port, fileName, "")).toDataGramPacket();
+                sendPacket = (new WritePacket(address, port, fileName, "")).toDataGramPacket();
             } else {
-                sendPacket = (new ReadPacket(InetAddress.getLocalHost(), port, fileName, "")).toDataGramPacket();
+                sendPacket = (new ReadPacket(address, port, fileName, "")).toDataGramPacket();
             }
 
-        } catch (IOException e) {
+        } catch (Exception e) {
             cl.print("Error: Packet creation has failed.");
             e.printStackTrace();
             System.exit(1);
@@ -178,9 +179,9 @@ public class ClientThread extends ToolThreadClass {
             //Send Response Packet to server
             try {
 
-                sendPacket = (new AcknowledgementPacket(InetAddress.getLocalHost(), port, blockNumber)).toDataGramPacket();
+                sendPacket = (new AcknowledgementPacket(address, port, blockNumber)).toDataGramPacket();
                 prvsPkt = sendPacket;
-            } catch (UnknownHostException e) {
+            } catch (Exception e) {
                 e.printStackTrace();
             }
 
