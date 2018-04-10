@@ -10,7 +10,7 @@ import java.net.SocketException;
 import java.util.ArrayList;
 
 
-public class Listener extends Thread{
+public class Listener extends Thread {
 
     DatagramPacket receivePacket;
     DatagramSocket receiveSocket;
@@ -18,7 +18,7 @@ public class Listener extends Thread{
     Logger logger;
 
     /**
-     * 
+     *
      */
     public Listener() {
         // initialize a logger with maximum Verboseness
@@ -45,16 +45,16 @@ public class Listener extends Thread{
             waitForPacketAndHandle();
         }
     }
-    
+
     public void run() {
-    	listen(69);
+        listen(69);
     }
 
     /**
      * Wait for a packet from the client, and pass of handling it to a connection thread..
      */
     /**
-     * 
+     *
      */
     public void waitForPacketAndHandle() {
         byte data[] = new byte[100];
@@ -65,8 +65,8 @@ public class Listener extends Thread{
             logger.println(LogLevels.INFO, "Waiting...");
             receiveSocket.receive(receivePacket);
         } catch (IOException e) {
-            logger.println(LogLevels.ERROR, "IO Exception: likely: Receive Socket Timed Out.");
-            logger.printException(LogLevels.ERROR, e);
+            logger.println(LogLevels.FATAL, "IO Exception: likely: Receive Socket Timed Out.");
+            logger.printException(LogLevels.FATAL, e);
             e.printStackTrace();
             System.exit(1);
         }
@@ -75,7 +75,7 @@ public class Listener extends Thread{
             Thread thread = new Thread(new Connection(logger, receivePacket), "Server Connection");
             thread.start();
         } catch (Exception e) {
-            System.out.println("Error: Client thread not created successfully.");
+            logger.println(LogLevels.FATAL, "Error: Client thread not created successfully.");
             e.printStackTrace();
             System.exit(1);
         }

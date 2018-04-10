@@ -48,7 +48,7 @@ public class ClientThread extends ToolThreadClass {
             e.printStackTrace();
             System.exit(1);
         }
-        System.out.println("Client socket created.");
+        logger.println(LogLevels.INFO, "Client socket created.");
     }
 
     /**
@@ -69,15 +69,15 @@ public class ClientThread extends ToolThreadClass {
     /**
      * run is used to create packets and send them then wait for confirmation from the server
      * that it has been received.
-     * 
+     *
      * @see java.lang.Runnable#run()
      */
     public void run() {
         int ogPort = port;
         try {
-            if(write){
+            if (write) {
                 sendPacket = (new WritePacket(InetAddress.getLocalHost(), port, fileName, "")).toDataGramPacket();
-            }else{
+            } else {
                 sendPacket = (new ReadPacket(InetAddress.getLocalHost(), port, fileName, "")).toDataGramPacket();
             }
 
@@ -88,11 +88,11 @@ public class ClientThread extends ToolThreadClass {
         }
         send(sendPacket);
 
-        if(!write) {
+        if (!write) {
             receivePackets();
-            System.out.println("File received.");
+            logger.println(LogLevels.INFO, "File received.");
             return;
-        }else{
+        } else {
             sendPackets();
         }
         sendReceiveSocket.close();
@@ -100,7 +100,7 @@ public class ClientThread extends ToolThreadClass {
         this.runonce = false;
         this.fileName = "receivedFile.txt";
     }
-    
+
     /* (non-Javadoc)
      * @see tools.ToolThreadClass#receivePackets()
      */
@@ -116,36 +116,35 @@ public class ClientThread extends ToolThreadClass {
             //Try and receive from server
             try {
                 sendReceiveSocket.receive(receivePacket);
-            }catch (SocketTimeoutException e){
+            } catch (SocketTimeoutException e) {
                 receivePacket = timeout(prvsPkt, 0, sendReceiveSocket);
             } catch (IOException e) {
                 e.printStackTrace();
                 System.exit(1);
             }
-            if(port == ogPort){
+            if (port == ogPort) {
                 port = receivePacket.getPort();
             }
             //Check for ErrorPacket
             Packet pkt = null;
             try {
                 pkt = Packet.parse(receivePacket);
-                if(pkt instanceof ErrorPacket) {
-                    System.out.println("Error: Serverside.");
+                if (pkt instanceof ErrorPacket) {
+                    logger.println(LogLevels.FATAL, "Error: Serverside.");
                     System.exit(1);
                 }
-            }catch (IllegalArgumentException e1){
+            } catch (IllegalArgumentException e1) {
                 ErrorPacket errorPkt = new ErrorPacket(address, port, 4);
                 ifErrorPrintAndExit(errorPkt);
-            } catch(Exception e) {
+            } catch (Exception e) {
                 e.printStackTrace();
             }
 
 
-
-                ifInvalidTIDPrintAndExit(receivePacket);
+            ifInvalidTIDPrintAndExit(receivePacket);
 
             //Write out where the packet came from
-            System.out.println("Client - Packet received from " + receivePacket.getAddress() + " Port " + receivePacket.getPort());
+            logger.println(LogLevels.INFO, "Client - Packet received from " + receivePacket.getAddress() + " Port " + receivePacket.getPort());
 
             ByteArrayOutputStream data = new ByteArrayOutputStream();
             try {
@@ -157,10 +156,10 @@ public class ClientThread extends ToolThreadClass {
 
             //Try and write to file from the new data string
             try {
-                if(pkt instanceof DataPacket) {
+                if (pkt instanceof DataPacket) {
                     DataPacket dataPacket = (DataPacket) pkt;
                     if (shouldDiscardPacket(dataPacket)) {
-                        System.out.println("[debug]: Dropping packet index " + dataPacket.getBlockNumber());
+                        logger.println(LogLevels.WARN, "Dropping packet index " + dataPacket.getBlockNumber());
                         continue;
                     }
                     setLastBlockNumber(dataPacket.getBlockNumber());
@@ -172,14 +171,14 @@ public class ClientThread extends ToolThreadClass {
                 e2.printStackTrace();
                 System.exit(1);
             } catch (Exception e) {
-               ErrorPacket errorPkt = new ErrorPacket(address, port, 4);
+                ErrorPacket errorPkt = new ErrorPacket(address, port, 4);
                 ifErrorPrintAndExit(errorPkt);
             }
 
             //Send Response Packet to server
             try {
 
-                sendPacket = (new AcknowledgementPacket(InetAddress.getLocalHost(),port, blockNumber)).toDataGramPacket();
+                sendPacket = (new AcknowledgementPacket(InetAddress.getLocalHost(), port, blockNumber)).toDataGramPacket();
                 prvsPkt = sendPacket;
             } catch (UnknownHostException e) {
                 e.printStackTrace();
@@ -204,8 +203,9 @@ public class ClientThread extends ToolThreadClass {
 
     /**
      * sendPackets passes the first request packet to sendPackets.
-     *
+     * <p>
      * (non-Javadoc)
+     *
      * @see tools.ToolThreadClass#sendPackets()
      */
     public void sendPackets() {
@@ -217,12 +217,12 @@ public class ClientThread extends ToolThreadClass {
 
         try {
             sendReceiveSocket.receive(receivePacket);
-        }catch(IOException e) {
-            System.out.println("Error in receiving first packet.");
+        } catch (IOException e) {
+            logger.println(LogLevels.FATAL, "Error in receiving first packet.");
             e.printStackTrace();
             System.exit(1);
         }
-        if(port == ogPort){
+        if (port == ogPort) {
             port = receivePacket.getPort();
         }
 
@@ -237,7 +237,7 @@ public class ClientThread extends ToolThreadClass {
         }
 
         tid = ack.getPort();
-        System.out.println("Starting file transfer.");
+        logger.println(LogLevels.INFO, "Starting file transfer.");
 
 
         try {
@@ -262,10 +262,10 @@ public class ClientThread extends ToolThreadClass {
 
 
             try {
-                System.out.println("Waiting2.0"); // TODO: output more / better information
+                logger.println(LogLevels.INFO, "Waiting2.0"); // TODO: output more / better information
                 sendReceiveSocket.receive(receivePkt);
-            }catch (SocketTimeoutException e) {
-                receivePkt = timeout( prvsPkt,0, sendReceiveSocket);
+            } catch (SocketTimeoutException e) {
+                receivePkt = timeout(prvsPkt, 0, sendReceiveSocket);
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -273,15 +273,15 @@ public class ClientThread extends ToolThreadClass {
             ifDataPacketErrorPrintAndExit(receivePkt);
             ifInvalidTIDPrintAndExit(receivePkt);
 
-            try{
-                AcknowledgementPacket test = (AcknowledgementPacket)Packet.parse(receivePkt);
+            try {
+                AcknowledgementPacket test = (AcknowledgementPacket) Packet.parse(receivePkt);
             } catch (Exception e) {
                 ErrorPacket errorPkt = new ErrorPacket(address, port, 4);
                 ifErrorPrintAndExit(errorPkt);
             }
         }
 
-        System.out.println("Send finished.");
+        logger.println(LogLevels.INFO, "Send finished.");
     }
 
     /**
@@ -292,11 +292,11 @@ public class ClientThread extends ToolThreadClass {
      */
     public void send(DatagramPacket sndPkt) { //TODO: Breakdown to handle acknowledgments and sendFilePackets
         if (sendPacket == null) {
-            System.out.println("Error: No packet to be sent.");
+            logger.println(LogLevels.FATAL, "Error: No packet to be sent.");
             System.exit(1);
         }
 
-        System.out.println("Client - Sending packet to " + sendPacket.getAddress() + " Port " + sendPacket.getPort());
+        logger.println(LogLevels.INFO, "Client - Sending packet to " + sendPacket.getAddress() + " Port " + sendPacket.getPort());
 
         try {
             sendReceiveSocket.send(sndPkt);
@@ -305,6 +305,6 @@ public class ClientThread extends ToolThreadClass {
             System.exit(1);
         }
 
-        System.out.println("Client - Packet sent.");
+        logger.println(LogLevels.INFO, "Client - Packet sent.");
     }
 }

@@ -36,8 +36,8 @@ public class Connection extends ToolThreadClass {
      * Method called when thread is initialized to handle the packet it was created to handle.
      */
     public void run() {
-        System.out.println("Server: Packet received:");
-        logger.printPacket(LogLevels.INFO, receivePacket);
+        logger.println(LogLevels.INFO, "Server: Packet received:");
+        logger.printPacket(LogLevels.DEBUG, receivePacket);
 
         // attempt to wait 100ms.
         try {
@@ -55,14 +55,14 @@ public class Connection extends ToolThreadClass {
             System.exit(1);
         }
 
-        System.out.println("Server:/n Sending packet:");
-        logger.printPacket(LogLevels.INFO, receivePacket);
+        logger.println(LogLevels.INFO, "Server:/n Sending packet:");
+        logger.printPacket(LogLevels.DEBUG, receivePacket);
 
         //Parse Packet that was received
         Packet packet = null;
         try {
             packet = Packet.parse(receivePacket);
-        }catch (IllegalArgumentException e1){
+        } catch (IllegalArgumentException e1) {
             errorPkt = new ErrorPacket(address, port, 4);
             ifErrorPrintAndExit(errorPkt);
         } catch (Exception e) {
@@ -72,7 +72,6 @@ public class Connection extends ToolThreadClass {
 
         //Setting TID from the first packet received from client side
         ifInvalidTIDPrintAndExit(receivePacket);
-
 
 
         //Check which packet has been given to us
@@ -116,8 +115,8 @@ public class Connection extends ToolThreadClass {
             //Try and receive first Ack Packet
             try {
                 sendReceiveSocket.receive(receivePkt);
-            } catch (SocketTimeoutException e){
-                receivePkt = timeout(prvsPkt,0,sendReceiveSocket);
+            } catch (SocketTimeoutException e) {
+                receivePkt = timeout(prvsPkt, 0, sendReceiveSocket);
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -160,8 +159,8 @@ public class Connection extends ToolThreadClass {
             //Try and receive from Client
             try {
                 sendReceiveSocket.receive(receivedDataPacket);
-            } catch (SocketTimeoutException e){
-                receivedDataPacket =  timeout(prvsPkt,0, sendReceiveSocket);
+            } catch (SocketTimeoutException e) {
+                receivedDataPacket = timeout(prvsPkt, 0, sendReceiveSocket);
             } catch (IOException e) {
                 e.printStackTrace();
                 System.exit(1);
@@ -170,14 +169,14 @@ public class Connection extends ToolThreadClass {
             ifDataPacketErrorPrintAndExit(receivedDataPacket);
             ifInvalidTIDPrintAndExit(receivedDataPacket);
             //Write out where the packet came from
-            System.out.println("Server - Packet received from " + receivedDataPacket.getAddress() + " Port " + receivedDataPacket.getPort());
+            logger.println(LogLevels.INFO, "Server - Packet received from " + receivedDataPacket.getAddress() + " Port " + receivedDataPacket.getPort());
 
             //Get received Data and parse and check for duplecets and valid op code
             DataPacket receivedData = null;
             try {
                 receivedData = (DataPacket) (Packet.parse(receivedDataPacket));
                 if (shouldDiscardPacket(receivedData)) {
-                    System.out.println("[debug]: Dropping packet index " + receivedData.getBlockNumber());
+                    logger.println(LogLevels.WARN, "Dropping packet index " + receivedData.getBlockNumber());
                     continue;
                 }
                 setLastBlockNumber(receivedData.getBlockNumber());
@@ -216,7 +215,7 @@ public class Connection extends ToolThreadClass {
 
         }
         //Finished receiving the file
-        System.out.println("Received file.");
+        logger.println(LogLevels.INFO, "Received file.");
 
     }
 
