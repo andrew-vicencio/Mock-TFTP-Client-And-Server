@@ -16,12 +16,12 @@ import Packet.*;
  */
 public class ErrorSimulator {
 	private boolean newConnection;
-    private DatagramSocket sendReceiveSocket;
+    private DatagramSocket sendReceiveSocket, newTransferIDSocket;
     private DatagramPacket receiveClientPacket, receiveServerPacket, sendPacket;
     private int clientPort, connectionPort;
     private ErrorSimCommandLine cl;
     
-    private int testModeID = 2; // 0 : normal operation; 1 : lose a packet; 2 : delay a packet, 3 : duplicate a packet -- SELECT WHICH ERROR TO SIMULATE
+    private int testModeID = 2; // 0 : normal operation; 1 : lose a packet; 2 : delay a packet, 3 : duplicate a packet, 5 : Invalid transfer ID -- SELECT WHICH ERROR TO SIMULATE
     private int errorPacketID = 0; // 0 : None; 1: 1st WRQ/RRQ, 2: 2nd WRQ/RRQ, 3: 1st Data, 4: 2nd Data, 5: 1st ACK, 6: 2nd Ack -- SELECT WHICH PACKET TO LOSE/DELAY/DUPLICATE
     private int timeDelay = 1000; //How much time between delays or sending duplicates (in MILLISECONDS)
     
@@ -36,6 +36,7 @@ public class ErrorSimulator {
         try {
             //Error simulator will use port 23
             sendReceiveSocket = new DatagramSocket(23);
+            newTransferIDSocket = new DatagramSocket();
         } catch (SocketException se) {
             se.printStackTrace();
             System.exit(1);
@@ -223,6 +224,9 @@ public class ErrorSimulator {
 	            receiveClientPacket = null;
 	            delayAndSendDuplicate(sendPacket);
 	        	break;
+	        
+	        case 5: //
+	        	
 	        }
     		} else {
     			try {
@@ -284,6 +288,10 @@ public class ErrorSimulator {
         }
         
         return false;
+    }
+    
+    public void sendFromInvalidTransferID(DatagramPacket packet){
+    	
     }
 }
 
