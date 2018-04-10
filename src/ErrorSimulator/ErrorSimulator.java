@@ -127,7 +127,7 @@ public class ErrorSimulator {
     public void sendClientPacket() {
         sendPacket = new DatagramPacket(receiveServerPacket.getData(), receiveServerPacket.getLength(),
         receiveServerPacket.getAddress(), clientPort);
-        checkNetworkErrorsAndSend(testModeID, sendPacket);
+        checkNetworkErrorsAndSend(cl.getCurrentMode(), sendPacket);
     }
 
      /**
@@ -137,7 +137,7 @@ public class ErrorSimulator {
         //send to port 69 (server)
         sendPacket = new DatagramPacket(receiveClientPacket.getData(), receiveClientPacket.getLength(),
         receiveClientPacket.getAddress(), 69);
-        checkNetworkErrorsAndSend(testModeID, sendPacket);
+        checkNetworkErrorsAndSend(cl.getCurrentMode(), sendPacket);
         newConnection = false;
     }
 
@@ -147,7 +147,7 @@ public class ErrorSimulator {
     public void sendResponsePacket(){
         sendPacket = new DatagramPacket(receiveClientPacket.getData(), receiveClientPacket.getLength(),
         receiveClientPacket.getAddress(), connectionPort);
-        checkNetworkErrorsAndSend(testModeID, sendPacket);
+        checkNetworkErrorsAndSend(cl.getCurrentMode(), sendPacket);
     }
     
     public void delay(){
