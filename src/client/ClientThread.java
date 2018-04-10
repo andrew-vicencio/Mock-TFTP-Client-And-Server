@@ -41,6 +41,7 @@ public class ClientThread extends ToolThreadClass {
             this.write = write;
             this.fileName = filename;
             this.port = port;
+            this.ogPort = port;
             sendPacket = null;
             this.address = address;
             this.cl = cl;
@@ -64,6 +65,9 @@ public class ClientThread extends ToolThreadClass {
     //TODO: add in host from commandline
     public ClientThread(boolean write, String filename, int port) throws UnknownHostException {
         this(write, filename, InetAddress.getLocalHost(), port, null);
+    }
+    public ClientThread(boolean write, String filename, int port, InetAddress address) throws UnknownHostException {
+        this(write, filename, address, port, null);
     }
 
 
