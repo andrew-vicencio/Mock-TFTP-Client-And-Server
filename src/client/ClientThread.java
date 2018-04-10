@@ -41,6 +41,7 @@ public class ClientThread extends ToolThreadClass {
             this.write = write;
             this.fileName = filename;
             this.port = port;
+            this.ogPort = port;
             sendPacket = null;
             this.address = address;
             this.cl = cl;
