@@ -32,14 +32,24 @@ public class ErrorSimCommandLine extends CommandLine {
 				System.out.print("0: Normal Operations (i.e. Choosing packets to be lost/duplicated/delayed.)\n");
 				break;
 			case 1:
-				System.out.print("1: Error code 4 - Wrong TFTP Operation.\n");
+				System.out.print("1: Lose a packet.\n");
 				break;
 			case 2:
-				System.out.print("2: Wrong mode.\n");
+				System.out.print("2: Delay a packet.\n");
 				break;
+            case 3:
+                System.out.print("3: Duplicate Packet.\n");
+                break;
+           /* case 4:
+                System.out.print("4: Invalid TFTP packet.\n");
+                break;*/
+            case 5:
+                System.out.print("5: Invalid transfer ID.\n");
+                break;
+
 		}
 		
-		print("What mode would you like to operate in? (0, 1, 2)");
+		print("What mode would you like to operate in? (0, 1, 2, 3, 5)");
 		String mode = in.next();
 		
 		switch(mode) {
@@ -52,6 +62,12 @@ public class ErrorSimCommandLine extends CommandLine {
 			case "2":
 				interpretTwo();
 				break;
+            case "3":
+                interpretThree();
+                break;
+            case "5":
+                interpretFive();
+                break;
 			default:
 				print("This mode is invalid. Please try again.");
 				return;
@@ -129,18 +145,30 @@ public class ErrorSimCommandLine extends CommandLine {
 	private void interpretOne() {
 		currentMode = 1;
 	}
+    private void interpretTwo() {
+        currentMode = 2;
+    }
 	
-	private void interpretTwo() {
-		currentMode = 2;
-	}
+	private void interpretThree() {
+        currentMode = 3;
+    }
+    private void interpretFour() {
+        currentMode = 4;
+    }
+    private void interpretFive() {
+        currentMode = 5;
+    }
+
 
 	@Override
 	public void helpCommand() {
 		print("Follow the prompts.");
 		System.out.print("Supported modes are:\n"
-				+ "0: Normal Operations (i.e. Choosing packets to be lost/duplicated/delayed.)\n"
-				+ "1: Error code 4 - Wrong TFTP Operation.\n"
-				+ "2: Wrong mode.\n");
+				+ "0: Normal Operations.\n"
+				+ "1: Lose a Packet.\n"
+				+ "2: Delay a Packet."
+                + "3: Duplicate a Packet"
+                + "5: Invalid TFTP Packet\n");
 		print("Valid commands for Q2 are: data, ack, err, read, write");
 		print("Valid commands for Q3 are integers less than 5.");
 	}
