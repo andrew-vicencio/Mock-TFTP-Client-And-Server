@@ -14,6 +14,10 @@ public class Logger {
         filter = new Filter(logLevel);
     }
 
+    public void setLogLevel(LogLevels logLevel) {
+        filter.setLogLevel(logLevel);
+    }
+
     /**
      * @param logLevel
      * @param datagramPacket

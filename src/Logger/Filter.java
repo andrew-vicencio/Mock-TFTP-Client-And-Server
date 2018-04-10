@@ -1,13 +1,17 @@
 package Logger;
 
 public class Filter {
-    LogLevels printLogLevel;
+    private LogLevels printLogLevel;
 
     /**
      * @param printLogLevel
      */
     Filter(LogLevels printLogLevel) {
         this.printLogLevel = printLogLevel;
+    }
+
+    public void setLogLevel(LogLevels logLevel) {
+        printLogLevel = logLevel;
     }
 
     /**
