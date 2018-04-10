@@ -3,6 +3,7 @@ package ErrorSimulator;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
+import java.net.InetAddress;
 import java.net.SocketException;
 import Packet.*;
 
@@ -15,10 +16,11 @@ import Packet.*;
  * Processes one client request at a time
  */
 public class ErrorSimulator {
-	private boolean newConnection;
     private DatagramSocket sendReceiveSocket, newTransferIDSocket;
+	private boolean newConnection, gotServerAdress = false, gotClientAddress = false;
     private DatagramPacket receiveClientPacket, receiveServerPacket, sendPacket;
     private int clientPort, connectionPort;
+    private InetAddress clientAddress, serverAddress;
     private ErrorSimCommandLine cl;
     
     private int testModeID = 2; // 0 : normal operation; 1 : lose a packet; 2 : delay a packet, 3 : duplicate a packet, 5 : Invalid transfer ID -- SELECT WHICH ERROR TO SIMULATE
@@ -80,7 +82,10 @@ public class ErrorSimulator {
             e.printStackTrace();
             System.exit(1);
         }
-        
+        if(!gotClientAddress){
+        clientAddress = receiveClientPacket.getAddress();
+        gotClientAddress = true;
+        }
         Packet pkt = null;
         try {
         	pkt = Packet.parse(receiveClientPacket);
@@ -110,6 +115,10 @@ public class ErrorSimulator {
         } catch (IOException e) {
             e.printStackTrace();
             System.exit(1);
+        }
+        if(!gotServerAdress){
+            gotServerAdress = true;
+            serverAddress = receiveServerPacket.getAddress();
         }
 
         System.out.println("ErrorSimulator: Received packet from server:");
