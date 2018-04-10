@@ -1,6 +1,7 @@
 package client;
 
 import java.io.IOException;
+import java.net.InetAddress;
 
 import tools.CommandLine;
 
@@ -27,18 +28,34 @@ public class ClientCommandLine extends CommandLine {
 		print("What file would you like to " + write + "?");
 		String fileNameIn = in.next();
 		
-		if (write.equalsIgnoreCase("exit")) {
+		if (fileNameIn.equalsIgnoreCase("exit")) {
 				System.exit(1);
 		}
+
+
+		print("What address would you like to talk too? type local for local adress");
+        String address = in.next();
+
+        if (address.equalsIgnoreCase("exit")) {
+            System.exit(1);
+        }
 
 		int port = 69;
 		if (isTest()) {
 			port = 23;
 		}
-			
+
+		//Utilizied to change for local host
         try {
-            Thread thread = new Thread(new ClientThread(writeBool, fileNameIn, port), "Client");
-            thread.start();
+			if(address.equalsIgnoreCase("local")){
+                Thread thread = new Thread(new ClientThread(writeBool, fileNameIn, port), "Client");
+                thread.start();
+            }else {
+                Thread thread = new Thread(new ClientThread(writeBool, fileNameIn, port, InetAddress.getByName(address)), "Client");
+                thread.start();
+            }
+
+
         } catch (IOException e) {
             print("Error: Client thread not created successfully.");
             e.printStackTrace();
