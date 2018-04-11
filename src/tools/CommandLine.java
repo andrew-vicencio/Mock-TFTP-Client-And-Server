@@ -37,7 +37,7 @@ public abstract class CommandLine extends Thread { //TODO: Does not need to exte
 		l = new Logger(LogLevels.ALL);
 	}
 	
-	public abstract void interpret();
+	public abstract void interpret(String[] tokens);
 	
 	public abstract void helpCommand();
 
@@ -165,10 +165,11 @@ public abstract class CommandLine extends Thread { //TODO: Does not need to exte
 			if (Arrays.asList(token).contains("help")) {
 				helpCommand();
 			}
+
+            interpret(token);
 			
 			if (Arrays.asList(token).contains("exit")) {
-				in.close();
-				System.exit(1);
+				exit=true;
 			}
 			
 			interpret();

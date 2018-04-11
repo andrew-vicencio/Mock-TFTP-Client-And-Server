@@ -13,16 +13,18 @@ import tools.CommandLine;
  */
 public class ServerCommandLine extends CommandLine {
 	private Listener listen;
-	public ServerCommandLine(Listener listen) {
+	private Thread thread;
+	public ServerCommandLine(Listener listen, Thread thread) {
 		super("Server");
 		this.listen = listen;
+		this.thread = thread;
 	}
 
-    /**
-     * Not needed, used to interpret input for specific operations
-     */
-    @Override
-	public void interpret() {
+	@Override
+	public void interpret(String[] tokens) {
+	    if(Arrays.asList(tokens).contains("exit")){
+	        listen.interrupt();
+        }
 	}
 
     /**
