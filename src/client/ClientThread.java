@@ -166,6 +166,8 @@ public class ClientThread extends ToolThreadClass {
                     DataPacket dataPacket = (DataPacket) pkt;
                     if (shouldDiscardPacket(dataPacket)) {
                         logger.println(LogLevels.WARN, "Dropping packet index " + dataPacket.getBlockNumber());
+
+                        sendACKPacketReadRequest(blockNumber);
                         continue;
                     }
                     setLastBlockNumber(dataPacket.getBlockNumber());
@@ -182,20 +184,7 @@ public class ClientThread extends ToolThreadClass {
             }
 
             //Send Response Packet to server
-            try {
-
-                sendPacket = (new AcknowledgementPacket(address, port, blockNumber)).toDataGramPacket();
-                prvsPkt = sendPacket;
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-
-            try {
-                Thread.sleep(5);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-            send(sendPacket);
+           sendACKPacketReadRequest(blockNumber);
 
             //Check if file transhpher is complete
             if (receivedData.length < 512) {
@@ -204,6 +193,22 @@ public class ClientThread extends ToolThreadClass {
 
         }
 
+    }
+
+    public void sendACKPacketReadRequest(int blockNumber){
+        try {
+            sendPacket = (new AcknowledgementPacket(address, port, blockNumber)).toDataGramPacket();
+            prvsPkt = sendPacket;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        try {
+            Thread.sleep(5);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        send(sendPacket);
     }
 
 
