@@ -21,8 +21,8 @@ public class ServerCommandLine extends CommandLine {
 	}
 
 	@Override
-	public void interpret(String[] tokens) {
-	    if(Arrays.asList(tokens).contains("exit")){
+	public void interpret() {
+	    if(Arrays.asList(token).contains("exit")){
 	        listen.interrupt();
         }
 	}

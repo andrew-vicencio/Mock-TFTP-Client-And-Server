@@ -24,8 +24,9 @@ public abstract class CommandLine extends Thread { //TODO: Does not need to exte
 	protected Scanner in;
 	private String name;
 	private Logger l;
-	
-	/**
+	protected String[] token;
+
+    /**
 	 * 
 	 */
 	public CommandLine(String name) {
@@ -37,7 +38,7 @@ public abstract class CommandLine extends Thread { //TODO: Does not need to exte
 		l = new Logger(LogLevels.ALL);
 	}
 	
-	public abstract void interpret(String[] tokens);
+	public abstract void interpret();
 	
 	public abstract void helpCommand();
 
@@ -139,17 +140,16 @@ public abstract class CommandLine extends Thread { //TODO: Does not need to exte
 		while(!exit) {
 		    //Option2
 		    //Add action for after seting test to reset test type test again
-
 			print(name + " Command line ready.");
 			print("Verbose: " + verbose);
 			print("Test: " + test);
 			print("[--verbose], [--test], [HELP], [EXIT], or [CONTINUE]");
-            String input = "";
+			String input = "";
 			while(input.isEmpty()){
                 input = in.nextLine();
 			}
 			input = input.toLowerCase();			//User input to lower case
-			String[] token = input.split("\\s");	//Input split into tokens
+			token = input.split("\\s");	//Input split into tokens
 			
 			//Checks for verbose flag change
 			if (Arrays.asList(token).contains("--verbose") || Arrays.asList(token).contains("-v")) {
@@ -165,8 +165,6 @@ public abstract class CommandLine extends Thread { //TODO: Does not need to exte
 			if (Arrays.asList(token).contains("help")) {
 				helpCommand();
 			}
-
-            interpret(token);
 			
 			if (Arrays.asList(token).contains("exit")) {
 				exit=true;

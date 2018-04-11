@@ -14,7 +14,7 @@ public class ClientCommandLine extends CommandLine {
     }
 
 	@Override
-	public void interpret(String[] tokens) {
+	public void interpret() {
 		boolean writeBool = false;
 		print("Would you like to read or write?");
 		String write = in.next();

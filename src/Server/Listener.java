@@ -35,7 +35,6 @@ public class Listener extends Thread {
      */
     public void listen(int port) throws InterruptedException {
         try {
-            System.out.println("2"); //TODO: remove
             receiveSocket = new DatagramSocket(port);
         } catch (SocketException se) {
             se.printStackTrace();
@@ -53,7 +52,6 @@ public class Listener extends Thread {
     @Override
     public void run() {
         while (!stopRequested) {
-            System.out.println("1"); //TODO: remove
             try {
                 listen(69);
             } catch (InterruptedException ie) {
@@ -79,9 +77,7 @@ public class Listener extends Thread {
 
         try {
             logger.println(LogLevels.INFO, "Waiting...");
-            System.out.println("3"); //TODO: remove
             receiveSocket.receive(receivePacket);
-            System.out.println("4"); //TODO: remove
         } catch (InterruptedIOException e) {
             System.out.println("Interrupt");
             throw new InterruptedException();
@@ -95,7 +91,6 @@ public class Listener extends Thread {
         }
 
         try {
-            System.out.println("5");
             Thread thread = new Thread(new Connection(logger, receivePacket), "Server Connection");
             thread.start();
         } catch (Exception e) {
