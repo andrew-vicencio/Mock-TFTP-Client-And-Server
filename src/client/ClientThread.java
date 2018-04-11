@@ -69,9 +69,6 @@ public class ClientThread extends ToolThreadClass {
     public ClientThread(boolean write, String filename, int port, InetAddress address) throws UnknownHostException {
         this(write, filename, address, port, null, null);
     }
-    public ClientThread(boolean write, String filename, int port, InetAddress address) throws UnknownHostException {
-        this(write, filename, address, port, null);
-    }
 
 
     /**
