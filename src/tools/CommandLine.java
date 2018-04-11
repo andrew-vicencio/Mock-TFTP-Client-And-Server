@@ -93,11 +93,17 @@ public abstract class CommandLine extends Thread { //TODO: Does not need to exte
 	public void run() { //TODO: Make quit handel exiting server and
         //TODO: Make this class for all mains for exiting
 		while(!exit) {
+		    //Option2
+		    //Add action for after seting test to reset test type test again
+
 			print(name + " Command line ready.");
 			print("Verbose: " + verbose);
 			print("Test: " + test);
 			print("[--verbose], [--test], [HELP], [EXIT], or [CONTINUE]");
-			String input = in.nextLine();				//User input
+            String input = "";
+			while(input.isEmpty()){
+                input = in.nextLine();
+			}
 			input = input.toLowerCase();			//User input to lower case
 			String[] token = input.split("\\s");	//Input split into tokens
 			

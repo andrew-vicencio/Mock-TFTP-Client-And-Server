@@ -39,7 +39,12 @@ public class ClientCommandLine extends CommandLine {
         if (address.equalsIgnoreCase("exit")) {
             System.exit(1);
         }
-
+        /*option 1
+        int port = 23;
+		if (isTest()) {
+			port = 69;
+		}
+        */
 		int port = 69;
 		if (isTest()) {
 			port = 23;
