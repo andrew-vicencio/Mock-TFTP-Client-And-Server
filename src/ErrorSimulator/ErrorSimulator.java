@@ -5,8 +5,6 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketException;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import Packet.*;
@@ -20,14 +18,11 @@ import Packet.*;
  * Processes one client request at a time
  */
 public class ErrorSimulator {
-    private DatagramSocket sendReceiveSocket, newTransferIDSocket;
-    private boolean newConnection, gotServerAddress = false, gotClientAddress = false;
-    private DatagramPacket receiveClientPacket, receiveServerPacket, sendPacket;
-    private int clientPort, connectionPort;
+    private DatagramSocket sendReceiveSocket;
+    private boolean newConnection, gotServerPort = false, gotClientPort = false;
+    private int clientPort, serverPort;
     private InetAddress clientAddress, serverAddress;
     private ErrorSimCommandLine cl;
-    private int testModeID = 2; // 0 : normal operation; 1 : lose a packet; 2 : delay a packet, 3 : duplicate a packet, 5 : Invalid transfer ID -- SELECT WHICH ERROR TO SIMULATE
-    private int errorPacketID = 0; // 0 : None; 1: 1st WRQ/RRQ, 2: 2nd WRQ/RRQ, 3: 1st Data, 4: 2nd Data, 5: 1st ACK, 6: 2nd Ack -- SELECT WHICH PACKET TO LOSE/DELAY/DUPLICATE
 
     private int RRQCount = 0;
     private int dataCount = 0;
@@ -40,7 +35,6 @@ public class ErrorSimulator {
         try {
             //Error simulator will use port 23
             sendReceiveSocket = new DatagramSocket(23);
-            newTransferIDSocket = new DatagramSocket();
         } catch (SocketException se) {
             se.printStackTrace();
             System.exit(1);
@@ -54,15 +48,10 @@ public class ErrorSimulator {
      * packets between the client and server
      */
     public void start() {
+        this.receiveFirstPacket();
+
         while (true) {
-            this.receiveClientPacket();
-            if (newConnection) {
-                this.sendServerPacket();
-            } else {
-                this.sendResponsePacket();
-            }
-            this.receiveServerPacket();
-            this.sendClientPacket();
+            this.receiveSubsequentPackets();
         }
     }
 
@@ -73,23 +62,19 @@ public class ErrorSimulator {
     /**
      *
      */
-    public void receiveClientPacket() {
+    public void receiveFirstPacket() {
         byte data[] = new byte[522];
-        receiveClientPacket = new DatagramPacket(data, data.length);
+        DatagramPacket receivedPacket = new DatagramPacket(data, data.length);
 
         try {
-            sendReceiveSocket.receive(receiveClientPacket);
+            sendReceiveSocket.receive(receivedPacket);
         } catch (IOException e) {
             e.printStackTrace();
             System.exit(1);
         }
-        if (!gotClientAddress) {
-            clientAddress = receiveClientPacket.getAddress();
-            gotClientAddress = true;
-        }
         Packet pkt = null;
         try {
-            pkt = Packet.parse(receiveClientPacket);
+            pkt = Packet.parse(receivedPacket);
         } catch (Exception e) {
             System.out.println("Invalid packet");
         } finally {
@@ -99,65 +84,49 @@ public class ErrorSimulator {
         }
 
         System.out.println("ErrorSimulator: Received packet from client:");
-        System.out.println("From host: " + receiveClientPacket.getAddress());
-        System.out.println("Host port: " + receiveClientPacket.getPort() + "\n");
-        clientPort = receiveClientPacket.getPort();
+        System.out.println("From host: " + receivedPacket.getAddress());
+        System.out.println("Host port: " + receivedPacket.getPort() + "\n");
+        clientPort = receivedPacket.getPort();
+
+        DatagramPacket sendPacket = new DatagramPacket(receivedPacket.getData(), receivedPacket.getLength(),
+                receivedPacket.getAddress(), 69);
+        checkNetworkErrorsAndSend(sendPacket);
 
     }
 
     /**
      * receiveServerPacket is used to receive packet from server
      */
-    public void receiveServerPacket() {
+    public void receiveSubsequentPackets() {
         byte data[] = new byte[522];
-        receiveServerPacket = new DatagramPacket(data, data.length);
+        DatagramPacket receivedPacket = new DatagramPacket(data, data.length);
         try {
-            sendReceiveSocket.receive(receiveServerPacket);
+            sendReceiveSocket.receive(receivedPacket);
         } catch (IOException e) {
             e.printStackTrace();
             System.exit(1);
         }
-        if (!gotServerAddress) {
-            gotServerAddress = true;
-            serverAddress = receiveServerPacket.getAddress();
+
+        if (!gotServerPort) {
+            gotServerPort = true;
+            serverPort = receivedPacket.getPort();
         }
 
         System.out.println("ErrorSimulator: Received packet from server:");
-        System.out.println("From host: " + receiveServerPacket.getAddress());
-        System.out.println("Host port: " + receiveServerPacket.getPort() + "\n");
-        connectionPort = receiveServerPacket.getPort();
-    }
+        System.out.println("From host: " + receivedPacket.getAddress());
+        System.out.println("Host port: " + receivedPacket.getPort() + "\n");
+        int sourcePort = receivedPacket.getPort();
 
-    /**
-     * sendClientPacket is used to send packet from server to client
-     */
-    /**
-     *
-     */
-    public void sendClientPacket() {
-        sendPacket = new DatagramPacket(receiveServerPacket.getData(), receiveServerPacket.getLength(),
-                receiveServerPacket.getAddress(), clientPort);
-        checkNetworkErrorsAndSend(sendPacket);
-    }
+        if (sourcePort == clientPort) {
+            DatagramPacket sendPacket = new DatagramPacket(receivedPacket.getData(), receivedPacket.getLength(),
+                    receivedPacket.getAddress(), serverPort);
+            checkNetworkErrorsAndSend(sendPacket);
+        } else {
+            DatagramPacket sendPacket = new DatagramPacket(receivedPacket.getData(), receivedPacket.getLength(),
+                    receivedPacket.getAddress(), clientPort);
+            checkNetworkErrorsAndSend(sendPacket);
+        }
 
-    /**
-     * sendServerPacket is used to send packet to server
-     */
-    public void sendServerPacket() {
-        //send to port 69 (server)
-        sendPacket = new DatagramPacket(receiveClientPacket.getData(), receiveClientPacket.getLength(),
-                receiveClientPacket.getAddress(), 69);
-        checkNetworkErrorsAndSend(sendPacket);
-        newConnection = false;
-    }
-
-    /**
-     * sendServerPacket is used to send packet to connection's random port
-     */
-    public void sendResponsePacket() {
-        sendPacket = new DatagramPacket(receiveClientPacket.getData(), receiveClientPacket.getLength(),
-                receiveClientPacket.getAddress(), connectionPort);
-        checkNetworkErrorsAndSend(sendPacket);
     }
 
     public void delay(int timeDelay) {
@@ -227,6 +196,7 @@ public class ErrorSimulator {
             } else {
                 DatagramSocket newSocket = new DatagramSocket();
                 newSocket.send(packet.toDataGramPacket());
+                newSocket.close();
                 System.out.println("Sending packet from wrong port");
             }
         } catch (IOException e) {
