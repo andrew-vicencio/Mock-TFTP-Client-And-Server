@@ -1,16 +1,29 @@
 package tools;
 
+import Logger.LogLevels;
+
 import java.io.*;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import Logger.*;
 
+/**
+ * Used to handle and make all classes implement handling user input
+ *
+ * @author Andrew V.
+ * @since 2018
+ * @version 1.0
+ */
 public abstract class CommandLine extends Thread { //TODO: Does not need to extend thread
 	private final boolean VERBOSE_DEFAULT = true;
-	private final boolean TEST_DEFAULT = true;
+	private final boolean TEST_DEFAULT = false;
 	private boolean exit;
 	private boolean verbose;
 	private boolean test;
 	protected Scanner in;
 	private String name;
+	private Logger l;
 	
 	/**
 	 * 
@@ -21,6 +34,7 @@ public abstract class CommandLine extends Thread { //TODO: Does not need to exte
 		test = true;
 		in = new Scanner(new BufferedInputStream(System.in));
 		this.name = name;
+		l = new Logger(LogLevels.ALL);
 	}
 	
 	public abstract void interpret();
@@ -83,6 +97,36 @@ public abstract class CommandLine extends Thread { //TODO: Does not need to exte
 	public synchronized void print(String str) {
 		System.out.println(str);
 	}
+
+	public void checkFlags(String str){
+	    System.out.println(str);
+	    Pattern p = Pattern.compile("(?:\\s(?:--|-))(\\w+)(\\s\\w+)?");
+	    Matcher m = p.matcher(str);
+	    while(m.find()){
+	        for (int i = 0; i <= m.groupCount(); i++){
+	            if (m.group(i).equalsIgnoreCase("logger")) {
+                    l.setLogLevel(getStringWithinEnum(LogLevels.class, m.group(i + 1).toUpperCase()));
+                }
+
+                if (m.group(i).toUpperCase().indexOf("v") != -1){
+	                toggleVerbose();
+                }
+
+                if(m.group(i).toUpperCase().indexOf("t") != -1){
+	                toggleTest();
+                }
+            }
+        }
+
+    }
+
+    private <E extends Enum<E>> E getStringWithinEnum(Class<E> enumType, String userInput) {
+        try {
+            return Enum.valueOf(enumType, userInput);
+        } catch (Error error) {
+            return getStringWithinEnum(enumType, userInput);
+        }
+    }
 	
 	/**
 	 * run is the main logic
@@ -122,8 +166,6 @@ public abstract class CommandLine extends Thread { //TODO: Does not need to exte
 			}
 			
 			interpret();
-			test = TEST_DEFAULT;
-			verbose = VERBOSE_DEFAULT;
 		}
 		in.close();
 	}

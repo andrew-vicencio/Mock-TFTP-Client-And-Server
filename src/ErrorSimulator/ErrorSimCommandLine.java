@@ -1,196 +1,105 @@
 package ErrorSimulator;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import tools.*;
 
+import static java.lang.Integer.parseInt;
+
 public class ErrorSimCommandLine extends CommandLine {
-	private int RRQ;
-	private String packetType;
-	private int packetNum;
-	private int errorCode;
-	private int delayAmt;
-	private int currentMode;
+    private List<PacketError> errors;
 
-	private final String[] types = {"data", "ack", "err", "read", "write"};
-	
-	public ErrorSimCommandLine() {
-		super("Error Simulator");
-		setErrorCode(0);
-		RRQ = 0;
-		packetType = null;
-		errorCode = 0;
-		delayAmt = 0;
-		currentMode = 0;
-	}
+    public ErrorSimCommandLine() {
+        super("Error Simulator");
+        errors = new ArrayList<>();
+    }
 
-	@Override
-	public void interpret() {
-		System.out.print("Current mode ");
-		switch(currentMode) {
-			case 0:
-				System.out.print("0: Normal Operations (i.e. Choosing packets to be lost/duplicated/delayed.)\n");
-				break;
-			case 1:
-				System.out.print("1: Error code 4 - Wrong TFTP Operation.\n");
-				break;
-			case 2:
-				System.out.print("2: Wrong mode.\n");
-				break;
-		}
-		
-		print("What mode would you like to operate in? (0, 1, 2)");
-		String mode = in.next();
-		
-		switch(mode) {
-			case "0":
-				interpretZero();
-				break;
-			case "1":
-				interpretOne();
-				break;
-			case "2":
-				interpretTwo();
-				break;
-			default:
-				print("This mode is invalid. Please try again.");
-				return;
-		}
-	}
-	
-	private void interpretZero() {
-		currentMode = 0;
-		print("Q1: Would you like to tamper with a [read] or [write] request?");
-		String write = in.next();
-		
-		if (write.equalsIgnoreCase("read")){
-			RRQ = 1;
-		} else if(write.equalsIgnoreCase("write")) {
-			RRQ = -1;
-		} else if (write.equalsIgnoreCase("exit")) {
-			System.exit(1);
-		}	else {
-			print("Invalid command. PLease try again.");
-			return;
-		}
-		
-		print("Q2: What packet type would you like to tamper with? (i.e. DATA, ACK, etc.");
-		String type = in.next();
-		
-		if (!Arrays.asList(types).contains(type.toLowerCase())) {
-			print("Invalid Packet type. Please try again.");
-			return;
-		} else if (write.equalsIgnoreCase("exit")) {
-			System.exit(1);
-		}
-		
-		print("Q3: Which packet would you like to choose? (i.e. Choosing DATA and 3 chooses the 3rd DATA packet.)");
-		String num = in.next();
-		
-		if (write.equalsIgnoreCase("exit")) {
-				System.exit(1);
-		}
-		
-		try {
-			packetNum = Integer.parseInt(num);
-		} catch (Exception e) {
-			packetNum = 3;
-			print("Invalid delay amount. Default amount (3) will be used.");
-		}
-		
-		print("Q4: Would you like to [lose], [delay], or [duplicate] this packet?");
-		String errCode = in.next();
-		
-		if (errCode.equalsIgnoreCase("lose")) {
-			errorCode = 1;
-		} else if (errCode.equalsIgnoreCase("delay")) {
-			errorCode = 2;
-			print("Q5: How long would you like to delay (in seconds)?");
-			String delay = in.next();
-			try {
-				delayAmt = Integer.parseInt(delay);
-			} catch (Exception e) {
-				delayAmt = 2;
-				print("Invalid delay amount. Default amount (2s) will be used.");
-			}
-			if (delayAmt >= 5) {
-				delayAmt = 2;
-				print("Delay amount may be too long. File transfer may have already completed."
-						+ "\nDefault amount (2s) will be used.");
-			}
-		} else if (errCode.equalsIgnoreCase("duplicate")) {
-			errorCode = 3;
-		} else if (write.equalsIgnoreCase("exit")) {
-			System.exit(1);
-		}
+    public List<PacketError> getErrors() {
+        return errors;
+    }
 
-	}
-	
-	private void interpretOne() {
-		currentMode = 1;
-	}
-	
-	private void interpretTwo() {
-		currentMode = 2;
-	}
+    private <E extends Enum<E>> E getInputWithinEnum(Class<E> enumType) {
+        String userInput = in.next();
 
-	@Override
-	public void helpCommand() {
-		print("Follow the prompts.");
-		System.out.print("Supported modes are:\n"
-				+ "0: Normal Operations (i.e. Choosing packets to be lost/duplicated/delayed.)\n"
-				+ "1: Error code 4 - Wrong TFTP Operation.\n"
-				+ "2: Wrong mode.\n");
-		print("Valid commands for Q2 are: data, ack, err, read, write");
-		print("Valid commands for Q3 are integers less than 5.");
-	}
+        try {
+            return Enum.valueOf(enumType, userInput);
+        } catch (IllegalArgumentException error) {
+            return getInputWithinEnum(enumType);
+        }
+    }
 
-	public int getRRQ() {
-		return RRQ;
-	}
+    private int getInputInt() {
+        String userInput = in.next();
 
-	public void setRRQ(int rRQ) {
-		RRQ = rRQ;
-	}
+        try {
+            return parseInt(userInput);
+        } catch (NumberFormatException error) {
+            print("Please enter a valid number");
+            return getInputInt();
+        }
+    }
 
-	public String getPacketType() {
-		return packetType;
-	}
+    private char getInputChar() {
+        String userInput = in.next();
 
-	public void setPacketType(String packetType) {
-		this.packetType = packetType;
-	}
+        try {
+            int inputNum = parseInt(userInput);
+            if (inputNum < 0 || inputNum > 255) {
+                print("Number is outside of bounds for a byte");
+                return getInputChar();
+            }
 
-	public int getErrorCode() {
-		return errorCode;
-	}
+            return (char) inputNum;
+        } catch (NumberFormatException error) {
+            print("Please enter a valid number");
+            return getInputChar();
+        }
+    }
 
-	public void setErrorCode(int errorCode) {
-		this.errorCode = errorCode;
-	}
+    @Override
+    public void interpret() {
+        PacketError packetError = new PacketError();
 
-	public int getDelayAmt() {
-		return delayAmt;
-	}
+        print("What packet type would you like to modify?");
+        print("One of " + Stream.of(PacketType.values()).map(Enum::toString).collect(Collectors.joining(", ")));
+        packetError.setPacketType(getInputWithinEnum(PacketType.class));
 
-	public void setDelayAmt(int delayAmt) {
-		this.delayAmt = delayAmt;
-	}
-	
-	public int getPacketNum() {
-		return packetNum;
-	}
+        print("What would you like to do to it? ");
+        print("One of " + Stream.of(ErrorOperation.values()).map(Enum::toString).collect(Collectors.joining(", ")));
+        packetError.setPacketOperation(getInputWithinEnum(ErrorOperation.class));
 
-	public void setPacketNum(int packetNum) {
-		this.packetNum = packetNum;
-	}
+        print("How many packets of the given type should we ignore before we modify one?");
+        packetError.setPacketIndex(getInputInt());
 
-	public int getCurrentMode() {
-		return currentMode;
-	}
+        if (packetError.getPacketOperation().equals(ErrorOperation.DELAY)) {
+            print("How Long should we delay the packet? (ms)");
+            packetError.setPacketDelay(getInputInt());
+        }
 
-	public void setCurrentMode(int currentMode) {
-		this.currentMode = currentMode;
-	}
+        if (packetError.getPacketOperation().equals(ErrorOperation.MODIFY)) {
+            print("How would you like to modify a byte within the packet?");
+            print("One of " + Stream.of(PacketModification.values()).map(Enum::toString).collect(Collectors.joining(", ")));
+            packetError.setPacketModification(getInputWithinEnum(PacketModification.class));
+
+            print("How far into the packet would you like to modify a byte (zero indexed)?");
+            packetError.setPacketModificationIndex(getInputInt());
+
+            if (packetError.getPacketModification().equals(PacketModification.EDIT)) {
+                print("What would you like the new data to be? ");
+                packetError.setNewData(getInputChar());
+            }
+        }
+
+        errors.add(packetError);
+    }
+
+    @Override
+    public void helpCommand() {
+        print("Follow the prompts.");
+    }
 
 }
