@@ -23,7 +23,7 @@ public abstract class CommandLine extends Thread { //TODO: Does not need to exte
 		this.name = name;
 	}
 	
-	public abstract void interpret();
+	public abstract void interpret(String[] tokens);
 	
 	public abstract void helpCommand();
 
@@ -83,6 +83,14 @@ public abstract class CommandLine extends Thread { //TODO: Does not need to exte
 	public synchronized void print(String str) {
 		System.out.println(str);
 	}
+
+	public void checkFlags(String str){
+
+    }
+
+    public static void main(String[] args){
+
+    }
 	
 	/**
 	 * run is the main logic
@@ -115,15 +123,12 @@ public abstract class CommandLine extends Thread { //TODO: Does not need to exte
 			if (Arrays.asList(token).contains("help")) {
 				helpCommand();
 			}
+
+            interpret(token);
 			
 			if (Arrays.asList(token).contains("exit")) {
-				in.close();
-				System.exit(1);
+				exit=true;
 			}
-			
-			interpret();
-			test = TEST_DEFAULT;
-			verbose = VERBOSE_DEFAULT;
 		}
 		in.close();
 	}

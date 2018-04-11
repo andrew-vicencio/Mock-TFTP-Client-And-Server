@@ -9,7 +9,7 @@ public class Server {
      */
     public static void main(String args[]) {
     	Listener l = new Listener();
-    	ServerCommandLine listen= new ServerCommandLine(l);
+    	ServerCommandLine listen= new ServerCommandLine(l, l);
     	l.start();
     	listen.start();
     }

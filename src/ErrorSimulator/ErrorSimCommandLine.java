@@ -25,7 +25,7 @@ public class ErrorSimCommandLine extends CommandLine {
 	}
 
 	@Override
-	public void interpret() {
+	public void interpret(String[] tokens) {
 		System.out.print("Current mode ");
 		switch(currentMode) {
 			case 0:
