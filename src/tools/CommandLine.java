@@ -1,16 +1,29 @@
 package tools;
 
+import Logger.LogLevels;
+
 import java.io.*;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import Logger.*;
 
+/**
+ * Used to handle and make all classes implement handling user input
+ *
+ * @author Andrew V.
+ * @since 2018
+ * @version 1.0
+ */
 public abstract class CommandLine extends Thread { //TODO: Does not need to extend thread
 	private final boolean VERBOSE_DEFAULT = true;
-	private final boolean TEST_DEFAULT = true;
+	private final boolean TEST_DEFAULT = false;
 	private boolean exit;
 	private boolean verbose;
 	private boolean test;
 	protected Scanner in;
 	private String name;
+	private Logger l;
 	
 	/**
 	 * 
@@ -21,6 +34,7 @@ public abstract class CommandLine extends Thread { //TODO: Does not need to exte
 		test = true;
 		in = new Scanner(new BufferedInputStream(System.in));
 		this.name = name;
+		l = new Logger(LogLevels.ALL);
 	}
 	
 	public abstract void interpret(String[] tokens);
@@ -85,11 +99,33 @@ public abstract class CommandLine extends Thread { //TODO: Does not need to exte
 	}
 
 	public void checkFlags(String str){
+	    System.out.println(str);
+	    Pattern p = Pattern.compile("(?:\\s(?:--|-))(\\w+)(\\s\\w+)?");
+	    Matcher m = p.matcher(str);
+	    while(m.find()){
+	        for (int i = 0; i <= m.groupCount(); i++){
+	            if (m.group(i).equalsIgnoreCase("logger")) {
+                    l.setLogLevel(getStringWithinEnum(LogLevels.class, m.group(i + 1).toUpperCase()));
+                }
+
+                if (m.group(i).toUpperCase().indexOf("v") != -1){
+	                toggleVerbose();
+                }
+
+                if(m.group(i).toUpperCase().indexOf("t") != -1){
+	                toggleTest();
+                }
+            }
+        }
 
     }
 
-    public static void main(String[] args){
-
+    private <E extends Enum<E>> E getStringWithinEnum(Class<E> enumType, String userInput) {
+        try {
+            return Enum.valueOf(enumType, userInput);
+        } catch (Error error) {
+            return getStringWithinEnum(enumType, userInput);
+        }
     }
 	
 	/**
@@ -101,11 +137,17 @@ public abstract class CommandLine extends Thread { //TODO: Does not need to exte
 	public void run() { //TODO: Make quit handel exiting server and
         //TODO: Make this class for all mains for exiting
 		while(!exit) {
+		    //Option2
+		    //Add action for after seting test to reset test type test again
+
 			print(name + " Command line ready.");
 			print("Verbose: " + verbose);
 			print("Test: " + test);
 			print("[--verbose], [--test], [HELP], [EXIT], or [CONTINUE]");
-			String input = in.nextLine();				//User input
+            String input = "";
+			while(input.isEmpty()){
+                input = in.nextLine();
+			}
 			input = input.toLowerCase();			//User input to lower case
 			String[] token = input.split("\\s");	//Input split into tokens
 			
@@ -129,6 +171,8 @@ public abstract class CommandLine extends Thread { //TODO: Does not need to exte
 			if (Arrays.asList(token).contains("exit")) {
 				exit=true;
 			}
+			
+			interpret();
 		}
 		in.close();
 	}

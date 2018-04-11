@@ -5,6 +5,7 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketException;
+import java.util.List;
 
 import Packet.*;
 
@@ -17,17 +18,13 @@ import Packet.*;
  * Processes one client request at a time
  */
 public class ErrorSimulator {
-    private DatagramSocket sendReceiveSocket, newTransferIDSocket;
-    private boolean newConnection, gotServerAdress = false, gotClientAddress = false;
-    private DatagramPacket receiveClientPacket, receiveServerPacket, sendPacket;
-    private int clientPort, connectionPort;
+    private DatagramSocket sendReceiveSocket;
+    private boolean newConnection, gotServerPort = false, gotClientPort = false;
+    private int clientPort, serverPort;
     private InetAddress clientAddress, serverAddress;
     private ErrorSimCommandLine cl;
-    private int testModeID = 2; // 0 : normal operation; 1 : lose a packet; 2 : delay a packet, 3 : duplicate a packet, 5 : Invalid transfer ID -- SELECT WHICH ERROR TO SIMULATE
-    private int errorPacketID = 0; // 0 : None; 1: 1st WRQ/RRQ, 2: 2nd WRQ/RRQ, 3: 1st Data, 4: 2nd Data, 5: 1st ACK, 6: 2nd Ack -- SELECT WHICH PACKET TO LOSE/DELAY/DUPLICATE
-    private int timeDelay = 1000; //How much time between delays or sending duplicates (in MILLISECONDS)
 
-    private int rwCount = 0;
+    private int RRQCount = 0;
     private int dataCount = 0;
     private int ackCount = 0;
 
@@ -38,7 +35,6 @@ public class ErrorSimulator {
         try {
             //Error simulator will use port 23
             sendReceiveSocket = new DatagramSocket(23);
-            newTransferIDSocket = new DatagramSocket();
         } catch (SocketException se) {
             se.printStackTrace();
             System.exit(1);
@@ -53,112 +49,62 @@ public class ErrorSimulator {
      */
     public void start() {
         while (true) {
-            this.receiveClientPacket();
-            if (newConnection) {
-                this.sendServerPacket();
-            } else {
-                this.sendResponsePacket();
-            }
-            this.receiveServerPacket();
-            this.sendClientPacket();
+            this.receivePacket();
         }
-    }
-
-    /**
-     * receiveClientPacket is used to receive packet sent to
-     * port 23 from client
-     */
-    /**
-     *
-     */
-    public void receiveClientPacket() {
-        byte data[] = new byte[522];
-        receiveClientPacket = new DatagramPacket(data, data.length);
-
-        try {
-            sendReceiveSocket.receive(receiveClientPacket);
-        } catch (IOException e) {
-            e.printStackTrace();
-            System.exit(1);
-        }
-        if (!gotClientAddress) {
-            clientAddress = receiveClientPacket.getAddress();
-            gotClientAddress = true;
-        }
-        Packet pkt = null;
-        try {
-            pkt = Packet.parse(receiveClientPacket);
-        } catch (Exception e) {
-            System.out.println("Invalid packet");
-        } finally {
-            if (pkt instanceof ReadPacket || pkt instanceof WritePacket) {
-                newConnection = true;
-            }
-        }
-
-        System.out.println("ErrorSimulator: Received packet from client:");
-        System.out.println("From host: " + receiveClientPacket.getAddress());
-        System.out.println("Host port: " + receiveClientPacket.getPort() + "\n");
-        clientPort = receiveClientPacket.getPort();
-
     }
 
     /**
      * receiveServerPacket is used to receive packet from server
      */
-    public void receiveServerPacket() {
+    public void receivePacket() {
         byte data[] = new byte[522];
-        receiveServerPacket = new DatagramPacket(data, data.length);
+        DatagramPacket receivedPacket = new DatagramPacket(data, data.length);
         try {
-            sendReceiveSocket.receive(receiveServerPacket);
+            sendReceiveSocket.receive(receivedPacket);
         } catch (IOException e) {
             e.printStackTrace();
             System.exit(1);
         }
-        if (!gotServerAdress) {
-            gotServerAdress = true;
-            serverAddress = receiveServerPacket.getAddress();
+
+        boolean newConnection = false;
+        Packet pkt = null;
+        try {
+            pkt = Packet.parse(receivedPacket);
+        } catch (Exception e) {
+            System.out.println("Invalid packet");
+            System.exit(1);
+        }
+
+        if (pkt instanceof ReadPacket || pkt instanceof WritePacket) {
+            newConnection = true;
+            gotServerPort = false;
+            clientPort = receivedPacket.getPort();
+        } else if (!gotServerPort) {
+            gotServerPort = true;
+            serverPort = receivedPacket.getPort();
         }
 
         System.out.println("ErrorSimulator: Received packet from server:");
-        System.out.println("From host: " + receiveServerPacket.getAddress());
-        System.out.println("Host port: " + receiveServerPacket.getPort() + "\n");
-        connectionPort = receiveServerPacket.getPort();
+        System.out.println("From host: " + receivedPacket.getAddress());
+        System.out.println("Host port: " + receivedPacket.getPort() + "\n");
+
+        if (newConnection) {
+            DatagramPacket sendPacket = new DatagramPacket(receivedPacket.getData(), receivedPacket.getLength(),
+                    receivedPacket.getAddress(), 69);
+            checkNetworkErrorsAndSend(sendPacket);
+        } else if (clientPort == receivedPacket.getPort()) {
+            DatagramPacket sendPacket = new DatagramPacket(receivedPacket.getData(), receivedPacket.getLength(),
+                    receivedPacket.getAddress(), serverPort);
+            checkNetworkErrorsAndSend(sendPacket);
+        } else {
+            DatagramPacket sendPacket = new DatagramPacket(receivedPacket.getData(), receivedPacket.getLength(),
+                    receivedPacket.getAddress(), clientPort);
+            checkNetworkErrorsAndSend(sendPacket);
+        }
+
     }
 
-    /**
-     * sendClientPacket is used to send packet from server to client
-     */
-    /**
-     *
-     */
-    public void sendClientPacket() {
-        sendPacket = new DatagramPacket(receiveServerPacket.getData(), receiveServerPacket.getLength(),
-                receiveServerPacket.getAddress(), clientPort);
-        checkNetworkErrorsAndSend(cl.getCurrentMode(), sendPacket);
-    }
-
-    /**
-     * sendServerPacket is used to send packet to server
-     */
-    public void sendServerPacket() {
-        //send to port 69 (server)
-        sendPacket = new DatagramPacket(receiveClientPacket.getData(), receiveClientPacket.getLength(),
-                receiveClientPacket.getAddress(), 69);
-        checkNetworkErrorsAndSend(testModeID, sendPacket);
-        newConnection = false;
-    }
-
-    /**
-     * sendServerPacket is used to send packet to connection's random port
-     */
-    public void sendResponsePacket() {
-        sendPacket = new DatagramPacket(receiveClientPacket.getData(), receiveClientPacket.getLength(),
-                receiveClientPacket.getAddress(), connectionPort);
-        checkNetworkErrorsAndSend(testModeID, sendPacket);
-    }
-
-    public void delay() {
+    public void delay(int timeDelay) {
         try {
             Thread.sleep(timeDelay);
         } catch (InterruptedException e) {
@@ -166,139 +112,165 @@ public class ErrorSimulator {
         }
     }
 
-    public void delayAndSendDuplicate(DatagramPacket packet) {
-        this.delay();
+
+    public void checkNetworkErrorsAndSend(DatagramPacket datagramPacket) {
+        Packet packet;
         try {
-            sendReceiveSocket.send(packet);
+            packet = Packet.parse(datagramPacket);
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.exit(133);
+            return;
+        }
+
+        incrementPacketCounter(packet);
+
+        Packet afterPacket = modifyPacket(cl.getErrors(), packet);
+        if (afterPacket != null) {
+            sendPacket(afterPacket);
+        }
+    }
+
+    private void incrementPacketCounter(Packet packet) {
+        if (packet instanceof ReadPacket || packet instanceof WritePacket) {
+            RRQCount++;
+        } else if (packet instanceof AcknowledgementPacket) {
+            ackCount++;
+        } else if (packet instanceof DataPacket) {
+            dataCount++;
+        }
+    }
+
+    private int getPacketCounter(Packet packet) {
+        if (packet instanceof ReadPacket || packet instanceof WritePacket) {
+            return RRQCount;
+        } else if (packet instanceof AcknowledgementPacket) {
+            return ackCount;
+        } else if (packet instanceof DataPacket) {
+            return dataCount;
+        }
+        return 0;
+    }
+
+    private boolean isPacketOfType(PacketType type, Packet packet) {
+        if (type.equals(PacketType.RRQ)) {
+            return packet instanceof ReadPacket || packet instanceof WritePacket;
+        } else if (type.equals(PacketType.ACK)) {
+            return packet instanceof AcknowledgementPacket;
+        } else if (type.equals(PacketType.DATA)) {
+            return packet instanceof DataPacket;
+        }
+        return false;
+    }
+
+    public void sendPacket(Packet packet) {
+        try {
+            if (packet.getSendPort() == 0) {
+                sendReceiveSocket.send(packet.toDataGramPacket());
+                System.out.println("Sending packet from normal port");
+            } else {
+                DatagramSocket newSocket = new DatagramSocket();
+                newSocket.send(packet.toDataGramPacket());
+                newSocket.close();
+                System.out.println("Sending packet from wrong port");
+            }
         } catch (IOException e) {
             e.printStackTrace();
             System.exit(1);
         }
-        System.out.println("ErrorSimulator: Sending duplicate packet with delay:");
-        System.out.println("To host: " + sendPacket.getAddress());
-        System.out.println("Destination host port: " + sendPacket.getPort() + "\n");
-        receiveClientPacket = null;
+
     }
 
-    public void checkNetworkErrorsAndSend(int testModeID, DatagramPacket packet) {
-        if (isErrorPacket(packet)) {
-            switch (testModeID) {
-                case 0: //No network error
-                    System.out.println("Case 0");
-                    try {
-                        sendReceiveSocket.send(packet);
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                        System.exit(1);
-                    }
+    public Packet modifyPacket(List<PacketError> errors, Packet packet) {
+        Packet afterPacket = packet;
 
-                    System.out.println("ErrorSimulator: Sending packet");
-                    System.out.println("To host: " + sendPacket.getAddress());
-                    System.out.println("Destination host port: " + sendPacket.getPort() + "\n");
-                    receiveClientPacket = null;
-                    break;
-
-                case 1: //Lose a packet
-                    System.out.println("Case 1");
-                    break;
-
-                case 2: //Delay a packet
-                    System.out.println("Case 2");
-                    delay();
-                    try {
-                        sendReceiveSocket.send(sendPacket);
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                        System.exit(1);
-                    }
-
-                    System.out.println("ErrorSimulator: Sending packet with delay:");
-                    System.out.println("To host: " + sendPacket.getAddress());
-                    System.out.println("Destination host port: " + sendPacket.getPort() + "\n");
-                    receiveClientPacket = null;
-                    break;
-
-                case 3: //Duplicate a packet
-                    System.out.println("Case 3");
-                    try {
-                        sendReceiveSocket.send(sendPacket);
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                        System.exit(1);
-                    }
-                    System.out.println("ErrorSimulator: Sending packet before duplicate:");
-                    System.out.println("To host: " + sendPacket.getAddress());
-                    System.out.println("Destination host port: " + sendPacket.getPort() + "\n");
-                    receiveClientPacket = null;
-                    delayAndSendDuplicate(sendPacket);
-                    break;
-
-                case 5: //
-
+        for (PacketError error : errors) {
+            if (!isPacketOfType(error.getPacketType(), packet)) {
+                continue;
             }
-        } else {
-            try {
-                sendReceiveSocket.send(sendPacket);
-            } catch (IOException e) {
-                e.printStackTrace();
-                System.exit(1);
+
+            if (getPacketCounter(packet) != error.getPacketIndex()) {
+                continue;
+            }
+
+            switch (error.getPacketOperation()) {
+                case DELAY:
+                    System.out.println("Delaying packet");
+                    delay(error.getPacketDelay());
+                    break;
+                case LOSE:
+                    System.out.println("Modifying packet");
+                    afterPacket = null;
+                    break;
+                case DUPLICATE:
+                    System.out.println("Duplicating packet");
+                    if (afterPacket != null) {
+                        sendPacket(afterPacket);
+                    }
+                    break;
+                case CHANGETRANSFERID:
+                    System.out.println("Changing transfer id");
+                    if (afterPacket != null) {
+                        packet.setSendPort(2000);
+                    }
+                    break;
+                case MODIFY:
+                    System.out.println("Modifying packet");
+                    if (afterPacket != null) {
+                        afterPacket = modifyPacketData(error, packet);
+                    }
+                    break;
             }
         }
+
+        return afterPacket;
     }
 
-    public boolean isErrorPacket(DatagramPacket receivePacket) {
-        Packet packet;
+    private Packet modifyPacketData(PacketError error, Packet packet) {
+
+        byte[] bytes;
         try {
-            packet = Packet.parse(receivePacket);
-        } catch (Exception e) {
+            bytes = packet.getCacheAwareByteData();
+
+        } catch (IOException e) {
             e.printStackTrace();
-            System.exit(133);
-            return false;
+            System.exit(23);
+            return null;
         }
 
+        int modificationIndex = error.getPacketModificationIndex();
 
-        //Check which packet has been given to us
-        if (packet instanceof ReadPacket || packet instanceof WritePacket) {
-            rwCount++;
-            if (errorPacketID % 2 == 0) {
-                if (rwCount == 2) {
-                    return true;
-                }
-            } else {
-                if (rwCount == 1) {
-                    return true;
-                }
+        switch (error.getPacketModification()) {
+            case REMOVE: {
+
+                byte[] newBytes = new byte[bytes.length - 1];
+
+                System.arraycopy(bytes, 0, newBytes, 0, modificationIndex);
+                System.arraycopy(bytes, modificationIndex + 1, newBytes, modificationIndex, bytes.length - modificationIndex - 1);
+
+                bytes = newBytes;
+                break;
             }
-        } else if (packet instanceof DataPacket) {
-            dataCount++;
-            if (errorPacketID % 2 == 0) {
-                if (dataCount == 2) {
-                    return true;
-                }
-            } else {
-                if (dataCount == 1) {
-                    return true;
-                }
+            case EDIT:
+                bytes[modificationIndex] = error.getNewData();
+                break;
+            case ADD: {
+                byte[] newBytes = new byte[bytes.length + 1];
+
+                System.arraycopy(bytes, 0, newBytes, 0, modificationIndex);
+                System.arraycopy(bytes, modificationIndex, newBytes, modificationIndex + 1, bytes.length - modificationIndex);
+
+                bytes[modificationIndex] = error.getNewData();
+
+                bytes = newBytes;
+                break;
             }
-        } else if (packet instanceof AcknowledgementPacket) {
-            ackCount++;
-            if (ackCount % 2 == 0) {
-                if (rwCount == 2) {
-                    return true;
-                }
-            } else {
-                if (ackCount == 1) {
-                    return true;
-                }
-            }
-        } else {
-            return false;
+
         }
 
-        return false;
-    }
+        packet.cacheByteData(bytes);
 
-    public void sendFromInvalidTransferID(DatagramPacket packet) {
+        return packet;
     }
 }
 

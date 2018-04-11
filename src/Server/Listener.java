@@ -19,8 +19,9 @@ public class Listener extends Thread {
 
     Logger logger;
 
+
     /**
-     *
+     * Constructor to create main logger for server
      */
     public Listener() {
         // initialize a logger with maximum Verboseness
@@ -30,10 +31,6 @@ public class Listener extends Thread {
 
     /**
      * Start a socket on provided port and handles connections.
-     *
-     * @param port
-     */
-    /**
      * @param port
      */
     public void listen(int port) throws InterruptedException {
@@ -50,6 +47,10 @@ public class Listener extends Thread {
         }
     }
 
+    /**
+     * Starts the thread to listen on port 69
+     */
+    @Override
     public void run() {
         while (!stopRequested) {
             System.out.println("1"); //TODO: remove
@@ -70,9 +71,6 @@ public class Listener extends Thread {
 
     /**
      * Wait for a packet from the client, and pass of handling it to a connection thread..
-     */
-    /**
-     *
      */
     public void waitForPacketAndHandle() throws InterruptedException {
         byte data[] = new byte[100];

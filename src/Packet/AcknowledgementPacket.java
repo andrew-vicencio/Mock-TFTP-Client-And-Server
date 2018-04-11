@@ -40,7 +40,7 @@ public class AcknowledgementPacket extends Packet {
     }
 
     @Override
-    byte[] toByteArray() throws IOException {
+    public byte[] toByteArray() throws IOException {
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 
         outputStream.write(acknowledgeResponse);

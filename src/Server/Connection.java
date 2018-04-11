@@ -9,6 +9,13 @@ import java.io.IOException;
 import java.net.*;
 import java.util.ArrayList;
 
+/**
+ * Threads that are delegated from the listener to handle requests and fulfill them
+ *
+ * @author Benjamin Bichel and Jacob MacDonald
+ * @version 1.0
+ * @since 2018
+ */
 public class Connection extends ToolThreadClass {
     private Logger logger;
     private DatagramPacket receivePacket;

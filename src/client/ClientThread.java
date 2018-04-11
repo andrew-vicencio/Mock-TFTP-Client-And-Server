@@ -34,8 +34,8 @@ public class ClientThread extends ToolThreadClass {
      * @param port
      * @param cl
      */
-    public ClientThread(boolean write, String filename, InetAddress address, int port, ClientCommandLine cl) {
-        logger = new Logger(LogLevels.ALL);
+    public ClientThread(boolean write, String filename, InetAddress address, int port, ClientCommandLine cl, Logger l) {
+        logger = l;
         try {
             sendReceiveSocket = new DatagramSocket();
             this.write = write;
@@ -64,10 +64,10 @@ public class ClientThread extends ToolThreadClass {
      */
     //TODO: add in host from commandline
     public ClientThread(boolean write, String filename, int port) throws UnknownHostException {
-        this(write, filename, InetAddress.getLocalHost(), port, null);
+        this(write, filename, InetAddress.getLocalHost(), port, null, null);
     }
     public ClientThread(boolean write, String filename, int port, InetAddress address) throws UnknownHostException {
-        this(write, filename, address, port, null);
+        this(write, filename, address, port, null, null);
     }
 
 
@@ -150,6 +150,7 @@ public class ClientThread extends ToolThreadClass {
 
             //Write out where the packet came from
             logger.println(LogLevels.INFO, "Client - Packet received from " + receivePacket.getAddress() + " Port " + receivePacket.getPort());
+            logger.printPacket(LogLevels.DEBUG, receivePacket);
 
             ByteArrayOutputStream data = new ByteArrayOutputStream();
             try {
@@ -165,6 +166,8 @@ public class ClientThread extends ToolThreadClass {
                     DataPacket dataPacket = (DataPacket) pkt;
                     if (shouldDiscardPacket(dataPacket)) {
                         logger.println(LogLevels.WARN, "Dropping packet index " + dataPacket.getBlockNumber());
+
+                        sendACKPacketReadRequest(blockNumber);
                         continue;
                     }
                     setLastBlockNumber(dataPacket.getBlockNumber());
@@ -181,20 +184,7 @@ public class ClientThread extends ToolThreadClass {
             }
 
             //Send Response Packet to server
-            try {
-
-                sendPacket = (new AcknowledgementPacket(address, port, blockNumber)).toDataGramPacket();
-                prvsPkt = sendPacket;
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-
-            try {
-                Thread.sleep(5);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-            send(sendPacket);
+           sendACKPacketReadRequest(blockNumber);
 
             //Check if file transhpher is complete
             if (receivedData.length < 512) {
@@ -203,6 +193,22 @@ public class ClientThread extends ToolThreadClass {
 
         }
 
+    }
+
+    public void sendACKPacketReadRequest(int blockNumber){
+        try {
+            sendPacket = (new AcknowledgementPacket(address, port, blockNumber)).toDataGramPacket();
+            prvsPkt = sendPacket;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        try {
+            Thread.sleep(5);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        send(sendPacket);
     }
 
 
