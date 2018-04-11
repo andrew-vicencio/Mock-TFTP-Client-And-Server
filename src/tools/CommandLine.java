@@ -3,6 +3,13 @@ package tools;
 import java.io.*;
 import java.util.*;
 
+/**
+ * Used to handle and make all classes implement handling user input
+ *
+ * @author Andrew V.
+ * @since 2018
+ * @version 1.0
+ */
 public abstract class CommandLine extends Thread { //TODO: Does not need to extend thread
 	private final boolean VERBOSE_DEFAULT = true;
 	private final boolean TEST_DEFAULT = true;
