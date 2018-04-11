@@ -12,7 +12,7 @@ public abstract class Packet {
 
     protected InetAddress address;
     protected int port;
-    protected int sendPort;
+    protected int sendPort = 0;
     protected byte[] byteDataCache;
 
     protected static final byte writeHeader[] = {0, 2};

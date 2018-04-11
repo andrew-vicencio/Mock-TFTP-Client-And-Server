@@ -221,11 +221,13 @@ public class ErrorSimulator {
 
     public void sendPacket(Packet packet) {
         try {
-            if (packet.getSendPort() != 0) {
+            if (packet.getSendPort() == 0) {
                 sendReceiveSocket.send(packet.toDataGramPacket());
+                System.out.println("Sending packet to server from normal port");
             } else {
                 DatagramSocket newSocket = new DatagramSocket();
                 newSocket.send(packet.toDataGramPacket());
+                System.out.println("Sending packet to server from wrong port");
             }
         } catch (IOException e) {
             e.printStackTrace();
