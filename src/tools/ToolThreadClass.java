@@ -139,7 +139,7 @@ public abstract class ToolThreadClass implements Runnable {
             }
         }else{
             //write request Checking
-            if(x.exists()){
+            if(x.exists() & x.length() <= x.getFreeSpace()){
                 if(runonce){
                     return x;
                 }else{
