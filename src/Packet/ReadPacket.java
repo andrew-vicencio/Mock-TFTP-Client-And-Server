@@ -44,7 +44,7 @@ public class ReadPacket extends Packet {
     }
 
     @Override
-    byte[] toByteArray() {
+    public byte[] toByteArray() {
         return composeReadWriteData(1, fileName, mode);
     }
 }

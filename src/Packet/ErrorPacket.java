@@ -97,7 +97,7 @@ public class ErrorPacket extends Packet {
     }
 
     @Override
-    byte[] toByteArray() {
+    public byte[] toByteArray() {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
 
         out.write(opCode, 0, 2);
