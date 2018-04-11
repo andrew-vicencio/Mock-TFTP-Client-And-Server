@@ -34,8 +34,8 @@ public class ClientThread extends ToolThreadClass {
      * @param port
      * @param cl
      */
-    public ClientThread(boolean write, String filename, InetAddress address, int port, ClientCommandLine cl) {
-        logger = new Logger(LogLevels.ALL);
+    public ClientThread(boolean write, String filename, InetAddress address, int port, ClientCommandLine cl, Logger l) {
+        logger = l;
         try {
             sendReceiveSocket = new DatagramSocket();
             this.write = write;
