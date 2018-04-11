@@ -12,6 +12,7 @@ public abstract class Packet {
 
     protected InetAddress address;
     protected int port;
+    protected int sendPort;
     protected byte[] byteDataCache;
 
     protected static final byte writeHeader[] = {0, 2};
@@ -75,10 +76,29 @@ public abstract class Packet {
     }
 
     /**
-     * Changes the datagramPacket port
+     * Changes the destination port
+     *
      * @param port port
      */
-    public void setPort(int port) { this.port = port; }
+    public void setPort(int port) {
+        this.port = port;
+    }
+
+    /**
+     * Changes the source port
+     * @param port port to send to
+     */
+    public void setSendPort(int port) {
+        this.sendPort = port;
+    }
+
+    /**
+     * Gets the destination port
+     * @return port
+     */
+    public int getSendPort() {
+        return this.sendPort;
+    }
 
     /**
      * @param datagramPacket

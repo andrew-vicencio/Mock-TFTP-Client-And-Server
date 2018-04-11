@@ -81,11 +81,11 @@ public class ErrorSimCommandLine extends CommandLine {
         }
 
         if (packetError.getPacketOperation().equals(ErrorOperation.MODIFY)) {
-            print("How would you like to modify a byte within the packet? ");
+            print("How would you like to modify a byte within the packet?");
             print("One of " + Stream.of(PacketModification.values()).map(Enum::toString).collect(Collectors.joining(", ")));
             packetError.setPacketModification(getInputWithinEnum(PacketModification.class));
 
-            print("How far into the packet would you like to modify a byte? ");
+            print("How far into the packet would you like to modify a byte (zero indexed)?");
             packetError.setPacketModificationIndex(getInputInt());
 
             if (packetError.getPacketModification().equals(PacketModification.EDIT)) {

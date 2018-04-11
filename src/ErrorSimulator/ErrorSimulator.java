@@ -221,7 +221,12 @@ public class ErrorSimulator {
 
     public void sendPacket(Packet packet) {
         try {
-            sendReceiveSocket.send(packet.toDataGramPacket());
+            if (packet.getSendPort() != 0) {
+                sendReceiveSocket.send(packet.toDataGramPacket());
+            } else {
+                DatagramSocket newSocket = new DatagramSocket();
+                newSocket.send(packet.toDataGramPacket());
+            }
         } catch (IOException e) {
             e.printStackTrace();
             System.exit(1);
@@ -259,7 +264,7 @@ public class ErrorSimulator {
                 case CHANGETRANSFERID:
                     System.out.println("Changing transfer id");
                     if (afterPacket != null) {
-                        afterPacket.setPort(2000);
+                        packet.setSendPort(2000);
                     }
                     break;
                 case MODIFY:
@@ -294,7 +299,7 @@ public class ErrorSimulator {
                 byte[] newBytes = new byte[bytes.length - 1];
 
                 System.arraycopy(bytes, 0, newBytes, 0, modificationIndex);
-                System.arraycopy(bytes, 0, newBytes, modificationIndex, bytes.length - modificationIndex - 1);
+                System.arraycopy(bytes, modificationIndex + 1, newBytes, modificationIndex, bytes.length - modificationIndex - 1);
 
                 bytes = newBytes;
                 break;
@@ -303,10 +308,12 @@ public class ErrorSimulator {
                 bytes[modificationIndex] = error.getNewData();
                 break;
             case ADD: {
-                byte[] newBytes = new byte[bytes.length - 1];
+                byte[] newBytes = new byte[bytes.length + 1];
 
                 System.arraycopy(bytes, 0, newBytes, 0, modificationIndex);
-                System.arraycopy(bytes, 0, newBytes, modificationIndex, bytes.length - modificationIndex - 1);
+                System.arraycopy(bytes, modificationIndex, newBytes, modificationIndex + 1, bytes.length - modificationIndex);
+
+                bytes[modificationIndex] = error.getNewData();
 
                 bytes = newBytes;
                 break;
