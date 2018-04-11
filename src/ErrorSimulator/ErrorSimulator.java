@@ -233,24 +233,37 @@ public class ErrorSimulator {
         Packet afterPacket = packet;
 
         for (PacketError error : errors) {
+            if (!isPacketOfType(error.getPacketType(), packet)) {
+                continue;
+            }
+
+            if (getPacketCounter(packet) != error.getPacketIndex()) {
+                continue;
+            }
+
             switch (error.getPacketOperation()) {
                 case DELAY:
+                    System.out.println("Delaying packet");
                     delay(error.getPacketDelay());
                     break;
                 case LOSE:
+                    System.out.println("Modifying packet");
                     afterPacket = null;
                     break;
                 case DUPLICATE:
+                    System.out.println("Duplicating packet");
                     if (afterPacket != null) {
                         sendPacket(afterPacket);
                     }
                     break;
                 case CHANGETRANSFERID:
+                    System.out.println("Changing transfer id");
                     if (afterPacket != null) {
                         afterPacket.setPort(2000);
                     }
                     break;
                 case MODIFY:
+                    System.out.println("Modifying packet");
                     if (afterPacket != null) {
                         afterPacket = modifyPacketData(error, packet);
                     }
@@ -262,13 +275,6 @@ public class ErrorSimulator {
     }
 
     private Packet modifyPacketData(PacketError error, Packet packet) {
-        if (!isPacketOfType(error.getPacketType(), packet)) {
-            return packet;
-        }
-
-        if (getPacketCounter(packet) != error.getPacketIndex()) {
-            return packet;
-        }
 
         byte[] bytes;
         try {

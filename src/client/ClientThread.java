@@ -150,6 +150,7 @@ public class ClientThread extends ToolThreadClass {
 
             //Write out where the packet came from
             logger.println(LogLevels.INFO, "Client - Packet received from " + receivePacket.getAddress() + " Port " + receivePacket.getPort());
+            logger.printPacket(LogLevels.DEBUG, receivePacket);
 
             ByteArrayOutputStream data = new ByteArrayOutputStream();
             try {

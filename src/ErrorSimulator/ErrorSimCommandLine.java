@@ -27,7 +27,7 @@ public class ErrorSimCommandLine extends CommandLine {
 
         try {
             return Enum.valueOf(enumType, userInput);
-        } catch (Error error) {
+        } catch (IllegalArgumentException error) {
             return getInputWithinEnum(enumType);
         }
     }

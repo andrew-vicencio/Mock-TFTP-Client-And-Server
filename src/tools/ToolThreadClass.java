@@ -223,7 +223,8 @@ public abstract class ToolThreadClass implements Runnable {
         try {
             Packet pkt = Packet.parse(receivedDataPacket);
             if (pkt instanceof ErrorPacket) {
-                System.out.println("Error Received from client");
+                ErrorPacket errorPacket = (ErrorPacket) pkt;
+                System.out.println("Error Received: "  + errorPacket.getErrorCode() + ": " + errorPacket.getErrorMessage());
                 System.exit(1);
             }
         } catch (Exception e) {
@@ -231,7 +232,7 @@ public abstract class ToolThreadClass implements Runnable {
         }
     }
 
-     protected   void ifErrorPrintAndExit(ErrorPacket errorPacket) {
+     protected void ifErrorPrintAndExit(ErrorPacket errorPacket) {
         if (errorPacket != null) {
             try {
                 sendReceiveSocket.send(errorPacket.toDataGramPacket());
