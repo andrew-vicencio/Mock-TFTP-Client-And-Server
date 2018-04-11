@@ -5,6 +5,9 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 import Packet.*;
 
@@ -18,16 +21,15 @@ import Packet.*;
  */
 public class ErrorSimulator {
     private DatagramSocket sendReceiveSocket, newTransferIDSocket;
-    private boolean newConnection, gotServerAdress = false, gotClientAddress = false;
+    private boolean newConnection, gotServerAddress = false, gotClientAddress = false;
     private DatagramPacket receiveClientPacket, receiveServerPacket, sendPacket;
     private int clientPort, connectionPort;
     private InetAddress clientAddress, serverAddress;
     private ErrorSimCommandLine cl;
     private int testModeID = 2; // 0 : normal operation; 1 : lose a packet; 2 : delay a packet, 3 : duplicate a packet, 5 : Invalid transfer ID -- SELECT WHICH ERROR TO SIMULATE
     private int errorPacketID = 0; // 0 : None; 1: 1st WRQ/RRQ, 2: 2nd WRQ/RRQ, 3: 1st Data, 4: 2nd Data, 5: 1st ACK, 6: 2nd Ack -- SELECT WHICH PACKET TO LOSE/DELAY/DUPLICATE
-    private int timeDelay = 1000; //How much time between delays or sending duplicates (in MILLISECONDS)
 
-    private int rwCount = 0;
+    private int RRQCount = 0;
     private int dataCount = 0;
     private int ackCount = 0;
 
@@ -115,8 +117,8 @@ public class ErrorSimulator {
             e.printStackTrace();
             System.exit(1);
         }
-        if (!gotServerAdress) {
-            gotServerAdress = true;
+        if (!gotServerAddress) {
+            gotServerAddress = true;
             serverAddress = receiveServerPacket.getAddress();
         }
 
@@ -158,7 +160,7 @@ public class ErrorSimulator {
         checkNetworkErrorsAndSend(testModeID, sendPacket);
     }
 
-    public void delay() {
+    public void delay(int timeDelay) {
         try {
             Thread.sleep(timeDelay);
         } catch (InterruptedException e) {
@@ -180,8 +182,19 @@ public class ErrorSimulator {
         receiveClientPacket = null;
     }
 
-    public void checkNetworkErrorsAndSend(int testModeID, DatagramPacket packet) {
-        if (isErrorPacket(packet)) {
+    public void checkNetworkErrorsAndSend(DatagramPacket datagramPacket) {
+        Packet packet;
+        try {
+            packet = Packet.parse(datagramPacket);
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.exit(133);
+            return;
+        }
+
+        incrementPacketCounter(packet);
+
+        if (shouldModifyPacket(packet)) {
             switch (testModeID) {
                 case 0: //No network error
                     System.out.println("Case 0");
@@ -246,56 +259,95 @@ public class ErrorSimulator {
         }
     }
 
-    public boolean isErrorPacket(DatagramPacket receivePacket) {
-        Packet packet;
-        try {
-            packet = Packet.parse(receivePacket);
-        } catch (Exception e) {
-            e.printStackTrace();
-            System.exit(133);
-            return false;
-        }
-
-
-        //Check which packet has been given to us
+    private void incrementPacketCounter(Packet packet) {
         if (packet instanceof ReadPacket || packet instanceof WritePacket) {
-            rwCount++;
-            if (errorPacketID % 2 == 0) {
-                if (rwCount == 2) {
-                    return true;
-                }
-            } else {
-                if (rwCount == 1) {
-                    return true;
-                }
-            }
-        } else if (packet instanceof DataPacket) {
-            dataCount++;
-            if (errorPacketID % 2 == 0) {
-                if (dataCount == 2) {
-                    return true;
-                }
-            } else {
-                if (dataCount == 1) {
-                    return true;
-                }
-            }
-        } else if (packet instanceof AcknowledgementPacket) {
-            ackCount++;
-            if (ackCount % 2 == 0) {
-                if (rwCount == 2) {
-                    return true;
-                }
-            } else {
-                if (ackCount == 1) {
-                    return true;
-                }
-            }
-        } else {
-            return false;
+            RRQCount++;
         }
 
-        return false;
+    }
+
+    public void sendPacket(Packet packet) {
+        try {
+            sendReceiveSocket.send(packet.toDataGramPacket());
+        } catch (IOException e) {
+            e.printStackTrace();
+            System.exit(1);
+        }
+
+    }
+
+    public Packet modifyPacket(List<PacketError> errors, Packet packet) {
+        Packet afterPacket = packet;
+
+        for (PacketError error : errors) {
+            switch (error.getPacketOperation()) {
+                case DELAY:
+                    delay(error.getPacketDelay());
+                    break;
+                case LOSE:
+                    afterPacket = null;
+                    break;
+                case DUPLICATE:
+                    if (afterPacket != null) {
+                        sendPacket(afterPacket);
+                    }
+                    break;
+                case CHANGETRANSFERID:
+                    if (afterPacket != null) {
+                        afterPacket.setPort(2000);
+                    }
+                case MODIFY:
+                    if (afterPacket != null) {
+                        afterPacket = modifyPacketData(error, packet);
+                    }
+            }
+        }
+
+        return afterPacket;
+    }
+
+    private Packet modifyPacketData(PacketError error, Packet packet) {
+        byte[] bytes;
+        try {
+            bytes = packet.getCacheAwareByteData();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            System.exit(23);
+            return null;
+        }
+
+        int modificationIndex = error.getPacketModificationIndex();
+
+        switch (error.getPacketModification()) {
+            case REMOVE: {
+
+                byte[] newBytes = new byte[bytes.length - 1];
+
+                System.arraycopy(bytes, 0, newBytes, 0, modificationIndex);
+                System.arraycopy(bytes, 0, newBytes, modificationIndex, bytes.length - modificationIndex - 1);
+
+                bytes = newBytes;
+                break;
+            }
+            case EDIT:
+                bytes[modificationIndex] = error.getNewData();
+                break;
+            case ADD: {
+                byte[] newBytes = new byte[bytes.length - 1];
+
+                System.arraycopy(bytes, 0, newBytes, 0, modificationIndex);
+                System.arraycopy(bytes, 0, newBytes, modificationIndex, bytes.length - modificationIndex - 1);
+
+                bytes = newBytes;
+                break;
+            }
+
+        }
+
+        packet.cacheByteData(bytes);
+
+        return packet;
     }
 
     public void sendFromInvalidTransferID(DatagramPacket packet) {

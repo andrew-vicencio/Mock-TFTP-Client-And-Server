@@ -12,6 +12,7 @@ public abstract class Packet {
 
     protected InetAddress address;
     protected int port;
+    protected byte[] byteDataCache;
 
     protected static final byte writeHeader[] = {0, 2};
     protected static final byte readHeader[] = {0, 1};
@@ -72,6 +73,12 @@ public abstract class Packet {
     public int getPort() {
         return port;
     }
+
+    /**
+     * Changes the datagramPacket port
+     * @param port port
+     */
+    public void setPort(int port) { this.port = port; }
 
     /**
      * @param datagramPacket
@@ -149,7 +156,7 @@ public abstract class Packet {
     public DatagramPacket toDataGramPacket() {
         byte[] byteArray = new byte[0];
         try {
-            byteArray = toByteArray();
+            byteArray = getCacheAwareByteData();
         } catch (IOException e) {
             e.printStackTrace();
             System.exit(49);
@@ -158,9 +165,21 @@ public abstract class Packet {
         return new DatagramPacket(byteArray, byteArray.length, address, port);
     }
 
+    public void cacheByteData(byte[] bytes) {
+        this.byteDataCache = bytes;
+    }
+
+    public byte[] getCacheAwareByteData() throws IOException {
+        if (this.byteDataCache != null) {
+            return this.byteDataCache;
+        } else {
+            return this.toByteArray();
+        }
+    }
+
     /**
      * @return
      * @throws IOException
      */
-    abstract byte[] toByteArray() throws IOException;
+    abstract public byte[] toByteArray() throws IOException;
 }
